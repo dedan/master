@@ -45,9 +45,6 @@ for f_space in features:
     print 'working on: ', f_space
     ax = fig.add_subplot(111)
     mol_fspace = fl.get_features_for_molids(features[f_space], molecules)
-    if np.isnan(mol_fspace).all():
-        print 'only nans in distances'
-        continue
     ax.hist(pdist(mol_fspace), bins=N_BINS, log=True)
 
     isomere_distances = np.array([])
