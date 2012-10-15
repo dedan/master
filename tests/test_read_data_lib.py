@@ -43,6 +43,20 @@ class TestFeatureLib(unittest.TestCase):
             self.assertAlmostEqual(np.var(features[fname].values()), 1.0, 5)
             self.assertAlmostEqual(np.mean(features[fname].values()), 0, 5)
 
+    def test_get_cas_numbers(self):
+        """read the CAS numbers from the R package (rownames)"""
+        cas_numbers, _, _ = rdl.load_response_matrix()
+        self.assertEqual(len(cas_numbers), 249)
+        self.assertIn('89-78-1', cas_numbers)
+        self.assertNotIn('solvent', cas_numbers)
+
+    def test_get_response_matrix(self):
+        """read the response matrix from the DoOR R package"""
+        row_names, col_names, rm = rdl.load_response_matrix()
+        self.assertEqual(249, rm.shape[0])
+        self.assertEqual(67, rm.shape[1])
+        self.assertEqual(249, len(row_names))
+        self.assertEqual(67, len(col_names))
 
 if __name__ == '__main__':
     unittest.main()

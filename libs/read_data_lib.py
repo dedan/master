@@ -16,6 +16,10 @@ import csv
 from scipy.stats import zscore
 import numpy as np
 import pylab as plt
+from rpy2.robjects.packages import importr
+import rpy2.robjects as robjects
+from rpy2.rinterface import NARealType
+
 
 def read_feature_csvs(features_path):
     """read the feature CSVs into a dictionary structure
@@ -76,3 +80,23 @@ def get_features_for_molids(f_space, molids):
     # remove empty entries (features for molid not available)
     mol_fspace = [elem for elem in mol_fspace if elem]
     return np.array(mol_fspace)
+
+def load_response_matrix():
+    """load the DoOR response matrix from the R package"""
+    importr('DoOR.function')
+    importr('DoOR.data')
+    load_data = robjects.r['loadRD']
+    load_data()
+    rm = robjects.r['response.matrix']
+    row_idx = [i for i in range(len(rm.rownames))
+                    if not rm.rownames[i] in ['SFR', 'solvent']]
+    np_rm = np.zeros((len(row_idx), len(rm)))
+    for col_i, col in enumerate(rm):
+        for new_row_i, row_i in enumerate(row_idx):
+            try:
+                np_rm[new_row_i, col_i] = col[row_i]
+            except:
+                np_rm[new_row_i, col_i] = NARealType()
+    row_names = [rm.rownames[i] for i in row_idx]
+    return row_names, rm.colnames, np_rm
+
