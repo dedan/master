@@ -11,13 +11,13 @@ Created by  on 2012-01-27.
 Copyright (c) 2012. All rights reserved.
 """
 import json, os, csv, glob, json
-import feature_lib as fl
+import master.libs.read_data_lib as rdl
 import pylab as plt
 import numpy as np
 from collections import defaultdict
 import __builtin__
 from scipy.spatial.distance import pdist
-reload(fl)
+reload(rdl)
 
 data_path = '/Users/dedan/projects/master/'
 feature_set = 'features'
@@ -33,8 +33,8 @@ if os.path.exists(os.path.join(features_path, 'features.json')):
     features = json.load(open(os.path.join(features_path, 'features.json')))
 else:
     print('read features from csv, normalize and save them')
-    features = fl.read_feature_csvs(features_path)
-    features = fl.normalize_features(fl.remove_invalid_features(features))
+    features = rdl.read_feature_csvs(features_path)
+    features = rdl.normalize_features(rdl.remove_invalid_features(features))
     json.dump(features, open(os.path.join(features_path, 'features.json'), 'w'))
 
 # identify molecules with and without isomeres
@@ -47,7 +47,7 @@ for f_space in features:
     fig = plt.figure()
     print 'working on: ', f_space
     ax = fig.add_subplot(111)
-    mol_fspace = fl.get_features_for_molids(features[f_space], molecules)
+    mol_fspace = rdl.get_features_for_molids(features[f_space], molecules)
     assert not (mol_fspace == -999).any()
     mol_distances = pdist(mol_fspace)
     bins = np.linspace(0, max(mol_distances), num=N_BINS)
@@ -55,7 +55,7 @@ for f_space in features:
 
     isomere_distances = np.array([])
     for isomere in isomeres:
-        iso_fspace = fl.get_features_for_molids(features[f_space], isomere)
+        iso_fspace = rdl.get_features_for_molids(features[f_space], isomere)
         assert not (iso_fspace == -999).any()
         if iso_fspace.any():
             isomere_distances = np.hstack([isomere_distances, pdist(iso_fspace)])
