@@ -47,6 +47,14 @@ def read_feature_csvs(features_path):
                         features[f_space][header[f_id]][mol] = 0.
     return features
 
+def remove_invalid_features(features):
+    """remove features with 0 variance"""
+    for f_space in features:
+        for feature in list(features[f_space].keys()):
+            if np.var(features[f_space][feature].values()) == 0:
+                del(features[f_space][feature])
+    return features
+
 
 def normalize_features(features):
     """z-transform the features to make individual dimensions comparable"""

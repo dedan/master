@@ -33,7 +33,8 @@ if os.path.exists(os.path.join(features_path, 'features.json')):
     features = json.load(open(os.path.join(features_path, 'features.json')))
 else:
     print('read features from csv, normalize and save them')
-    features = fl.normalize_features(fl.read_feature_csvs(features_path))
+    features = fl.read_feature_csvs(features_path)
+    features = fl.normalize_features(fl.remove_invalid_features(features))
     json.dump(features, open(os.path.join(features_path, 'features.json'), 'w'))
 
 # identify molecules with and without isomeres
