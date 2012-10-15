@@ -48,11 +48,13 @@ for f_space in features:
     print 'working on: ', f_space
     ax = fig.add_subplot(111)
     mol_fspace = fl.get_features_for_molids(features[f_space], molecules)
+    assert not (mol_fspace == -999).any()
     ax.hist(pdist(mol_fspace), bins=N_BINS, log=True)
 
     isomere_distances = np.array([])
     for isomere in isomeres:
         iso_fspace = fl.get_features_for_molids(features[f_space], isomere)
+        assert not (iso_fspace == -999).any()
         if iso_fspace.any():
             isomere_distances = np.hstack([isomere_distances, pdist(iso_fspace)])
 
