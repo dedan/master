@@ -19,12 +19,14 @@ import __builtin__
 from scipy.spatial.distance import pdist
 reload(fl)
 
-features_path = '/Users/dedan/projects/master/data/features/'
-out_path = '/Users/dedan/projects/master/results/features'
+data_path = '/Users/dedan/projects/master/'
+feature_set = 'features_september'
+features_path = os.path.join(data_path, 'data', feature_set)
+out_path = os.path.join(data_path, 'results', feature_set)
 N_BINS = 100
 
 # mapping from the CAS number to jan's mol ID
-door2id = json.load(open(os.path.join(features_path, 'door2id.json')))
+door2id = json.load(open(os.path.join(data_path, 'data', 'door2id.json')))
 
 if os.path.exists(os.path.join(features_path, 'features.json')):
     print('read previously computed features from: %s JSON' % features_path)
