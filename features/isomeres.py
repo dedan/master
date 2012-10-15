@@ -20,7 +20,7 @@ from scipy.spatial.distance import pdist
 reload(fl)
 
 data_path = '/Users/dedan/projects/master/'
-feature_set = 'features_september'
+feature_set = 'features'
 features_path = os.path.join(data_path, 'data', feature_set)
 out_path = os.path.join(data_path, 'results', feature_set)
 N_BINS = 100
@@ -49,7 +49,9 @@ for f_space in features:
     ax = fig.add_subplot(111)
     mol_fspace = fl.get_features_for_molids(features[f_space], molecules)
     assert not (mol_fspace == -999).any()
-    ax.hist(pdist(mol_fspace), bins=N_BINS, log=True)
+    mol_distances = pdist(mol_fspace)
+    bins = np.linspace(0, max(mol_distances), num=N_BINS)
+    ax.hist(mol_distances, bins=bins, log=True)
 
     isomere_distances = np.array([])
     for isomere in isomeres:
@@ -58,9 +60,8 @@ for f_space in features:
         if iso_fspace.any():
             isomere_distances = np.hstack([isomere_distances, pdist(iso_fspace)])
 
-    print isomere_distances.shape
-    _, _, patches = ax.hist(isomere_distances, bins=N_BINS, log=True)
+    _, _, patches = ax.hist(isomere_distances, bins=bins, log=True)
     for patch in patches:
-        plt.setp(patch, color="r")
+        plt.setp(patch, color="r", edgecolor='k')
     fig.savefig(os.path.join(out_path, f_space + '_histo.png'))
 plt.close('all')
