@@ -18,9 +18,14 @@ import numpy as np
 import pylab as plt
 
 def read_feature_csvs(features_path):
-    """read the feature CSVs into a dictionary structure"""
+    """read the feature CSVs into a dictionary structure
+
+    csvs have molid in the 1st column, identifiere in 2nd and then features
+    """
     features = {}
-    molid_idx = 1
+    molid_idx = 0
+    identifiere_idx = 1
+    feature_start_idx = 2
     all_feature_files = glob.glob(os.path.join(features_path, '*.csv'))
     for feature_file in all_feature_files:
 
@@ -31,13 +36,9 @@ def read_feature_csvs(features_path):
             reader = csv.reader(f)
             header = reader.next()
 
-            # omit the first two columns (id and mol_id)
-            feature_start_idx = 2
-            # this column does not appear in all tables
-            if 'identifiere' in header:
-                feature_start_idx += 1
-
             for row in reader:
+                if 'Error' in row[identifiere_idx]:
+                    continue
                 mol = row[molid_idx]
                 for f_id in range(feature_start_idx, len(row)):
                     try:
@@ -54,7 +55,7 @@ def normalize_features(features):
             normed = zscore(features[f_space][feature].values())
             keys = features[f_space][feature].keys()
             for key, value in zip(keys, normed):
-                features[f_space][feature][int(key)] = value
+                features[f_space][feature][key] = value
     return features
 
 def get_features_for_molids(f_space, molids):
