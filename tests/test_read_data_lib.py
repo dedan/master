@@ -13,6 +13,7 @@ class TestFeatureLib(unittest.TestCase):
 
     def setUp(self):
         path = os.path.join(os.path.dirname(__file__), 'data', 'features')
+        self.tmp_path = os.path.join(os.path.dirname(__file__), 'data')
         self.features = rdl.read_feature_csvs(path)
 
     def test_feature_set_loaded(self):
@@ -45,18 +46,32 @@ class TestFeatureLib(unittest.TestCase):
 
     def test_get_cas_numbers(self):
         """read the CAS numbers from the R package (rownames)"""
-        cas_numbers, _, _ = rdl.load_response_matrix()
+        csv_path = os.path.join(self.tmp_path, 'rm.csv')
+        rdl.get_data_from_r(csv_path)
+        cas_numbers, _, _ = rdl.load_response_matrix(csv_path)
         self.assertEqual(len(cas_numbers), 249)
         self.assertIn('89-78-1', cas_numbers)
         self.assertNotIn('solvent', cas_numbers)
+        os.remove(csv_path)
+
+    def test_get_data_from_r(self):
+        """read the data from r and write it in a CSV file"""
+        csv_path = os.path.join(self.tmp_path, 'rm.csv')
+        self.assertFalse(os.path.exists(csv_path))
+        rdl.get_data_from_r(csv_path)
+        self.assertTrue(os.path.exists(csv_path))
+        os.remove(csv_path)
 
     def test_get_response_matrix(self):
         """read the response matrix from the DoOR R package"""
-        row_names, col_names, rm = rdl.load_response_matrix()
+        csv_path = os.path.join(self.tmp_path, 'rm.csv')
+        rdl.get_data_from_r(csv_path)
+        row_names, col_names, rm = rdl.load_response_matrix(csv_path)
         self.assertEqual(249, rm.shape[0])
         self.assertEqual(67, rm.shape[1])
         self.assertEqual(249, len(row_names))
         self.assertEqual(67, len(col_names))
+        os.remove(csv_path)
 
 if __name__ == '__main__':
     unittest.main()

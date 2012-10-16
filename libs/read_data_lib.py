@@ -82,22 +82,28 @@ def get_features_for_molids(f_space, molids):
     mol_fspace = [elem if elem else [0] * len(f_space) for elem in mol_fspace]
     return np.array(mol_fspace), available
 
-def load_response_matrix():
-    """load the DoOR response matrix from the R package"""
+def get_data_from_r(path_to_csv):
+    """extract the response matrix from the R package and save it as a CSV"""
     importr('DoOR.function')
     importr('DoOR.data')
     load_data = robjects.r['loadRD']
     load_data()
     rm = robjects.r['response.matrix']
-    row_idx = [i for i in range(len(rm.rownames))
-                    if not rm.rownames[i] in ['SFR', 'solvent']]
-    np_rm = np.zeros((len(row_idx), len(rm)))
-    for col_i, col in enumerate(rm):
-        for new_row_i, row_i in enumerate(row_idx):
-            try:
-                np_rm[new_row_i, col_i] = col[row_i]
-            except:
-                np_rm[new_row_i, col_i] = NARealType()
-    row_names = [rm.rownames[i] for i in row_idx]
-    return row_names, list(rm.colnames), np_rm
+    rm.to_csvfile(path_to_csv)
+
+def load_response_matrix(path_to_csv):
+    """load the DoOR response matrix from the R package"""
+    with open(path_to_csv) as csvfile:
+        reader = csv.reader(csvfile, delimiter=',')
+        glomeruli = reader.next()
+        cas_numbers, data = [], []
+        for row in reader:
+            if not row[0] in ['SFR', 'solvent']:
+                cas_numbers.append(row[0])
+                data.append(row[1:])
+    rm = np.zeros((len(cas_numbers), len(glomeruli)))
+    for i in range(len(cas_numbers)):
+        for j in range(len(glomeruli)):
+            rm[i, j] = float(data[i][j]) if data[i][j] != 'NA' else np.nan
+    return cas_numbers, glomeruli, rm
 
