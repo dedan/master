@@ -78,8 +78,9 @@ def get_features_for_molids(f_space, molids):
     mol_fspace = [[f_space[f][molid] for f in f_space if molid in f_space[f]]
                                      for molid in molids]
     # remove empty entries (features for molid not available)
-    mol_fspace = [elem for elem in mol_fspace if elem]
-    return np.array(mol_fspace)
+    available = [i for i in range(len(mol_fspace)) if mol_fspace[i]]
+    mol_fspace = [elem if elem else [0] * len(f_space) for elem in mol_fspace]
+    return np.array(mol_fspace), available
 
 def load_response_matrix():
     """load the DoOR response matrix from the R package"""
@@ -98,5 +99,5 @@ def load_response_matrix():
             except:
                 np_rm[new_row_i, col_i] = NARealType()
     row_names = [rm.rownames[i] for i in row_idx]
-    return row_names, rm.colnames, np_rm
+    return row_names, list(rm.colnames), np_rm
 
