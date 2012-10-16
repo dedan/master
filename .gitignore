@@ -1,3 +1,4 @@
 *.pyc
 .DS_Store
 results
+data/response_matrix.pckl
