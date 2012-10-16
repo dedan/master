@@ -18,27 +18,14 @@ import numpy as np
 import pylab as plt
 reload(rdl)
 
-features_path = '/Users/dedan/projects/master/data/features/features.json'
-door_path = '/Users/dedan/projects/master/data/response_matrix.pckl'
-data_path = '/Users/dedan/projects/master/'
+data_path = '/Users/dedan/projects/master/data'
 results_path = '/Users/dedan/projects/master/results/summary/'
 descriptor = 'ATOMCENTRED_FRAGMENTS'
-glomeruli_id = 0
 format = 'png'
 
-door2id = json.load(open(os.path.join(data_path, 'data', 'door2id.json')))
-features = json.load(open(features_path))
-if os.path.exists(door_path):
-    print 'loading from: %s' % door_path
-    rm_dict = pickle.load(open(door_path))
-    cas_numbers = rm_dict['cas_numbers']
-    glomeruli = rm_dict['glomeruli']
-    rm = rm_dict['rm']
-else:
-    cas_numbers, glomeruli, rm = rdl.load_response_matrix()
-    rm_dict = {'cas_numbers': cas_numbers, 'glomeruli': glomeruli, 'rm': rm}
-    pickle.dump(rm_dict, open(door_path, 'w'))
-
+door2id = json.load(open(os.path.join(data_path, 'door2id.json')))
+features = json.load(open(os.path.join(data_path, 'features.json')))
+cas_numbers, glomeruli, rm = rdl.load_response_matrix(os.path.join(data_path, 'response_matrix.csv'))
 
 # which molecules are missing in door2id?
 print 'molecues missing in door2id: \n%s' % [r for r in cas_numbers if not door2id[r]]
@@ -55,7 +42,6 @@ ax.set_xticklabels(bla, rotation='90', ha='right')
 ax.set_title('number of glomeruli available for a stimulus')
 fig.savefig(os.path.join(results_path, 'glomeruli_per_stimulus.' + format))
 
-
 fig = plt.figure(figsize=(15, 7))
 ax = fig.add_subplot(111)
 ax.bar(range(len(glomeruli)), np.sum(~np.isnan(rm), axis=0))
@@ -64,9 +50,7 @@ ax.set_xticklabels(glomeruli, rotation='45', ha='right')
 ax.set_title('number of stimuli available for a glomerulus')
 fig.savefig(os.path.join(results_path, 'stimuli_per_glomerulus.' + format))
 
-# use a good glomerulus (many molecules available) for training and feature selection,
-
 # number of molecules available for all glomeruli
-
-# get the feature vectors for all available responses
-
+print 'glomerulus for which all stimuli are available'
+all_stims_idx = np.where(np.sum(~np.isnan(rm), axis=0) == rm.shape[0])
+print [glomeruli[i] for i in all_stims_idx[0]]
