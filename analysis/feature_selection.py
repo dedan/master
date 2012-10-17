@@ -64,15 +64,14 @@ for descriptor in features:
         rfr.fit(data,targets)
         res[descriptor][glom]['rf'] = rfr.feature_importances_
 
-
 # plotting
 plt.close('all')
 for descriptor in res:
     fig = plt.figure()
     fig.suptitle(descriptor)
 
-    max_lin = np.max([res[descriptor][glom]['regr'] for glom in res[descriptor]])
-    max_rf = np.max([res[descriptor][glom]['rf'] for glom in res[descriptor]])
+    max_lin = np.nanmax([res[descriptor][glom]['regr'] for glom in res[descriptor]])
+    max_rf = np.nanmax([res[descriptor][glom]['rf'] for glom in res[descriptor]])
     x_indices = np.arange(len(res[descriptor][glom]['rf']))
 
     for glom_i, glom in enumerate(res[descriptor]):
