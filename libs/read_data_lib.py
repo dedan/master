@@ -112,3 +112,10 @@ def select_n_best_glomeruli(response_matrix, glomeruli, n_glomeruli):
     glom_available = np.sum(~np.isnan(response_matrix), axis=0)
     glom_available_idx = np.argsort(glom_available)[::-1]
     return [glomeruli[i] for i in glom_available_idx[:n_glomeruli]]
+
+def get_avail_for_glom(rm, cas_numbers, glom_idx):
+    """filter response matrix and cas numbers for availability in a glomerulus"""
+    avail_cas_idx = np.where(~np.isnan(rm[:, glom_idx]))[0]
+    tmp_rm = rm[avail_cas_idx]
+    tmp_cas_numbers = [cas_numbers[i] for i in avail_cas_idx]
+    return tmp_rm, tmp_cas_numbers
