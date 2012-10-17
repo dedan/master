@@ -19,23 +19,14 @@ import __builtin__
 from scipy.spatial.distance import pdist
 reload(rdl)
 
-data_path = '/Users/dedan/projects/master/'
-feature_set = 'features'
-features_path = os.path.join(data_path, 'data', feature_set)
-out_path = os.path.join(data_path, 'results', feature_set)
+base_path = '/Users/dedan/projects/master/'
+out_path = os.path.join(base_path, 'results', 'isomeres')
+data_path = os.path.join(base_path, 'data')
 N_BINS = 100
 
 # mapping from the CAS number to jan's mol ID
-door2id = json.load(open(os.path.join(data_path, 'data', 'door2id.json')))
-
-if os.path.exists(os.path.join(features_path, 'features.json')):
-    print('read previously computed features from: %s JSON' % features_path)
-    features = json.load(open(os.path.join(features_path, 'features.json')))
-else:
-    print('read features from csv, normalize and save them')
-    features = rdl.read_feature_csvs(features_path)
-    features = rdl.normalize_features(rdl.remove_invalid_features(features))
-    json.dump(features, open(os.path.join(features_path, 'features.json'), 'w'))
+door2id = json.load(open(os.path.join(data_path, 'door2id.json')))
+features = json.load(open(os.path.join(data_path, 'features.json')))
 
 # identify molecules with and without isomeres
 molecules = [molids[0] for molids in door2id.values() if len(molids) == 1]
