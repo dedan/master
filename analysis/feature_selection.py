@@ -32,20 +32,18 @@ print best_glom
 stim_idx = [i for i in range(len(cas_numbers)) if door2id[cas_numbers[i]]]
 rm = rm[stim_idx, :]
 cas_numbers = [cas_numbers[i] for i in stim_idx]
-assert rm.shape[0] == len(cas_numbers)
 
-plt.close('all')
+# data collection
+res = {}
 for descriptor in [features.keys()[0]]:
 
-    fig = plt.figure()
-    fig.suptitle(descriptor)
-    axes = []
-    max_likeli, max_likeli_1 = 0, 0
     print descriptor
+    res[descriptor] = {}
 
-    for glom_i, glom in enumerate(best_glom):
+    for glom in best_glom:
 
         print glom
+        res[descriptor][glom] = {}
         glom_idx = glomeruli.index(glom)
 
         # select molecules available for the glomerulus
@@ -60,30 +58,32 @@ for descriptor in [features.keys()[0]]:
         targets = [tmp_rm[i, glom_idx] for i in avail_features]
 
         _, p = f_regression(data, targets)
-        scores = -np.log10(p)
-        if np.max(scores) > max_likeli:
-            max_likeli = np.max(scores)
-
-        ax = fig.add_subplot(n_glomeruli, 1, glom_i + 1)
-        axes.append(ax)
-        x_indices = np.arange(data.shape[-1])
-        ax.bar(x_indices, scores)
-        ax.set_ylabel(glom)
-        ax.set_xticklabels([])
+        res[descriptor][glom]['regr'] = -np.log10(p)
 
         rfr = RandomForestRegressor(n_estimators=10, compute_importances=True)
         rfr.fit(data,targets)
-        scores = rfr.feature_importances_
-        if np.max(scores) > max_likeli_1:
-            max_likeli_1 = np.max(scores)
-        ax.bar(x_indices, -scores*10)
-    for ax in axes:
-        ax.set_ylim([-max_likeli_1*10, max_likeli])
+        res[descriptor][glom]['rf'] = rfr.feature_importances_
+
+
+# plotting
+plt.close('all')
+for descriptor in res:
+    fig = plt.figure()
+    fig.suptitle(descriptor)
+
+    max_lin = np.max([res[descriptor][glom]['regr'] for glom in res[descriptor]])
+    max_rf = np.max([res[descriptor][glom]['rf'] for glom in res[descriptor]])
+    x_indices = np.arange(len(res[descriptor][glom]['rf']))
+
+    for glom_i, glom in enumerate(res[descriptor]):
+
+        ax = fig.add_subplot(n_glomeruli, 1, glom_i + 1)
+        ax.bar(x_indices, res[descriptor][glom]['regr'] / max_lin, color='0.5')
+        ax.bar(x_indices, -res[descriptor][glom]['rf'] / max_rf, color='0')
+
+        ax.set_ylabel(glom)
+        ax.set_yticks([-1, 0, 1])
+        ax.set_xticklabels([])
     fig.savefig(os.path.join(base_path, 'results', 'features', descriptor + '.' + format))
 
 plt.show()
-
-    # svr_rbf = svm.SVR(kernel='rbf', C=1e3, gamma=0.1)
-    # svr_rbf.fit(data[:-1, :], targets[:-1])
-
-    # print svr_rbf.predict(data[-1, :]), targets[-1]
