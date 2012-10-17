@@ -38,7 +38,7 @@ for f_space in features:
     fig = plt.figure()
     print 'working on: ', f_space
     ax = fig.add_subplot(111)
-    mol_fspace = rdl.get_features_for_molids(features[f_space], molecules)
+    mol_fspace, _ = rdl.get_features_for_molids(features[f_space], molecules)
     assert not (mol_fspace == -999).any()
     mol_distances = pdist(mol_fspace)
     bins = np.linspace(0, max(mol_distances), num=N_BINS)
@@ -46,7 +46,7 @@ for f_space in features:
 
     isomere_distances = np.array([])
     for isomere in isomeres:
-        iso_fspace = rdl.get_features_for_molids(features[f_space], isomere)
+        iso_fspace, _ = rdl.get_features_for_molids(features[f_space], isomere)
         assert not (iso_fspace == -999).any()
         if iso_fspace.any():
             isomere_distances = np.hstack([isomere_distances, pdist(iso_fspace)])

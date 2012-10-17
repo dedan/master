@@ -1,4 +1,5 @@
 *.pyc
 .DS_Store
 results
-data/response_matrix.pckl
+data/response_matrix.csv
+data/features.json
