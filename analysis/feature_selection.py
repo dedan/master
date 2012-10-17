@@ -35,7 +35,7 @@ cas_numbers = [cas_numbers[i] for i in stim_idx]
 
 # data collection
 res = {}
-for descriptor in [features.keys()[0]]:
+for descriptor in features:
 
     print descriptor
     res[descriptor] = {}
@@ -47,7 +47,7 @@ for descriptor in [features.keys()[0]]:
         glom_idx = glomeruli.index(glom)
 
         # select molecules available for the glomerulus
-        tmp_rm , tmp_cas_numbers = rdl.get_avail_for_glom(rm, cas_numbers, glom_idx)
+        targets , tmp_cas_numbers = rdl.get_avail_targets_for_glom(rm, cas_numbers, glom_idx)
 
         # get the molecule ids and retrieve all features available
         molids = [door2id[cas_number][0] for cas_number in tmp_cas_numbers]
@@ -55,7 +55,7 @@ for descriptor in [features.keys()[0]]:
 
         # use only the data for which features are available
         data = data[avail_features, :]
-        targets = [tmp_rm[i, glom_idx] for i in avail_features]
+        targets = targets[avail_features]
 
         _, p = f_regression(data, targets)
         res[descriptor][glom]['regr'] = -np.log10(p)
