@@ -107,3 +107,8 @@ def load_response_matrix(path_to_csv):
             rm[i, j] = float(data[i][j]) if data[i][j] != 'NA' else np.nan
     return cas_numbers, glomeruli, rm
 
+def select_n_best_glomeruli(response_matrix, glomeruli, n_glomeruli):
+    """select the glomeruli with most stimuli available"""
+    glom_available = np.sum(~np.isnan(response_matrix), axis=0)
+    glom_available_idx = np.argsort(glom_available)[::-1]
+    return [glomeruli[i] for i in glom_available_idx[:n_glomeruli]]
