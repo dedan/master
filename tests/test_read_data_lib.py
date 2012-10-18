@@ -73,5 +73,12 @@ class TestFeatureLib(unittest.TestCase):
         self.assertEqual(67, len(col_names))
         os.remove(csv_path)
 
+    # TODO: make this a test
+        #     data, avail_features = rdl.get_features_for_molids(features[descriptor], molids)
+        # assert data.shape[0] == len(molids)
+        # for i in np.where(np.sum(data, axis=1) == 0)[0]:
+        #     assert not i in avail_features
+
+
 if __name__ == '__main__':
     unittest.main()
