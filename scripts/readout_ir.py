@@ -9,7 +9,7 @@ from collections import defaultdict
 
 inpath = '/Users/dedan/projects/master/results/gamess/'
 n_lines_after_warning = 0
-outdict = {}
+outdict = defaultdict(dict)
 problems = defaultdict(list)
 
 uncritical_warnings = ['OLD KEYWORD COORD=CART', 'WARNING, MODE 7']
@@ -51,10 +51,13 @@ for outfilename in outfiles:
             nonvibrations = range(1, 7)
 
     # select only the vibration modes (!!! only if not imaginary !!!)
-    freq = [float(freq[i]) for i in range(len(freq)) if not 'I' in freq[i] and not i in nonvibrations]
-    ir = [float(ir[i]) for i in range(len(ir)) if not 'I' in ir[i] and not i in nonvibrations]
-    outdict[molid] = zip(freq, ir)
+    freq = [f for f in freq if not 'I' in f]
+    freq_cut = [float(freq[i]) for i in range(len(freq)) if not i in nonvibrations]
+    ir_cut = [float(ir[i]) for i in range(len(ir)) if not i in nonvibrations]
+    assert len(freq_cut) == len(ir_cut)
+    outdict[molid]['freq'] = freq_cut
+    outdict[molid]['ir'] = ir_cut
 
-pickle.dump(outdict, open(os.path.join(inpath, 'ir.pckl'),'w'))
+pickle.dump(dict(outdict), open(os.path.join(inpath, 'ir.pckl'),'w'))
 json.dump(dict(problems), open(os.path.join(inpath, 'problems.json'),'w'))
 
