@@ -22,16 +22,11 @@ n_glomeruli = 5
 door2id = json.load(open(os.path.join(base_path, 'data', 'door2id.json')))
 features = json.load(open(os.path.join(base_path, 'data', 'features.json')))
 csv_path = os.path.join(base_path, 'data', 'response_matrix.csv')
-cas_numbers, glomeruli, rm = rdl.load_response_matrix(csv_path)
+cas_numbers, glomeruli, rm = rdl.load_response_matrix(csv_path, door2id)
 
 # select the N glomeruli with most molecules available
 best_glom = rdl.select_n_best_glomeruli(rm, glomeruli, n_glomeruli)
 print best_glom
-
-# check whether we have molids for the CAS number and if not remove them
-stim_idx = [i for i in range(len(cas_numbers)) if door2id[cas_numbers[i]]]
-rm = rm[stim_idx, :]
-cas_numbers = [cas_numbers[i] for i in stim_idx]
 
 # data collection
 res = {}

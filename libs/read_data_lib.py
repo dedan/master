@@ -91,8 +91,11 @@ def get_data_from_r(path_to_csv):
     rm = robjects.r['response.matrix']
     rm.to_csvfile(path_to_csv)
 
-def load_response_matrix(path_to_csv):
-    """load the DoOR response matrix from the R package"""
+def load_response_matrix(path_to_csv, door2id=None):
+    """load the DoOR response matrix from the R package
+
+        if door2id given, return only the stimuli for which we have a molID
+    """
     with open(path_to_csv) as csvfile:
         reader = csv.reader(csvfile, delimiter=',')
         glomeruli = reader.next()
@@ -105,6 +108,13 @@ def load_response_matrix(path_to_csv):
     for i in range(len(cas_numbers)):
         for j in range(len(glomeruli)):
             rm[i, j] = float(data[i][j]) if data[i][j] != 'NA' else np.nan
+
+    if door2id:
+        # check whether we have molids for the CAS number and if not remove them
+        stim_idx = [i for i in range(len(cas_numbers)) if door2id[cas_numbers[i]]]
+        rm = rm[stim_idx, :]
+        cas_numbers = [cas_numbers[i] for i in stim_idx]
+
     return cas_numbers, glomeruli, rm
 
 def select_n_best_glomeruli(response_matrix, glomeruli, n_glomeruli):
