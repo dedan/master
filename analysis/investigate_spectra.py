@@ -58,7 +58,13 @@ def get_spectral_features(spectra, molids, kernel_width=1, max_freq=None):
         data = np.mean(x.reshape((x.shape[0], factor, -1)), axis=2)
     return data
 
+def max_in_values(value_dict):
+    """maximum of non NANs in the values of a dict"""
+    stacker = lambda x,y: np.hstack((x,y))
+    all_values = reduce(stacker, value_dict.values(), np.array([]))
+    return np.max(all_values[~np.isnan(all_values)])
 
+res = {}
 for glom in best_glom:
 
     print glom
@@ -79,34 +85,41 @@ for glom in best_glom:
     # plt.hist(np.diff(sorted(all_freq)), bins=1000)
     # plt.xlim([0,2])
 
-    fig = plt.figure()
+    res[glom] = {'data': {}, 'regression': {}, 'forest': {}}
+    fig = plt.figure(figsize=(10, 10))
+    fig.suptitle(glom)
     for i, kernel_width in enumerate(kernel_widths):
 
-        ax = fig.add_subplot(len(kernel_widths)*2, 1, (i*2)+1)
         data = get_spectral_features(spectra, molids, kernel_width=kernel_width)
-        ax.imshow(data, aspect='auto')
+        res[glom]['data'][kernel_width] = data
+
+        # univariate test
+        _, p = f_regression(data, targets)
+        res[glom]['regression'][kernel_width] = -np.log10(p)
+
+        # random forest regression
+        rfr = RandomForestRegressor(n_estimators=10, compute_importances=True)
+        rfr.fit(data,targets)
+        res[glom]['forest'][kernel_width] = rfr.feature_importances_
+
+    # normalize both methods to their maximum value to make them comparable
+    max_reg = max_in_values(res['regression'])
+    max_for = max_in_values(res['forest'])
+    for i, kernel_width in enumerate(kernel_widths):
+        ax = fig.add_subplot(len(kernel_widths)*2, 1, (i*2)+1)
+        ax.imshow(res['data'][kernel_width], aspect='auto')
         ax.set_xticklabels([])
         ax.set_yticklabels([])
 
-        _, p = f_regression(data, targets)
-
         ax = fig.add_subplot(len(kernel_widths)*2, 1, (i*2)+2)
-        # rfr = RandomForestRegressor(n_estimators=10, compute_importances=True)
-        # rfr.fit(data,targets)
-        # ax.plot(rfr.feature_importances_)
-        ax.plot(-np.log10(p))
-        ax.set_xlim([0, data.shape[1]])
+        ax.plot(np.array(res['regression'][kernel_width]) / max_reg, 'b')
+        ax.plot(np.array(res['forest'][kernel_width]) / max_for, 'r')
+        ax.set_ylabel(kernel_width)
+        ax.set_xlim([0, res['regression'][kernel_width].shape[0]])
+        ax.set_yticks([0, 1])
+        ax.set_xticklabels([])
 
+    fig.savefig(os.path.join(out_folder, 'spectral_features_' + glom + '.' + format))
 
-    # kernel_width = 10
-    # # compute features for each molecule
-    # max_freq = np.max(frequencies)
-
-
-
-    # rfr = RandomForestRegressor(n_estimators=10, compute_importances=True)
-    # rfr.fit(data,targets)
-    # res[descriptor][glom]['rf'] = rfr.feature_importances_
-
-
+# compare kernel width 20 for different glomeruli
 
