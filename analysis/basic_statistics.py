@@ -12,16 +12,19 @@ Copyright (c) 2012. All rights reserved.
 
 import sys, os, pickle, json
 import master.libs.read_data_lib as rdl
-from sklearn import svm
-from sklearn import linear_model
+from master.libs import utils
 import numpy as np
 import pylab as plt
+from scipy.stats import scoreatpercentile
 reload(rdl)
 
 data_path = '/Users/dedan/projects/master/data'
 results_path = '/Users/dedan/projects/master/results/summary/'
 descriptor = 'ATOMCENTRED_FRAGMENTS'
 format = 'png'
+N = 50
+percentile = 75
+percentile_thres = 0.2
 
 door2id = json.load(open(os.path.join(data_path, 'door2id.json')))
 features = json.load(open(os.path.join(data_path, 'features.json')))
@@ -49,6 +52,29 @@ ax.set_xticks(np.arange(len(glomeruli)) + 1)
 ax.set_xticklabels(glomeruli, rotation='45', ha='right')
 ax.set_title('number of stimuli available for a glomerulus')
 fig.savefig(os.path.join(results_path, 'stimuli_per_glomerulus.' + format))
+
+# histograms for the glomeruli with more than N stimuli
+print '\n target distribution of glomeruli with more than %d stimuli' % N
+interesting = []
+fig = plt.figure(figsize=(10, 10))
+larger_n_idx = np.where(np.sum(~np.isnan(rm), axis=0) > 50)[0]
+for i, idx in enumerate(larger_n_idx):
+    w_c = utils.ceiled_root(len(larger_n_idx))
+    ax = fig.add_subplot(w_c, w_c, i + 1)
+    glom = rm[:, idx]
+    data = glom[~np.isnan(glom)]
+    if scoreatpercentile(data, 75) < 0.2:
+        ax.hist(data, bins=np.arange(0, 1.1, 0.1), color='r')
+    else:
+        interesting.append(glomeruli[idx])
+        ax.hist(data, bins=np.arange(0, 1.1, 0.1), color='b')
+    ax.set_title(glomeruli[idx])
+    ax.set_xticklabels([])  # can be switched of because all values 0 < x < 1
+fig.subplots_adjust(hspace=0.3)
+fig.savefig(os.path.join(results_path, 'target_quality.' + format))
+print ('\tlist of glomeruli with more than %d stimuli and %d percentile > %f' %
+       (N, percentile, percentile_thres))
+print interesting
 
 # number of molecules available for all glomeruli
 print 'glomerulus for which all stimuli are available'
