@@ -8,23 +8,28 @@
 """
 
 import pybel
-import os, sys, glob, json
+import os, sys, glob, json, time
 import subprocess
 from configobj import ConfigObj
+from datetime import datetime, timedelta
 
 config = ConfigObj(sys.argv[1], unrepr=True)
 
 molfile_path = os.path.join(config['module_path'], 'data', 'molecules.sdf')
 molfile = pybel.readfile('sdf', molfile_path)
 headers = json.load(open(os.path.join(config['module_path'], 'data', 'gamess_headers.json')))
-
 header = headers[config['header']]
+log = open(os.path.join(config['savepath'], 'gamess_log.log'), 'w')
 
-for mol in molfile:
+times = []
+
+for i, mol in enumerate(molfile):
 
     # read molid from database entry
     molid = mol.data['CdId']
-    print 'working on: ', molid
+    print 'working on file %s' % molid
+    t_start = time.time()
+
     input_file = molid + '.inp'
     outfile = os.path.join(config['savepath'], molid + '.log')
 
@@ -48,6 +53,19 @@ for mol in molfile:
            config['gamess_version'], config['n_nodes'],
            '>', outfile]
     cmd = ' '.join([str(c) for c in cmd])
-    print 'running ', cmd
-    subprocess.call(cmd, shell=True)
+    print '\trunning: %s' % cmd
+    subprocess.call(cmd, shell=True, stdout=log, stderr=log)
     os.remove(input_file)
+
+    delta_t = time.time() - t_start
+    times.append(delta_t)
+    d = datetime(1,1,1) + timedelta(seconds=times[-1])
+    print("\tfinished after: %d h %d min %d s" % (d.hour, d.minute, d.second))
+
+    if i % 10 == 0 and i:
+        d = datetime(1,1,1) + timedelta(seconds=(sum(times)/len(times)))
+        print("\n\tavg time: %d h %d min %d s\n" % (d.hour, d.minute, d.second))
+
+
+
+
