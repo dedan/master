@@ -8,6 +8,7 @@ import sys, os, pickle, json, __builtin__
 import numpy as np
 import pylab as plt
 from master.libs import read_data_lib as rdl
+from master.libs import utils
 from scipy.ndimage.filters import gaussian_filter
 from sklearn.ensemble import RandomForestRegressor
 from sklearn.feature_selection import SelectPercentile, f_regression
@@ -79,7 +80,8 @@ for glom in best_glom:
     for molid in molids:
         assert len(spectra[str(molid)]['freq']) == len(spectra[str(molid)]['ir'])
 
-    res[glom] = {'data': {}, 'regression': {}, 'forest': {}, 'oob': {}}
+    res[glom] = {'data': {}, 'regression': {}, 'forest': {}, 'oob': {},
+                 'targets': targets, 'oob_prediction': {}}
     for i, kernel_width in enumerate(kernel_widths):
 
         data = get_spectral_features(spectra, molids, kernel_width=kernel_width)
@@ -90,18 +92,22 @@ for glom in best_glom:
         res[glom]['regression'][kernel_width] = -np.log10(p)
 
         # random forest regression
-        rfr = RandomForestRegressor(n_estimators=10,
+        rfr = RandomForestRegressor(n_estimators=500,
                                     compute_importances=True,
                                     oob_score=True)
+
+        # TODO: feature selection step
         rfr.fit(data,targets)
         res[glom]['forest'][kernel_width] = rfr.feature_importances_
         res[glom]['oob'][kernel_width] = rfr.oob_score_
+        res[glom]['oob_prediction'][kernel_width] = rfr.oob_prediction_
 
 
 # plotting
 for glom in best_glom:
     fig = plt.figure(figsize=(10, 10))
     fig.suptitle(glom)
+    fig1 = plt.figure()
     # normalize both methods to their maximum value to make them comparable
     max_reg = max_in_values(res[glom]['regression'])
     max_for = max_in_values(res[glom]['forest'])
@@ -120,7 +126,13 @@ for glom in best_glom:
         ax.set_yticklabels([])
         ax.set_xticklabels([])
 
+        w_c = utils.ceiled_root(kernel_width)
+        ax = fig1.add_subplot(w_c, w_c, i+1)
+        ax.scatter(res[glom]['targets'], res[glom]['oob_prediction'][kernel_width])
+
+
     fig.savefig(os.path.join(out_folder, 'spectral_features_' + glom + '.' + format))
+    fig1.savefig(os.path.join(out_folder, 'target_vs_prediction_' + glom + '.' + format))
 
 # compare kernel width for different glomeruli
 fig = plt.figure(figsize=(10,10))
@@ -136,6 +148,7 @@ for i, kernel_width in enumerate(kernel_widths):
         ax2.set_yticks([0, ax2.get_yticks()[-1]])
         ax2.set_yticklabels(['', ax2.get_yticks()[-1]])
         ax2.set_xticklabels([])
+        # TODO: fix xrange
 
 ax1.set_xlabel('regression')
 ax2.set_xlabel('forest')
