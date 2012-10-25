@@ -19,8 +19,12 @@ base_path = '/Users/dedan/projects/master/'
 ir_file = '/Users/dedan/projects/master/results/gamess/ir.pckl'
 out_folder = '/Users/dedan/projects/master/results/spectra'
 format = 'png'
+# selected via the basic statistics script
+interesting_glomeruli = ['Or19a', 'Or22a', 'Or35a', 'Or43b', 'Or67a',
+                         'Or67b', 'Or7a', 'Or85b', 'Or98a', 'Or9a']
 n_glomeruli = 5
 resolution = 0.5
+recompute = False
 
 # read in the IR spectra TODO: move them to data when final version exists
 spectra = pickle.load(open(ir_file))
@@ -29,8 +33,8 @@ door2id = json.load(open(os.path.join(base_path, 'data', 'door2id.json')))
 # investigate only the glomeruli for which we have most molecules available
 csv_path = os.path.join(base_path, 'data', 'response_matrix.csv')
 cas_numbers, glomeruli, rm = rdl.load_response_matrix(csv_path, door2id)
-best_glom = rdl.select_n_best_glomeruli(rm, glomeruli, n_glomeruli)
-print best_glom
+# best_glom = rdl.select_n_best_glomeruli(rm, glomeruli, n_glomeruli)
+# print best_glom
 
 # # histogram of number of available frequencies
 # plt.figure()
@@ -67,44 +71,48 @@ def max_in_values(value_dict):
 
 res = {}
 # data collection
-for glom in best_glom:
+if recompute:
+    for glom in interesting_glomeruli:
 
-    print glom
-    glom_idx = glomeruli.index(glom)
+        print glom
+        glom_idx = glomeruli.index(glom)
 
-    # select molecules available for the glomerulus
-    targets , tmp_cas_numbers = rdl.get_avail_targets_for_glom(rm, cas_numbers, glom_idx)
-    molids = [door2id[cas_number][0] for cas_number in tmp_cas_numbers]
+        # select molecules available for the glomerulus
+        targets , tmp_cas_numbers = rdl.get_avail_targets_for_glom(rm, cas_numbers, glom_idx)
+        molids = [door2id[cas_number][0] for cas_number in tmp_cas_numbers]
 
-    # overlay of all spectra
-    for molid in molids:
-        assert len(spectra[str(molid)]['freq']) == len(spectra[str(molid)]['ir'])
+        # overlay of all spectra
+        for molid in molids:
+            assert len(spectra[str(molid)]['freq']) == len(spectra[str(molid)]['ir'])
 
-    res[glom] = {'data': {}, 'regression': {}, 'forest': {}, 'oob': {},
-                 'targets': targets, 'oob_prediction': {}}
-    for i, kernel_width in enumerate(kernel_widths):
+        res[glom] = {'data': {}, 'regression': {}, 'forest': {}, 'oob': {},
+                     'targets': targets, 'oob_prediction': {}}
+        for i, kernel_width in enumerate(kernel_widths):
 
-        data = get_spectral_features(spectra, molids, kernel_width=kernel_width)
-        res[glom]['data'][kernel_width] = data
+            data = get_spectral_features(spectra, molids, kernel_width=kernel_width)
+            res[glom]['data'][kernel_width] = data
 
-        # univariate test
-        _, p = f_regression(data, targets)
-        res[glom]['regression'][kernel_width] = -np.log10(p)
+            # univariate test
+            _, p = f_regression(data, targets)
+            res[glom]['regression'][kernel_width] = -np.log10(p)
 
-        # random forest regression
-        rfr = RandomForestRegressor(n_estimators=500,
-                                    compute_importances=True,
-                                    oob_score=True)
+            # random forest regression
+            rfr = RandomForestRegressor(n_estimators=500,
+                                        compute_importances=True,
+                                        oob_score=True)
 
-        # TODO: feature selection step
-        rfr.fit(data,targets)
-        res[glom]['forest'][kernel_width] = rfr.feature_importances_
-        res[glom]['oob'][kernel_width] = rfr.oob_score_
-        res[glom]['oob_prediction'][kernel_width] = rfr.oob_prediction_
-
+            # TODO: feature selection step
+            rfr.fit(data,targets)
+            res[glom]['forest'][kernel_width] = rfr.feature_importances_
+            res[glom]['oob'][kernel_width] = rfr.oob_score_
+            res[glom]['oob_prediction'][kernel_width] = rfr.oob_prediction_
+    pickle.dump(res, open(os.path.join(out_folder, 'res.pckl'), 'w'))
+else:
+    res = pickle.load(open(os.path.join(out_folder, 'res.pckl')))
 
 # plotting
-for glom in best_glom:
+for glom in interesting_glomeruli:
+    print 'plotting: ', glom
     fig = plt.figure(figsize=(10, 10))
     fig.suptitle(glom)
     fig1 = plt.figure()
@@ -126,7 +134,7 @@ for glom in best_glom:
         ax.set_yticklabels([])
         ax.set_xticklabels([])
 
-        w_c = utils.ceiled_root(kernel_width)
+        w_c = utils.ceiled_root(len(kernel_widths))
         ax = fig1.add_subplot(w_c, w_c, i+1)
         ax.scatter(res[glom]['targets'], res[glom]['oob_prediction'][kernel_width])
 
@@ -139,7 +147,7 @@ fig = plt.figure(figsize=(10,10))
 for i, kernel_width in enumerate(kernel_widths):
     ax1 = fig.add_subplot(len(kernel_widths)+1, 2, (i*2)+1)
     ax2 = fig.add_subplot(len(kernel_widths)+1, 2, (i*2)+2)
-    for glom in best_glom:
+    for glom in interesting_glomeruli:
         ax1.plot(res[glom]['regression'][kernel_width])
         ax1.set_xticklabels([])
         ax1.set_yticks([0, ax1.get_yticks()[-1]])
