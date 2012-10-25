@@ -65,6 +65,7 @@ def max_in_values(value_dict):
     return np.max(all_values[~np.isnan(all_values)])
 
 res = {}
+# data collection
 for glom in best_glom:
 
     print glom
@@ -77,17 +78,8 @@ for glom in best_glom:
     # overlay of all spectra
     for molid in molids:
         assert len(spectra[str(molid)]['freq']) == len(spectra[str(molid)]['ir'])
-    all_freq = __builtin__.sum([spectra[str(molid)]['freq'] for molid in molids], [])
-    all_ir = __builtin__.sum([spectra[str(molid)]['ir'] for molid in molids], [])
 
-    # distribution of distances between frequences (helps to decide for resolution)
-    # plt.figure()
-    # plt.hist(np.diff(sorted(all_freq)), bins=1000)
-    # plt.xlim([0,2])
-
-    res[glom] = {'data': {}, 'regression': {}, 'forest': {}}
-    fig = plt.figure(figsize=(10, 10))
-    fig.suptitle(glom)
+    res[glom] = {'data': {}, 'regression': {}, 'forest': {}, 'oob': {}}
     for i, kernel_width in enumerate(kernel_widths):
 
         data = get_spectral_features(spectra, molids, kernel_width=kernel_width)
@@ -98,10 +90,18 @@ for glom in best_glom:
         res[glom]['regression'][kernel_width] = -np.log10(p)
 
         # random forest regression
-        rfr = RandomForestRegressor(n_estimators=10, compute_importances=True)
+        rfr = RandomForestRegressor(n_estimators=10,
+                                    compute_importances=True,
+                                    oob_score=True)
         rfr.fit(data,targets)
         res[glom]['forest'][kernel_width] = rfr.feature_importances_
+        res[glom]['oob'][kernel_width] = rfr.oob_score_
 
+
+# plotting
+for glom in best_glom:
+    fig = plt.figure(figsize=(10, 10))
+    fig.suptitle(glom)
     # normalize both methods to their maximum value to make them comparable
     max_reg = max_in_values(res[glom]['regression'])
     max_for = max_in_values(res[glom]['forest'])
@@ -110,13 +110,14 @@ for glom in best_glom:
         ax.imshow(res[glom]['data'][kernel_width], aspect='auto')
         ax.set_xticklabels([])
         ax.set_yticklabels([])
+        ax.set_ylabel('%.2f' % res[glom]['oob'][kernel_width], rotation='0')
 
         ax = fig.add_subplot(len(kernel_widths)*2, 1, (i*2)+2)
         ax.plot(np.array(res[glom]['regression'][kernel_width]) / max_reg, 'b')
         ax.plot(np.array(res[glom]['forest'][kernel_width]) / max_for, 'r')
-        ax.set_ylabel(kernel_width)
+        ax.set_ylabel(kernel_width, rotation='0')
         ax.set_xlim([0, res[glom]['regression'][kernel_width].shape[0]])
-        ax.set_yticks([0, 1])
+        ax.set_yticklabels([])
         ax.set_xticklabels([])
 
     fig.savefig(os.path.join(out_folder, 'spectral_features_' + glom + '.' + format))
