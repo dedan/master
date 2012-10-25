@@ -103,23 +103,42 @@ for glom in best_glom:
         res[glom]['forest'][kernel_width] = rfr.feature_importances_
 
     # normalize both methods to their maximum value to make them comparable
-    max_reg = max_in_values(res['regression'])
-    max_for = max_in_values(res['forest'])
+    max_reg = max_in_values(res[glom]['regression'])
+    max_for = max_in_values(res[glom]['forest'])
     for i, kernel_width in enumerate(kernel_widths):
         ax = fig.add_subplot(len(kernel_widths)*2, 1, (i*2)+1)
-        ax.imshow(res['data'][kernel_width], aspect='auto')
+        ax.imshow(res[glom]['data'][kernel_width], aspect='auto')
         ax.set_xticklabels([])
         ax.set_yticklabels([])
 
         ax = fig.add_subplot(len(kernel_widths)*2, 1, (i*2)+2)
-        ax.plot(np.array(res['regression'][kernel_width]) / max_reg, 'b')
-        ax.plot(np.array(res['forest'][kernel_width]) / max_for, 'r')
+        ax.plot(np.array(res[glom]['regression'][kernel_width]) / max_reg, 'b')
+        ax.plot(np.array(res[glom]['forest'][kernel_width]) / max_for, 'r')
         ax.set_ylabel(kernel_width)
-        ax.set_xlim([0, res['regression'][kernel_width].shape[0]])
+        ax.set_xlim([0, res[glom]['regression'][kernel_width].shape[0]])
         ax.set_yticks([0, 1])
         ax.set_xticklabels([])
 
     fig.savefig(os.path.join(out_folder, 'spectral_features_' + glom + '.' + format))
 
-# compare kernel width 20 for different glomeruli
+# compare kernel width for different glomeruli
+fig = plt.figure(figsize=(10,10))
+for i, kernel_width in enumerate(kernel_widths):
+    ax1 = fig.add_subplot(len(kernel_widths)+1, 2, (i*2)+1)
+    ax2 = fig.add_subplot(len(kernel_widths)+1, 2, (i*2)+2)
+    for glom in best_glom:
+        ax1.plot(res[glom]['regression'][kernel_width])
+        ax1.set_xticklabels([])
+        ax1.set_yticks([0, ax1.get_yticks()[-1]])
+        ax1.set_yticklabels(['', ax1.get_yticks()[-1]])
+        ax2.plot(res[glom]['forest'][kernel_width])
+        ax2.set_yticks([0, ax2.get_yticks()[-1]])
+        ax2.set_yticklabels(['', ax2.get_yticks()[-1]])
+        ax2.set_xticklabels([])
+
+ax1.set_xlabel('regression')
+ax2.set_xlabel('forest')
+fig.subplots_adjust(hspace=0.4)
+fig.savefig(os.path.join(out_folder, 'glom_comparison.' + format))
+
 
