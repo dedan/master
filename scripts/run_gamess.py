@@ -40,8 +40,7 @@ for i, mol in enumerate(molfile):
     # clear the scratchfolder from tempfiles
     junkfiles = glob.glob(os.path.join(config['scratch_folder'], molid + '.*'))
     for f in junkfiles:
-        if config['redo']:
-            os.remove(f)
+        os.remove(f)
 
     # write the input file
     data = mol.write('inp')
