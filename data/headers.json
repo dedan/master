@@ -12,5 +12,21 @@
         " $CONTRL SCFTYP=RHF RUNTYP=Optimize DFTTYP=B3LYP $END",
         " $STATPT  HSSEND=.TRUE. OptTol=1e-4 NStep=500 $END",
         " $BASIS gbasis=n31 ngauss=6 ndfunc=1 npfunc=1 $END"
+    ],
+    "gauss_am1": [
+        "#P AM1",
+        "# Opt",
+        "#  freq(Raman)",
+        "# Gfinput IOP(6/7=3)  Pop=full  Density  Test",
+        "# Units(Ang,Deg)"
+    ],
+    "gauss_complex": [
+        "%MEM=12GB",
+        "%NProcShared=12",
+        "#P B3LYP/6-311G**",
+        "# Opt(Cartesian)",
+        "#  freq(Raman)",
+        "# Pop=full  Density  Test",
+        "# Units(Ang,Deg)"
     ]
 }
