@@ -152,11 +152,14 @@ for i, kernel_width in enumerate(kernel_widths):
         ax1.set_xticklabels([])
         ax1.set_yticks([0, ax1.get_yticks()[-1]])
         ax1.set_yticklabels(['', ax1.get_yticks()[-1]])
+        ax1.set_title('glom: {}'.format(glom))
+        ax1.set_xlim([0, res[glom]['forest'][kernel_width].shape[0]])
         ax2.plot(res[glom]['forest'][kernel_width])
         ax2.set_yticks([0, ax2.get_yticks()[-1]])
         ax2.set_yticklabels(['', ax2.get_yticks()[-1]])
         ax2.set_xticklabels([])
-        # TODO: fix xrange
+        ax2.set_title('width: {}'.format(kernel_width))
+        ax2.set_xlim([0, res[glom]['forest'][kernel_width].shape[0]])
 
 ax1.set_xlabel('regression')
 ax2.set_xlabel('forest')
