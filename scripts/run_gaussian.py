@@ -13,15 +13,15 @@
 import os, sys, glob, json
 import subprocess
 
-config = {"module_path": '/Users/dedan/projects/master',
-          "tmp_folder": '/Users/dedan/tmp',
-          "n_nodes": 12,
-          "memory": '12GB',
+config = {"module_path": '/home/dedan/master',
+          "tmp_folder": '/home/dedan/tmp/ir',
+          "n_nodes": 1,
+          "memory": '1GB',
           "header": 'gauss_am1'}
 
 headers = json.load(open(os.path.join(config['module_path'], 'data', 'headers.json')))
 header = headers[config['header']]
-cluster_instr = "%MEM={memory}\n%ProcShared={n_nodes}\n".format(**config)
+cluster_instr = "%MEM={memory}\n%NProcShared={n_nodes}".format(**config)
 
 input_path = os.path.join(config['module_path'], 'data', 'input_files', 'gaussian')
 input_files = glob.glob(os.path.join(input_path, '*.com'))
@@ -34,9 +34,9 @@ for input_file in input_files:
 
     tmp_file = os.path.join(config['tmp_folder'], os.path.basename(input_file))
     with open(input_file) as f:
-        data = f.read()
+        data = f.readlines()
     with open(tmp_file, 'w') as f:
-        f.write("\n".join([cluster_instr, '\n'.join(header), data]))
+        f.write("\n".join([cluster_instr, '\n'.join(header), ''.join(data[1:])]))
 
     # call gamess
     cmd = 'subg09 ' + tmp_file
