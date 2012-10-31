@@ -12,9 +12,12 @@
 
 import os, sys, glob, json
 import subprocess
-from configobj import ConfigObj
 
-config = ConfigObj(sys.argv[1], unrepr=True)
+config = {"module_path": '/Users/dedan/projects/master',
+          "tmp_folder": '/Users/dedan/tmp',
+          "n_nodes": 12,
+          "memory": '12GB',
+          "header": 'gauss_am1'}
 
 headers = json.load(open(os.path.join(config['module_path'], 'data', 'headers.json')))
 header = headers[config['header']]
