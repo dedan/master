@@ -96,19 +96,15 @@ for glom in interesting_glomeruli:
     max_reg = utils.max_in_values(res[glom]['regression'])
     max_for = utils.max_in_values(res[glom]['forest'])
     for i, kernel_width in enumerate(kernel_widths):
-        ax = fig.add_subplot(len(kernel_widths)*2, 1, (i*2)+1)
-        ax.imshow(res[glom]['data'][kernel_width], aspect='auto')
-        ax.set_xticklabels([])
-        ax.set_yticklabels([])
-        ax.set_ylabel('%.2f' % res[glom]['oob'][kernel_width], rotation='0')
 
-        ax = fig.add_subplot(len(kernel_widths)*2, 1, (i*2)+2)
+        ax = fig.add_subplot(len(kernel_widths), 1, i+1)
         ax.plot(np.array(res[glom]['regression'][kernel_width]) / max_reg, 'b')
         ax.plot(np.array(res[glom]['forest'][kernel_width]) / max_for, 'r')
         ax.set_ylabel(kernel_width, rotation='0')
         ax.set_xlim([0, res[glom]['regression'][kernel_width].shape[0]])
         ax.set_yticklabels([])
         ax.set_xticklabels([])
+        ax.set_ylabel('%.2f' % res[glom]['oob'][kernel_width], rotation='0')
 
         w_c = utils.ceiled_root(len(kernel_widths))
         ax = fig1.add_subplot(w_c, w_c, i+1)
