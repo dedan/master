@@ -7,7 +7,7 @@
 import pickle, os, glob, json
 from collections import defaultdict
 
-inpath = '/Users/dedan/projects/master/results/soroban/tmp/am1'
+inpath = '/Users/dedan/projects/master/results/spectra/gaussian_am1'
 n_lines_after_warning = 0
 outdict = defaultdict(dict)
 problem_files = []
@@ -15,10 +15,10 @@ problem_files = []
 outfiles=glob.glob(os.path.join(inpath, '*.log'))
 for outfilename in outfiles:
 
-    print 'reading from: ', outfilename
     freq, ir, raman = [], [], []
     outfile = open(outfilename)
     molid = os.path.splitext(os.path.basename(outfilename))[0]
+    molid = os.path.splitext(molid)[0]
 
     ok = False
     for line in outfile:
@@ -36,12 +36,12 @@ for outfilename in outfiles:
     assert len(freq) == len(ir)
     assert len(freq) == len(raman)
     if ok:
-        outdict[molid]['freq'] = freq
-        outdict[molid]['ir'] = ir
-        outdict[molid]['raman'] = raman
+        outdict[molid]['freq'] = [float(f) for f in freq]
+        outdict[molid]['ir'] = [float(f) for f in ir]
+        outdict[molid]['raman'] = [float(f) for f in raman]
     else:
-        problem_files.append(outfilename)
+        problem_files.append(molid)
 
 pickle.dump(dict(outdict), open(os.path.join(inpath, 'parsed.pckl'),'w'))
-json.dump(dict(problem_files), open(os.path.join(inpath, 'problems.json'),'w'))
+json.dump(problem_files, open(os.path.join(inpath, 'problems.json'),'w'))
 
