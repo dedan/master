@@ -21,8 +21,6 @@
         "# Units(Ang,Deg)"
     ],
     "gauss_complex": [
-        "%MEM=12GB",
-        "%NProcShared=12",
         "#P B3LYP/6-311G**",
         "# Opt(Cartesian)",
         "#  freq(Raman)",
