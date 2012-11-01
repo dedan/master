@@ -57,9 +57,9 @@ if recompute:
         targets , tmp_cas_numbers = rdl.get_avail_targets_for_glom(rm, cas_numbers, glom_idx)
         molids = [door2id[cas_number][0] for cas_number in tmp_cas_numbers]
 
-        # overlay of all spectra
-        for molid in molids:
-            assert len(spectra[str(molid)]['freq']) == len(spectra[str(molid)]['ir'])
+        # for some of them the spectra are not available
+        targets = [targets[i] for i in range(len(tmp_cas_numbers)) if str(molids[i]) in spectra]
+        molids = [m for m in molids if str(m) in spectra]
 
         res[glom] = {'data': {}, 'regression': {}, 'forest': {}, 'oob': {},
                      'targets': targets, 'oob_prediction': {}}
