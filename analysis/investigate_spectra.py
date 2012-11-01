@@ -25,7 +25,8 @@ interesting_glomeruli = ['Or19a', 'Or22a', 'Or35a', 'Or43b', 'Or67a',
                          'Or67b', 'Or7a', 'Or85b', 'Or98a', 'Or9a']
 n_glomeruli = 5
 resolution = 0.5
-recompute = False
+recompute = True
+n_estimators=50
 
 # read in the IR spectra TODO: move them to data when final version exists
 spectra = pickle.load(open(ir_file))
@@ -36,12 +37,6 @@ csv_path = os.path.join(base_path, 'data', 'response_matrix.csv')
 cas_numbers, glomeruli, rm = rdl.load_response_matrix(csv_path, door2id)
 # best_glom = rdl.select_n_best_glomeruli(rm, glomeruli, n_glomeruli)
 # print best_glom
-
-# # histogram of number of available frequencies
-# plt.figure()
-# plt.hist([len(mol['freq']) for mol in spectra.values()])
-# plt.title('number of frequencies available')
-# plt.savefig(os.path.join(out_folder, 'frequencies_hist.' + format))
 
 kernel_widths = [2, 3, 5, 10, 20, 30, 50]
 
@@ -73,7 +68,7 @@ if recompute:
             res[glom]['regression'][kernel_width] = -np.log10(p)
 
             # random forest regression
-            rfr = RandomForestRegressor(n_estimators=500,
+            rfr = RandomForestRegressor(n_estimators=n_estimators,
                                         compute_importances=True,
                                         oob_score=True)
 
