@@ -1,0 +1,7 @@
+{
+    "module_path": "/home/dedan/master",
+    "tmp_folder": "/home/dedan/tmp/ir",
+    "n_nodes": 1,
+    "memory": "1GB",
+    "header": "gauss_am1"
+}

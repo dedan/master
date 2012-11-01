@@ -13,12 +13,7 @@
 import os, sys, glob, json
 import subprocess
 
-config = {"module_path": '/home/dedan/master',
-          "tmp_folder": '/home/dedan/tmp/ir',
-          "n_nodes": 1,
-          "memory": '1GB',
-          "header": 'gauss_am1'}
-
+config = json.load(open(sys.argv[1]))
 headers = json.load(open(os.path.join(config['module_path'], 'data', 'headers.json')))
 header = headers[config['header']]
 cluster_instr = "%MEM={memory}\n%NProcShared={n_nodes}".format(**config)
