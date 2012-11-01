@@ -7,7 +7,7 @@
 import pickle, os, glob, json
 from collections import defaultdict
 
-inpath = '/Users/dedan/projects/master/results/gamess/'
+inpath = '/Users/dedan/projects/master/results/gamess/spectra/gamess_am1/'
 n_lines_after_warning = 0
 outdict = defaultdict(dict)
 problems = defaultdict(list)
@@ -55,6 +55,7 @@ for outfilename in outfiles:
     freq_cut = [float(freq[i]) for i in range(len(freq)) if not i in nonvibrations]
     ir_cut = [float(ir[i]) for i in range(len(ir)) if not i in nonvibrations]
     assert len(freq_cut) == len(ir_cut)
+    assert freq
     outdict[molid]['freq'] = freq_cut
     outdict[molid]['ir'] = ir_cut
 
