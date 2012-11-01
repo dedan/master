@@ -12,3 +12,9 @@ def ceiled_root(value):
         way with shape sqrt(n) x sqrt(n)
     """
     return int(np.ceil(value ** 0.5))
+
+def max_in_values(value_dict):
+    """maximum of non NANs in the values of a dict"""
+    stacker = lambda x,y: np.hstack((x,y))
+    all_values = reduce(stacker, value_dict.values(), np.array([]))
+    return np.max(all_values[~np.isnan(all_values)])

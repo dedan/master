@@ -9,15 +9,16 @@ import numpy as np
 import pylab as plt
 from master.libs import read_data_lib as rdl
 from master.libs import utils
-from scipy.ndimage.filters import gaussian_filter
+from master.libs import features
 from sklearn.ensemble import RandomForestRegressor
 from sklearn.feature_selection import SelectPercentile, f_regression
+reload(features)
 
 plt.close('all')
 
 base_path = '/Users/dedan/projects/master/'
-ir_file = '/Users/dedan/projects/master/results/gamess/ir.pckl'
-out_folder = '/Users/dedan/projects/master/results/spectra'
+ir_file = '/Users/dedan/projects/master/data/spectra/gamess_am1/parsed.pckl'
+out_folder = '/Users/dedan/projects/master/results/spectra/plots'
 format = 'png'
 # selected via the basic statistics script
 interesting_glomeruli = ['Or19a', 'Or22a', 'Or35a', 'Or43b', 'Or67a',
@@ -44,31 +45,6 @@ cas_numbers, glomeruli, rm = rdl.load_response_matrix(csv_path, door2id)
 
 kernel_widths = [2, 3, 5, 10, 20, 30, 50]
 
-def get_spectral_features(spectra, molids, kernel_width=1, max_freq=None):
-    """bining after convolution"""
-    if not max_freq:
-        all_freq = __builtin__.sum([spectra[str(molid)]['freq'] for molid in molids], [])
-        max_freq = np.max(all_freq)
-
-    x = np.zeros((len(molids), int(np.ceil(np.max(all_freq)/resolution)) + 1))
-    for i, molid in enumerate(molids):
-        idx = np.round(np.array(spectra[str(molid)]['freq']) / resolution).astype(int)
-        x[i, idx] = spectra[str(molid)]['ir']
-    x = gaussian_filter(x, [0, kernel_width], 0)
-    # bining
-    factor, rest = x.shape[1] / kernel_width, x.shape[1] % kernel_width
-    if rest:
-        data = np.mean(x[:,:-rest].reshape((x.shape[0], factor, -1)), axis=2)
-    else:
-        data = np.mean(x.reshape((x.shape[0], factor, -1)), axis=2)
-    return data
-
-def max_in_values(value_dict):
-    """maximum of non NANs in the values of a dict"""
-    stacker = lambda x,y: np.hstack((x,y))
-    all_values = reduce(stacker, value_dict.values(), np.array([]))
-    return np.max(all_values[~np.isnan(all_values)])
-
 res = {}
 # data collection
 if recompute:
@@ -89,8 +65,8 @@ if recompute:
                      'targets': targets, 'oob_prediction': {}}
         for i, kernel_width in enumerate(kernel_widths):
 
-            data = get_spectral_features(spectra, molids, kernel_width=kernel_width)
-            res[glom]['data'][kernel_width] = data
+            data = features.get_spectral_features(spectra, molids, resolution, kernel_width=kernel_width)
+            # res[glom]['data'][kernel_width] = data
 
             # univariate test
             _, p = f_regression(data, targets)
@@ -117,8 +93,8 @@ for glom in interesting_glomeruli:
     fig.suptitle(glom)
     fig1 = plt.figure()
     # normalize both methods to their maximum value to make them comparable
-    max_reg = max_in_values(res[glom]['regression'])
-    max_for = max_in_values(res[glom]['forest'])
+    max_reg = utils.max_in_values(res[glom]['regression'])
+    max_for = utils.max_in_values(res[glom]['forest'])
     for i, kernel_width in enumerate(kernel_widths):
         ax = fig.add_subplot(len(kernel_widths)*2, 1, (i*2)+1)
         ax.imshow(res[glom]['data'][kernel_width], aspect='auto')
