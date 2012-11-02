@@ -24,6 +24,7 @@ import sys
 import os
 import json
 import pickle
+import time
 from master.libs import read_data_lib as rdl
 from master.libs import features as flib
 from collections import defaultdict
@@ -74,20 +75,25 @@ for glom in config['glomeruli']:
     assert len(targets) == data.shape[0]
 
     # random forest regression
-    rfr = RandomForestRegressor(n_estimators=config['n_estimators'],
+    rfr_base = RandomForestRegressor(n_estimators=config['n_estimators'],
                                 compute_importances=True,
                                 oob_score=True)
-    rfr.fit(data, targets)
-    res[glom]['all_features'] = rfr
+    rfr_base.fit(data, targets)
+    res[glom]['all_features'] = rfr_base
     res[glom]['models'] = []
 
     # TODO: maybe make this the N_BEST features in order to be method independent
     for feature_threshold in config['feature_thresholds']:
-        rfr.fit(data[:, rfr.feature_importances_ > feature_threshold], targets)
+        rfr = RandomForestRegressor(n_estimators=config['n_estimators'],
+                                    compute_importances=True,
+                                    oob_score=True)
+        rfr.fit(data[:, rfr_base.feature_importances_ > feature_threshold], targets)
         rfr.feature_threshold = feature_threshold
         res[glom]['models'].append(rfr)
 
-res['config'] = config
+timestamp = time.strftime("%d%m%Y_%H%M%S", time.localtime())
+pickle.dump(res, open(os.path.join(config['results_path'], timestamp + '.pckl'), 'w'))
+json.dump(config, open(os.path.join(config['results_path'], timestamp + '.json'), 'w'))
 
 
 
