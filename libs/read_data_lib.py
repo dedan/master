@@ -49,7 +49,7 @@ def read_feature_csv(feature_file):
 
 def remove_invalid_features(features):
     """remove features with 0 variance"""
-    valid = np.var(np.array(features.values())) != 0.
+    valid = np.var(np.array(features.values()), axis=0) != 0.
     for feature in features.keys():
         features[feature] = features[feature][valid]
     return features
