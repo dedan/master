@@ -30,7 +30,7 @@ def read_feature_csv(feature_file):
     molid_idx = 0
     identifiere_idx = 1
     feature_start_idx = 2
-    features = defaultdict(dict)
+    features = defaultdict(list)
 
     with open(feature_file) as f:
         reader = csv.reader(f)
@@ -41,27 +41,26 @@ def read_feature_csv(feature_file):
                 continue
             mol = row[molid_idx]
             for f_id in range(feature_start_idx, len(row)):
-                try:
-                    features[header[f_id]][mol] = float(row[f_id])
-                except:
-                    features[header[f_id]][mol] = 0.
+                features[mol].append(float(row[f_id]))
+    mols = features.keys()
+    for i in range(len(mols) -1):
+        assert(len(features[mols[i]]) == len(features[mols[i+1]]))
     return features
 
 def remove_invalid_features(features):
     """remove features with 0 variance"""
-    for feature in list(features.keys()):
-        if np.var(features[feature].values()) == 0:
-            del(features[feature])
+    valid = np.var(np.array(features.values())) != 0.
+    for feature in features.keys():
+        features[feature] = features[feature][valid]
     return features
-
 
 def normalize_features(features):
     """z-transform the features to make individual dimensions comparable"""
-    for feature in features:
-        normed = zscore(features[feature].values())
-        keys = features[feature].keys()
-        for key, value in zip(keys, normed):
-            features[feature][key] = value
+    normed = zscore(np.array(features.values()))
+    orig_shape = np.array(features.values()).shape
+    for i, feature in enumerate(features):
+        features[feature] = normed[i]
+    assert(np.array(features.values()).shape == orig_shape)
     return features
 
 def get_features_for_molids(f_space, molids):
