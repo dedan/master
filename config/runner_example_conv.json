@@ -1,0 +1,9 @@
+{
+    "data_path": "/Users/dedan/projects/master/data",
+    "feature_type": "conventional",
+    "descriptor": "ATOMCENTRED_FRAGMENTS",
+    "normalize_features": true,
+    "glomeruli" :["Or19a", "Or22a", "Or35a", "Or43b", "Or67a"],
+    "n_estimators": 20,
+    "feature_thresholds": [0.001]
+}

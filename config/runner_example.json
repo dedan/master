@@ -1,8 +1,12 @@
 {
-	"data_path": "/Users/dedan/projects/master/data",
-    "features": {
-        "type": "conventional",
-        "descriptor": "ATOMCENTRED_FRAGMENTS",
-        "normalize": true
-    }
+    "data_path": "/Users/dedan/projects/master/data",
+    "feature_type": "spectral",
+    "descriptor": "gaussian_am1",
+    "normalize_features": true,
+    "glomeruli" :["Or19a", "Or22a", "Or35a", "Or43b", "Or67a"],
+    "n_estimators": 20,
+    "feature_thresholds": [0.001, 0.002, 0.005, 0.01],
+    "kernel_width": 30,
+    "resolution": 0.5,
+    "spec_type": "ir"
 }
