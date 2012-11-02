@@ -1,0 +1,1 @@
+I created this input files once and added them to the repo in order to avoid reading from the molecules.sdf when I want to run the gaussian or gamess jobs on another machine. pybel is not always installed and also not so easy to install.
