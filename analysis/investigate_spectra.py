@@ -17,8 +17,8 @@ reload(features)
 plt.close('all')
 
 base_path = '/Users/dedan/projects/master/'
-ir_file = '/Users/dedan/projects/master/data/spectra/gamess_am1/parsed.pckl'
-out_folder = '/Users/dedan/projects/master/results/spectra/plots'
+ir_file = '/Users/dedan/projects/master/data/spectra/gaussian_am1/parsed.pckl'
+out_folder = '/Users/dedan/projects/master/results/spectra/plots_gaussian_sel'
 format = 'png'
 # selected via the basic statistics script
 interesting_glomeruli = ['Or19a', 'Or22a', 'Or35a', 'Or43b', 'Or67a',
@@ -26,7 +26,7 @@ interesting_glomeruli = ['Or19a', 'Or22a', 'Or35a', 'Or43b', 'Or67a',
 n_glomeruli = 5
 resolution = 0.5
 recompute = True
-n_estimators=50
+n_estimators=100
 
 # read in the IR spectra TODO: move them to data when final version exists
 spectra = pickle.load(open(ir_file))
@@ -57,11 +57,10 @@ if recompute:
         molids = [m for m in molids if str(m) in spectra]
 
         res[glom] = {'data': {}, 'regression': {}, 'forest': {}, 'oob': {},
-                     'targets': targets, 'oob_prediction': {}}
+                     'targets': targets, 'oob_prediction': {}, 'oob_sel': {}}
         for i, kernel_width in enumerate(kernel_widths):
 
             data = features.get_spectral_features(spectra, molids, resolution, kernel_width=kernel_width)
-            # res[glom]['data'][kernel_width] = data
 
             # univariate test
             _, p = f_regression(data, targets)
@@ -77,6 +76,10 @@ if recompute:
             res[glom]['forest'][kernel_width] = rfr.feature_importances_
             res[glom]['oob'][kernel_width] = rfr.oob_score_
             res[glom]['oob_prediction'][kernel_width] = rfr.oob_prediction_
+
+            rfr.fit(data[:, rfr.feature_importances_ > 0.02], targets)
+            res[glom]['oob_sel'][kernel_width] = rfr.oob_score_
+
     pickle.dump(res, open(os.path.join(out_folder, 'res.pckl'), 'w'))
 else:
     res = pickle.load(open(os.path.join(out_folder, 'res.pckl')))
