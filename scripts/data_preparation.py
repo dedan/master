@@ -12,6 +12,7 @@ import master.libs.read_data_lib as rdl
 
 data_path = '/Users/dedan/projects/master/data/'
 
+# TODO: make it work with the new read_feature_csv function
 features = rdl.read_feature_csvs(os.path.join(data_path, 'features'))
 features = rdl.normalize_features(rdl.remove_invalid_features(features))
 json.dump(features, open(os.path.join(data_path, 'features.json'), 'w'))

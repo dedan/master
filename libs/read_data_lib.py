@@ -21,8 +21,8 @@ import rpy2.robjects as robjects
 from rpy2.rinterface import NARealType
 
 
-def read_feature_csvs(features_path):
-    """read the feature CSVs into a dictionary structure
+def read_feature_csv(feature_file):
+    """read one feature CSV into a dictionary structure
 
     csvs have molid in the 1st column, identifiere in 2nd and then features
     """
@@ -30,44 +30,38 @@ def read_feature_csvs(features_path):
     molid_idx = 0
     identifiere_idx = 1
     feature_start_idx = 2
-    all_feature_files = glob.glob(os.path.join(features_path, '*.csv'))
-    for feature_file in all_feature_files:
+    features = defaultdict(dict)
 
-        f_space = os.path.splitext(os.path.basename(feature_file))[0]
-        features[f_space] = defaultdict(dict)
+    with open(feature_file) as f:
+        reader = csv.reader(f)
+        header = reader.next()
 
-        with open(feature_file) as f:
-            reader = csv.reader(f)
-            header = reader.next()
-
-            for row in reader:
-                if 'Error' in row[identifiere_idx]:
-                    continue
-                mol = row[molid_idx]
-                for f_id in range(feature_start_idx, len(row)):
-                    try:
-                        features[f_space][header[f_id]][mol] = float(row[f_id])
-                    except:
-                        features[f_space][header[f_id]][mol] = 0.
+        for row in reader:
+            if 'Error' in row[identifiere_idx]:
+                continue
+            mol = row[molid_idx]
+            for f_id in range(feature_start_idx, len(row)):
+                try:
+                    features[header[f_id]][mol] = float(row[f_id])
+                except:
+                    features[header[f_id]][mol] = 0.
     return features
 
 def remove_invalid_features(features):
     """remove features with 0 variance"""
-    for f_space in features:
-        for feature in list(features[f_space].keys()):
-            if np.var(features[f_space][feature].values()) == 0:
-                del(features[f_space][feature])
+    for feature in list(features.keys()):
+        if np.var(features[feature].values()) == 0:
+            del(features[feature])
     return features
 
 
 def normalize_features(features):
     """z-transform the features to make individual dimensions comparable"""
-    for f_space in features:
-        for feature in features[f_space]:
-            normed = zscore(features[f_space][feature].values())
-            keys = features[f_space][feature].keys()
-            for key, value in zip(keys, normed):
-                features[f_space][feature][key] = value
+    for feature in features:
+        normed = zscore(features[feature].values())
+        keys = features[feature].keys()
+        for key, value in zip(keys, normed):
+            features[feature][key] = value
     return features
 
 def get_features_for_molids(f_space, molids):

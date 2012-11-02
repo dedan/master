@@ -1,0 +1,8 @@
+{
+	"data_path": "/Users/dedan/projects/master/data",
+    "features": {
+        "type": "conventional",
+        "descriptor": "ATOMCENTRED_FRAGMENTS",
+        "normalize": true
+    }
+}
