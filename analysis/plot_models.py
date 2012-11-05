@@ -29,7 +29,7 @@ for result_file in result_files:
     plotd = defaultdict(list)
     for glom in res:
         for model in res[glom]['models']:
-            plotd[model.feature_threshold].append(model.score)
+            plotd[model['feature_threshold']].append(model['score'])
 
     fig = plt.figure()
     ax = fig.add_subplot(111)
