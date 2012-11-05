@@ -1,12 +1,13 @@
 {
     "data_path": "/Users/dedan/projects/master/data",
+    "results_path": "/Users/dedan/projects/master/results/models/",
     "feature_type": "spectral",
     "descriptor": "gaussian_am1",
     "normalize_features": true,
     "glomeruli" :["Or19a", "Or22a", "Or35a", "Or43b", "Or67a"],
-    "n_estimators": 20,
+    "n_estimators": 500,
     "feature_thresholds": [0.001, 0.002, 0.005, 0.01],
-    "kernel_width": 30,
+    "kernel_width": 20,
     "resolution": 0.5,
     "spec_type": "ir"
 }
