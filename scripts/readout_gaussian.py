@@ -33,6 +33,8 @@ for outfilename in outfiles:
         if 'Normal termination' in line:
             ok = True
 
+        assert not 'stable' in line.lower()
+
     assert len(freq) == len(ir)
     assert len(freq) == len(raman)
     if ok:
