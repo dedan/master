@@ -76,10 +76,9 @@ for glom in config['glomeruli']:
 
     # random forest regression
     rfr_base = RandomForestRegressor(n_estimators=config['n_estimators'],
-                                compute_importances=True,
-                                oob_score=True)
+                                     compute_importances=True,
+                                     oob_score=True)
     rfr_base.fit(data, targets)
-    res[glom]['all_features'] = rfr_base
     res[glom]['models'] = []
 
     # TODO: maybe make this the N_BEST features in order to be method independent
@@ -87,9 +86,12 @@ for glom in config['glomeruli']:
         rfr = RandomForestRegressor(n_estimators=config['n_estimators'],
                                     compute_importances=True,
                                     oob_score=True)
-        rfr.fit(data[:, rfr_base.feature_importances_ > feature_threshold], targets)
+        sel_data = data[:, rfr_base.feature_importances_ > feature_threshold]
+        rfr.fit(sel_data, targets)
         rfr.feature_threshold = feature_threshold
-        res[glom]['models'].append(rfr)
+        res[glom]['models'].append({'feature_threshold': feature_threshold,
+                                    'params': rfr.get_params(),
+                                    'score': rfr.score(sel_data, targets)})
 
 timestamp = time.strftime("%d%m%Y_%H%M%S", time.localtime())
 pickle.dump(res, open(os.path.join(config['results_path'], timestamp + '.pckl'), 'w'))
