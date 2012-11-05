@@ -1,10 +1,10 @@
 {
     "gauss_complex": [
-        "#P B3LYP/6-311G**",
-        "# Opt(Cartesian)",
-        "#  freq(Raman)",
-        "# Pop=full  Density  Test",
-        "# Units(Ang,Deg)"
+		"#P B3LYP/6-311G(d,p)",
+		"# Opt",
+		"#  freq(Raman)",
+		"# Test",
+		"# Units(Ang,Deg)"
     ],
     "gauss_complex_factor": 0.967
 }
