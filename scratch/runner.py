@@ -96,8 +96,15 @@ for glom in config['glomeruli']:
     svr = llib.MySVR(cross_val=True, n_folds=config['n_folds'])
     svr.fit(data, targets)
     res[glom]['svr'] = {'params': svr.get_params(),
-                        'train_score': svr.fit(data, targets).score(data, targets),
+                        'train_score': svr.score(data, targets),
                         'gen_score': svr.r2_score_}
+
+    svr_ens = llib.SVREnsemble(n_estimators=config['n_estimators'],
+                               oob_score=True)
+    svr_ens.fit(data, targets)
+    res[glom]['svr_ens'] = {'params': svr_ens.get_params(),
+                            # 'train_score': svr.fit(data, targets).score(data, targets),
+                            'gen_score': svr_ens.oob_score_}
 
 
 timestamp = time.strftime("%d%m%Y_%H%M%S", time.localtime())
