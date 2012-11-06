@@ -83,18 +83,16 @@ for glom in config['glomeruli']:
     res[glom]['models'] = []
 
     # TODO: maybe make this the N_BEST features in order to be method independent
-    for feature_threshold in config['feature_thresholds']:
-        rfr = RandomForestRegressor(n_estimators=config['n_estimators'],
-                                    compute_importances=True,
-                                    oob_score=True,
-                                    random_state=0)
-        sel_data = data[:, rfr_base.feature_importances_ > feature_threshold]
-        rfr.fit(sel_data, targets)
-        params = rfr.get_params()
-        del(params['random_state'])
-        res[glom]['models'].append({'feature_threshold': feature_threshold,
-                                    'params': params,
-                                    'score': rfr.score(sel_data, targets)})
+    rfr = RandomForestRegressor(n_estimators=config['n_estimators'],
+                                compute_importances=True,
+                                oob_score=True,
+                                random_state=0)
+    sel_data = data[:, rfr_base.feature_importances_ > config['feature_threshold']]
+    rfr.fit(sel_data, targets)
+    params = rfr.get_params()
+    del(params['random_state'])
+    res[glom]['models'].append({'params': params,
+                                'score': rfr.score(sel_data, targets)})
 
 timestamp = time.strftime("%d%m%Y_%H%M%S", time.localtime())
 json.dump(dict(res), open(os.path.join(config['results_path'], timestamp + '.json'), 'w'))
