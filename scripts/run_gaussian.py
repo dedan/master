@@ -38,7 +38,7 @@ for input_file in input_files:
     print '\trunning: %s' % cmd
     subprocess.call(cmd, shell=True, stdout=log, stderr=log)
 
-json.dump(config, open('config.json'))
+json.dump(config, open('config.json', 'w'))
 os.chdir(wd)
 
 
