@@ -20,7 +20,7 @@ for outfilename in outfiles:
     molid = os.path.splitext(os.path.basename(outfilename))[0]
     molid = os.path.splitext(molid)[0]
 
-    ok = False
+    terminations = 0
     for line in outfile:
 
         # collect frequencies and intensities
@@ -31,13 +31,14 @@ for outfilename in outfiles:
         if 'Raman Activ' in line:
             raman.extend(line.split()[3:])
         if 'Normal termination' in line:
-            ok = True
+            terminations += 1
 
         assert not 'stable' in line.lower()
 
     assert len(freq) == len(ir)
     assert len(freq) == len(raman)
-    if ok:
+    if terminations == 2:
+        assert ir != []
         outdict[molid]['freq'] = [float(f) for f in freq]
         outdict[molid]['ir'] = [float(f) for f in ir]
         outdict[molid]['raman'] = [float(f) for f in raman]
