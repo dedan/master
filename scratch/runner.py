@@ -103,7 +103,7 @@ for glom in config['glomeruli']:
                                oob_score=True)
     svr_ens.fit(data, targets)
     res[glom]['svr_ens'] = {'params': svr_ens.get_params(),
-                            # 'train_score': svr.fit(data, targets).score(data, targets),
+                            'train_score': svr_ens.score(data, targets),
                             'gen_score': svr_ens.oob_score_}
 
 

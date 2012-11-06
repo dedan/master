@@ -70,6 +70,17 @@ class SVREnsemble(object):
             predictions /= n_predictions
             self.oob_score_ = r2_score(targets, predictions)
 
+    def predict(self, data):
+        """docstring for predict"""
+        predictions = np.zeros(data.shape[0])
+        for svr in self.ensemble:
+            predictions += svr.predict(data)
+        return predictions / len(self.ensemble)
+
+    def score(self, data, targets):
+        """docstring for score"""
+        return r2_score(targets, self.predict(data))
+
     def get_params(self):
         """docstring for get_params"""
         return self.ensemble[0].get_params()
