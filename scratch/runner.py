@@ -77,7 +77,8 @@ for glom in config['glomeruli']:
     # random forest regression
     rfr_base = RandomForestRegressor(n_estimators=config['n_estimators'],
                                      compute_importances=True,
-                                     oob_score=True)
+                                     oob_score=True,
+                                     random_state=0)
     rfr_base.fit(data, targets)
     res[glom]['models'] = []
 
@@ -85,18 +86,19 @@ for glom in config['glomeruli']:
     for feature_threshold in config['feature_thresholds']:
         rfr = RandomForestRegressor(n_estimators=config['n_estimators'],
                                     compute_importances=True,
-                                    oob_score=True)
+                                    oob_score=True,
+                                    random_state=0)
         sel_data = data[:, rfr_base.feature_importances_ > feature_threshold]
         rfr.fit(sel_data, targets)
-        rfr.feature_threshold = feature_threshold
+        params = rfr.get_params()
+        del(params['random_state'])
         res[glom]['models'].append({'feature_threshold': feature_threshold,
-                                    'params': rfr.get_params(),
+                                    'params': params,
                                     'score': rfr.score(sel_data, targets)})
 
 timestamp = time.strftime("%d%m%Y_%H%M%S", time.localtime())
-pickle.dump(res, open(os.path.join(config['results_path'], timestamp + '.pckl'), 'w'))
-json.dump(config, open(os.path.join(config['results_path'], timestamp + '.json'), 'w'))
-
+json.dump(dict(res), open(os.path.join(config['results_path'], timestamp + '.json'), 'w'))
+json.dump(config, open(os.path.join(config['results_path'], timestamp + '_config.json'), 'w'))
 
 
 
