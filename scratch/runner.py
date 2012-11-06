@@ -25,9 +25,13 @@ import os
 import json
 import pickle
 import time
+from collections import defaultdict
 from master.libs import read_data_lib as rdl
 from master.libs import features as flib
 from sklearn.ensemble import RandomForestRegressor
+from sklearn.svm import SVR
+from sklearn.cross_validation import KFold
+from sklearn.metrics import r2_score
 import numpy as np
 reload(rdl)
 reload(flib)
@@ -56,7 +60,7 @@ features = rdl.remove_invalid_features(features)
 if config['normalize_features']:
     features = rdl.normalize_features(features)
 
-res = {}
+res = defaultdict(dict)
 for glom in config['glomeruli']:
 
     print glom
@@ -69,22 +73,35 @@ for glom in config['glomeruli']:
 
     # for some of them the spectra are not available
     avail = [i for i in range(len(molids)) if molids[i] in features]
-    targets = [targets[i] for i in avail]
+    targets = np.array([targets[i] for i in avail])
     data = np.array([features[molids[i]] for i in avail])
-    assert len(targets) == data.shape[0]
+    assert targets.shape[0] == data.shape[0]
 
-    # random forest regression
+    # # feature selection
+    # sel_data = rfr.transform(data, config['feature_threshold'])
+    # rfr.fit(sel_data, targets)
+
+    # random forest
     rfr = RandomForestRegressor(n_estimators=config['n_estimators'],
                                 compute_importances=True,
                                 oob_score=True,
                                 random_state=0)
     rfr.fit(data, targets)
+    res[glom]['forest'] = {'params': rfr.get_params(),
+                           'train_score': rfr.score(data, targets),
+                           'gen_score': rfr.oob_score_}
+    del(res[glom]['forest']['params']['random_state'])
 
-    sel_data = rfr.transform(data, config['feature_threshold')
-    rfr.fit(sel_data, targets)
-    res[glom] = {'params': rfr.get_params(),
-                 'score': rfr.score(sel_data, targets)}
-    del(res[glom]['params']['random_state'])
+    # SVR
+    svr = SVR()
+    kf = KFold(len(targets), config['n_folds'])
+    predictions = np.zeros(len(targets))
+    for train, test in kf:
+        predictions[test] = svr.fit(data[train], targets[train]).predict(data[test])
+    res[glom]['svr'] = {'params': svr.get_params(),
+                        'train_score': svr.fit(data, targets).score(data, targets),
+                        'gen_score': r2_score(targets, predictions)}
+
 
 timestamp = time.strftime("%d%m%Y_%H%M%S", time.localtime())
 json.dump(dict(res), open(os.path.join(config['results_path'], timestamp + '.json'), 'w'))

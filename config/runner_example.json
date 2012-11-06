@@ -9,5 +9,6 @@
     "feature_threshold": 0.001,
     "kernel_width": 20,
     "resolution": 0.5,
-    "spec_type": "ir"
+    "spec_type": "ir",
+    "n_folds": 10
 }
