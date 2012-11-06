@@ -28,13 +28,13 @@ import time
 from collections import defaultdict
 from master.libs import read_data_lib as rdl
 from master.libs import features as flib
+from master.libs import learning_lib as llib
 from sklearn.ensemble import RandomForestRegressor
 from sklearn.svm import SVR
-from sklearn.cross_validation import KFold
-from sklearn.metrics import r2_score
 import numpy as np
 reload(rdl)
 reload(flib)
+reload(llib)
 
 # read from a config file, this might become a job file later
 config = json.load(open(sys.argv[1]))
@@ -93,14 +93,11 @@ for glom in config['glomeruli']:
     del(res[glom]['forest']['params']['random_state'])
 
     # SVR
-    svr = SVR()
-    kf = KFold(len(targets), config['n_folds'])
-    predictions = np.zeros(len(targets))
-    for train, test in kf:
-        predictions[test] = svr.fit(data[train], targets[train]).predict(data[test])
+    svr = llib.MySVR(cross_val=True, n_folds=config['n_folds'])
+    svr.fit(data, targets)
     res[glom]['svr'] = {'params': svr.get_params(),
                         'train_score': svr.fit(data, targets).score(data, targets),
-                        'gen_score': r2_score(targets, predictions)}
+                        'gen_score': svr.r2_score_}
 
 
 timestamp = time.strftime("%d%m%Y_%H%M%S", time.localtime())
