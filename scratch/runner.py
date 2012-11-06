@@ -27,7 +27,6 @@ import pickle
 import time
 from master.libs import read_data_lib as rdl
 from master.libs import features as flib
-from collections import defaultdict
 from sklearn.ensemble import RandomForestRegressor
 import numpy as np
 reload(rdl)
@@ -57,7 +56,7 @@ features = rdl.remove_invalid_features(features)
 if config['normalize_features']:
     features = rdl.normalize_features(features)
 
-res = defaultdict(dict)
+res = {}
 for glom in config['glomeruli']:
 
     print glom
@@ -75,24 +74,17 @@ for glom in config['glomeruli']:
     assert len(targets) == data.shape[0]
 
     # random forest regression
-    rfr_base = RandomForestRegressor(n_estimators=config['n_estimators'],
-                                     compute_importances=True,
-                                     oob_score=True,
-                                     random_state=0)
-    rfr_base.fit(data, targets)
-    res[glom]['models'] = []
-
-    # TODO: maybe make this the N_BEST features in order to be method independent
     rfr = RandomForestRegressor(n_estimators=config['n_estimators'],
                                 compute_importances=True,
                                 oob_score=True,
                                 random_state=0)
-    sel_data = data[:, rfr_base.feature_importances_ > config['feature_threshold']]
+    rfr.fit(data, targets)
+
+    sel_data = rfr.transform(data, config['feature_threshold')
     rfr.fit(sel_data, targets)
-    params = rfr.get_params()
-    del(params['random_state'])
-    res[glom]['models'].append({'params': params,
-                                'score': rfr.score(sel_data, targets)})
+    res[glom] = {'params': rfr.get_params(),
+                 'score': rfr.score(sel_data, targets)}
+    del(res[glom]['params']['random_state'])
 
 timestamp = time.strftime("%d%m%Y_%H%M%S", time.localtime())
 json.dump(dict(res), open(os.path.join(config['results_path'], timestamp + '.json'), 'w'))
