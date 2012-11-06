@@ -4,11 +4,12 @@
     "feature_type": "spectral",
     "descriptor": "large_base",
     "normalize_features": true,
-    "glomeruli" :["Or19a", "Or22a", "Or35a", "Or43b", "Or67a"],
+    "glomeruli" :["Or19a"],
     "n_estimators": 500,
     "feature_threshold": 0.001,
     "kernel_width": 20,
     "resolution": 0.5,
+    "use_intensity": false,
     "spec_type": "ir",
     "n_folds": 10
 }

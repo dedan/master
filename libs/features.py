@@ -11,7 +11,9 @@ import __builtin__
 import numpy as np
 from scipy.ndimage.filters import gaussian_filter
 
-def get_spectral_features(spectra, resolution, spec_type='ir', kernel_width=1):
+def get_spectral_features(spectra, resolution, use_intensity=True,
+                                               spec_type='ir',
+                                               kernel_width=1):
     """bining after convolution"""
     all_freq = __builtin__.sum([spectra[molid]['freq'] for molid in spectra], [])
     max_freq = np.max(all_freq)
@@ -19,7 +21,10 @@ def get_spectral_features(spectra, resolution, spec_type='ir', kernel_width=1):
     x = np.zeros((len(spectra), int(np.ceil(np.max(all_freq)/resolution)) + 1))
     for i, molid in enumerate(spectra):
         idx = np.round(np.array(spectra[molid]['freq']) / resolution).astype(int)
-        x[i, idx] = spectra[molid][spec_type]
+        if use_intensity:
+            x[i, idx] = spectra[molid][spec_type]
+        else:
+            x[i, idx] = 1
     x = gaussian_filter(x, [0, kernel_width], 0)
     # bining
     factor, rest = x.shape[1] / kernel_width, x.shape[1] % kernel_width

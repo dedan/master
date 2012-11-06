@@ -55,6 +55,7 @@ elif config['feature_type'] == 'spectral':
     spectra = pickle.load(open(feature_file))
     features = flib.get_spectral_features(spectra, config['resolution'],
                                           spec_type=config['spec_type'],
+                                          use_intensity=config['use_intensity'],
                                           kernel_width=config['kernel_width'])
 features = rdl.remove_invalid_features(features)
 if config['normalize_features']:
