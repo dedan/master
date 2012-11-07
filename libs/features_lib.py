@@ -22,25 +22,34 @@ def get_spectral_features(spectra, resolution, use_intensity=True,
                                                spec_type='ir',
                                                kernel_width=1):
     """bining after convolution"""
+    as_vectors = _place_waves_in_vector(spectra, resolution, use_intensity, spec_type)
+    as_vectors = gaussian_filter(as_vectors, [0, kernel_width], 0)
+    bined = _bining(as_vectors, kernel_width)
+    features = {}
+    for i, molid in enumerate(spectra):
+        features[molid] = bined[i]
+    assert(len(spectra) == len(features))
+    return features
+
+def _place_waves_in_vector(spectra, resolution, use_intensity, spec_type):
+    """from gaussian we only get the wavenumbers, place them in vector for convolution"""
     all_freq = __builtin__.sum([spectra[molid]['freq'] for molid in spectra], [])
     max_freq = np.max(all_freq)
 
-    x = np.zeros((len(spectra), int(np.ceil(np.max(all_freq)/resolution)) + 1))
+    x = np.zeros((len(spectra), int(np.ceil(max_freq/resolution)) + 1))
     for i, molid in enumerate(spectra):
         idx = np.round(np.array(spectra[molid]['freq']) / resolution).astype(int)
         if use_intensity:
             x[i, idx] = spectra[molid][spec_type]
         else:
             x[i, idx] = 1
-    x = gaussian_filter(x, [0, kernel_width], 0)
-    # bining
-    factor, rest = x.shape[1] / kernel_width, x.shape[1] % kernel_width
+    return x
+
+def _bining(vectors, kernel_width):
+    """divide the *continous* spectrum into bins"""
+    factor = vectors.shape[1] / kernel_width
+    rest = vectors.shape[1] % kernel_width
     if rest:
-        data = np.mean(x[:,:-rest].reshape((x.shape[0], factor, -1)), axis=2)
+        return np.mean(vectors[:,:-rest].reshape((vectors.shape[0], factor, -1)), axis=2)
     else:
-        data = np.mean(x.reshape((x.shape[0], factor, -1)), axis=2)
-    features = {}
-    for i, molid in enumerate(spectra):
-        features[molid] = data[i]
-    assert(len(spectra) == len(features))
-    return features
+        return np.mean(vectors.reshape((vectors.shape[0], factor, -1)), axis=2)
