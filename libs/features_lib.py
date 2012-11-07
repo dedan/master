@@ -14,6 +14,7 @@ from scipy.ndimage.filters import gaussian_filter
 def get_k_best(scores, k):
     """get indices for the k best features depending on the scores"""
     assert not (scores < 0).any()
+    assert len(scores) >= k
     scores[np.isnan(scores)] = 0
     return np.argsort(scores)[-k:]
 

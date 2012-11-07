@@ -11,6 +11,14 @@
 
     TODO: maybe make it work on job files in a folder (batch mode)
 
+    List of parameters that can be explored with this file
+
+    * parameters for each ML method (e.g. C for the SVR)
+    * different features
+    * spectral features with or without use_intensity
+    * feature selection threshold
+
+
 Created by  on 2012-01-27.
 Copyright (c) 2012. All rights reserved.
 """
@@ -27,10 +35,11 @@ import pickle
 import time
 from collections import defaultdict
 from master.libs import read_data_lib as rdl
-from master.libs import features as flib
+from master.libs import features_lib as flib
 from master.libs import learning_lib as llib
 from sklearn.ensemble import RandomForestRegressor
 from sklearn.svm import SVR
+from sklearn.feature_selection import f_regression, SelectKBest
 import numpy as np
 reload(rdl)
 reload(flib)
@@ -79,8 +88,14 @@ for glom in config['glomeruli']:
     assert targets.shape[0] == data.shape[0]
 
     # # feature selection
-    # sel_data = rfr.transform(data, config['feature_threshold'])
-    # rfr.fit(sel_data, targets)
+    if config['feature_selection']['method'] == 'linear':
+        sel_scores, _ = f_regression(data, targets)
+    elif config['feature_selection']['method'] == 'forest':
+        rfr_sel = RandomForestRegressor(compute_importances=True, random_state=0)
+        sel_scores = rfr_sel.fit(data, targets).feature_importances_
+    # res[glom]['feature_selection_scores'] = list(sel_scores)
+    idx = flib.get_k_best(sel_scores, config['feature_selection']['k_best'])
+    data = data[:, idx]
 
     # random forest
     rfr = RandomForestRegressor(n_estimators=config['n_estimators'],

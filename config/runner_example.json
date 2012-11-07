@@ -1,4 +1,8 @@
 {
+    "feature_selection": {
+        "method": "forest",
+        "k_best": 100
+    },
     "data_path": "/Users/dedan/projects/master/data",
     "results_path": "/Users/dedan/projects/master/results/models/",
     "feature_type": "spectral",
