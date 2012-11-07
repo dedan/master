@@ -42,6 +42,7 @@ from master.libs import learning_lib as llib
 from sklearn.ensemble import RandomForestRegressor
 from sklearn.svm import SVR
 from sklearn.feature_selection import f_regression, SelectKBest
+from sklearn.preprocessing import normalize
 import numpy as np
 reload(rdl)
 reload(flib)
@@ -89,7 +90,10 @@ for glom in config['glomeruli']:
     data = np.array([features[molids[i]] for i in avail])
     assert targets.shape[0] == data.shape[0]
 
-    # # feature selection
+    if config['features']['normalize_samples']:
+        data = normalize(data, norm='l2', axis=1, copy=True)
+
+    # feature selection
     if config['feature_selection']['method'] == 'linear':
         sel_scores, _ = f_regression(data, targets)
     elif config['feature_selection']['method'] == 'forest':
