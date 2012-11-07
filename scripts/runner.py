@@ -17,6 +17,7 @@
     * different features
     * spectral features with or without use_intensity
     * feature selection threshold
+    * different feature selection methods
 
 
 Created by  on 2012-01-27.
@@ -53,21 +54,21 @@ cas_numbers, glomeruli, rm = rdl.load_response_matrix(csv_path, door2id)
 
 
 # feature related stuff
-if config['feature_type'] == 'conventional':
+if config['features']['type'] == 'conventional':
     feature_file = os.path.join(config['data_path'], 'conventional_features',
-                                config['descriptor'] + '.csv')
+                                config['features']['descriptor'] + '.csv')
     features = rdl.read_feature_csv(feature_file)
 
-elif config['feature_type'] == 'spectral':
+elif config['features']['type'] == 'spectral':
     feature_file = os.path.join(config['data_path'], 'spectral_features',
-                                config['descriptor'], 'parsed.pckl')
+                                config['features']['descriptor'], 'parsed.pckl')
     spectra = pickle.load(open(feature_file))
-    features = flib.get_spectral_features(spectra, config['resolution'],
-                                          spec_type=config['spec_type'],
-                                          use_intensity=config['use_intensity'],
-                                          kernel_width=config['kernel_width'])
+    features = flib.get_spectral_features(spectra, config['features']['resolution'],
+                                          spec_type=config['features']['spec_type'],
+                                          use_intensity=config['features']['use_intensity'],
+                                          kernel_width=config['features']['kernel_width'])
 features = rdl.remove_invalid_features(features)
-if config['normalize_features']:
+if config['features']['normalize']:
     features = rdl.normalize_features(features)
 
 res = defaultdict(dict)
@@ -98,10 +99,7 @@ for glom in config['glomeruli']:
     data = data[:, idx]
 
     # random forest
-    rfr = RandomForestRegressor(n_estimators=config['n_estimators'],
-                                compute_importances=True,
-                                oob_score=True,
-                                random_state=0)
+    rfr = RandomForestRegressor(**config['methods']['forest'])
     rfr.fit(data, targets)
     res[glom]['forest'] = {'params': rfr.get_params(),
                            'train_score': rfr.score(data, targets),
@@ -109,14 +107,13 @@ for glom in config['glomeruli']:
     del(res[glom]['forest']['params']['random_state'])
 
     # SVR
-    svr = llib.MySVR(cross_val=True, n_folds=config['n_folds'])
+    svr = llib.MySVR(**config['methods']['svr'])
     svr.fit(data, targets)
     res[glom]['svr'] = {'params': svr.get_params(),
                         'train_score': svr.score(data, targets),
                         'gen_score': svr.r2_score_}
 
-    svr_ens = llib.SVREnsemble(n_estimators=config['n_estimators'],
-                               oob_score=True)
+    svr_ens = llib.SVREnsemble(**config['methods']['svr_ens'])
     svr_ens.fit(data, targets)
     res[glom]['svr_ens'] = {'params': svr_ens.get_params(),
                             'train_score': svr_ens.score(data, targets),
