@@ -19,6 +19,7 @@
     * feature selection threshold
     * different feature selection methods
     * depth of a tree
+    * combination of different spectral bands (kernel_widths)
 
 
 Created by  on 2012-01-27.
@@ -68,7 +69,8 @@ elif config['features']['type'] == 'spectral':
     features = flib.get_spectral_features(spectra, config['features']['resolution'],
                                           spec_type=config['features']['spec_type'],
                                           use_intensity=config['features']['use_intensity'],
-                                          kernel_width=config['features']['kernel_width'])
+                                          kernel_widths=config['features']['kernel_width'])
+
 features = rdl.remove_invalid_features(features)
 if config['features']['normalize']:
     features = rdl.normalize_features(features)

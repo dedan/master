@@ -20,14 +20,22 @@ def get_k_best(scores, k):
 
 def get_spectral_features(spectra, resolution, use_intensity=True,
                                                spec_type='ir',
-                                               kernel_width=1):
-    """bining after convolution"""
-    as_vectors = _place_waves_in_vector(spectra, resolution, use_intensity, spec_type)
-    as_vectors = gaussian_filter(as_vectors, [0, kernel_width], 0)
-    bined = _bining(as_vectors, kernel_width)
+                                               kernel_widths=1):
+    """bining after convolution
+
+        combine several binings if kernel_width is a list of widths
+    """
+    if not isinstance(kernel_widths, list):
+        kernel_widths = [kernel_widths]
+    combined = np.zeros((len(spectra),0))
+    for k_width in kernel_widths:
+        as_vectors = _place_waves_in_vector(spectra, resolution, use_intensity, spec_type)
+        as_vectors = gaussian_filter(as_vectors, [0, k_width], 0)
+        bined = _bining(as_vectors, k_width)
+        combined = np.hstack((combined, bined))
     features = {}
     for i, molid in enumerate(spectra):
-        features[molid] = bined[i]
+        features[molid] = combined[i]
     assert(len(spectra) == len(features))
     return features
 

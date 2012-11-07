@@ -8,7 +8,7 @@
         "descriptor": "large_base",
         "normalize": true,
         "normalize_samples": false,
-        "kernel_width": 20,
+        "kernel_width": [20, 50],
         "resolution": 0.5,
         "use_intensity": false,
         "spec_type": "ir"
