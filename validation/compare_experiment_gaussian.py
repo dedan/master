@@ -14,7 +14,7 @@ import __builtin__
 n_to_plot = 10
 
 # load all the results
-gaussian_spectra = '/Users/dedan/projects/master/results/soroban/large_base'
+gaussian_spectra = '/Users/dedan/projects/master/data/spectral_features/large_base'
 experimental_spectra = '/Users/dedan/projects/master/data/experimental_spectra.pckl'
 door2id = json.load(open('/Users/dedan/projects/master/data/door2id.json'))
 headers = json.load(open('/Users/dedan/projects/master/data/headers.json'))
@@ -50,7 +50,7 @@ for i in range(n_to_plot):
            -np.array(exp_spec[int(molid)]['spec']), edgecolor='r', width=3, label='exp')
     ax.set_yticklabels([])
     ax.set_title(molid)
-plt.show()
+    plt.show()
 
 
 

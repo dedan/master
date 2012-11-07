@@ -1,0 +1,7 @@
+{
+    "module_path": "/home/dedan/master",
+    "tmp_folder": "/home/dedan/large_base",
+    "n_nodes": 4,
+    "memory": "4GB",
+    "header": "gauss_complex"
+}
