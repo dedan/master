@@ -9,10 +9,10 @@ import numpy as np
 import pylab as plt
 from master.libs import read_data_lib as rdl
 from master.libs import utils
-from master.libs import features
+from master.libs import features_lib
 from sklearn.ensemble import RandomForestRegressor
 from sklearn.feature_selection import SelectPercentile, f_regression
-reload(features)
+reload(features_lib)
 
 plt.close('all')
 
@@ -60,7 +60,7 @@ if recompute:
                      'targets': targets, 'oob_prediction': {}, 'oob_sel': {}}
         for i, kernel_width in enumerate(kernel_widths):
 
-            data = features.get_spectral_features(spectra, molids, resolution, kernel_width=kernel_width)
+            data = features_lib.get_spectral_features(spectra, molids, resolution, kernel_width=kernel_width)
 
             # univariate test
             _, p = f_regression(data, targets)

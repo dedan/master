@@ -11,6 +11,12 @@ import __builtin__
 import numpy as np
 from scipy.ndimage.filters import gaussian_filter
 
+def get_k_best(scores, k):
+    """get indices for the k best features depending on the scores"""
+    assert not (scores < 0).any()
+    scores[np.isnan(scores)] = 0
+    return np.argsort(scores)[-k:]
+
 def get_spectral_features(spectra, resolution, use_intensity=True,
                                                spec_type='ir',
                                                kernel_width=1):
