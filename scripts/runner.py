@@ -18,6 +18,7 @@
     * spectral features with or without use_intensity
     * feature selection threshold
     * different feature selection methods
+    * depth of a tree
 
 
 Created by  on 2012-01-27.

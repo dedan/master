@@ -20,7 +20,8 @@
         },
         "svr": {
             "cross_val": true,
-            "n_folds": 10
+            "stratified": false,
+            "n_folds": 5
         },
         "svr_ens": {
             "n_estimators": 500,

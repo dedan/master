@@ -14,24 +14,43 @@ import os
 from sklearn.svm import SVR
 from sklearn.cross_validation import KFold
 from sklearn.metrics import r2_score
+from sklearn.cross_validation import StratifiedKFold
 import numpy as np
+
+class MyStratifiedKFold(StratifiedKFold):
+    """A StratifiedKFold for continous targets
+
+       the target range is divided into n_bins bins which are used as
+       class labels
+    """
+    def __init__(self, targets, n_folds, n_bins=2):
+        _, bins = np.histogram(targets, bins=n_bins)
+        # because of the < instead of <= condition in digitize
+        bins[-1] += np.finfo(targets.dtype).eps
+        binned_targets = np.digitize(targets, bins)
+        print binned_targets
+        super(MyStratifiedKFold, self).__init__(binned_targets, n_folds)
 
 
 class MySVR(SVR):
     """docstring for MySVR"""
-    def __init__(self, cross_val=True, n_folds=10, **kwargs):
+    def __init__(self, cross_val=True, n_folds=10, stratified=False, **kwargs):
         super(MySVR, self).__init__(**kwargs)
         self.kwargs = kwargs
         self.cross_val = cross_val
         self.n_folds = n_folds
         self.r2_score_ = None
+        self.stratified = stratified
 
     def fit(self, data, targets):
         """docstring for fit"""
         super(MySVR, self).fit(data, targets)
         tmp_svr = SVR(**self.kwargs)
         if self.cross_val:
-            kf = KFold(len(targets), self.n_folds)
+            if self.stratified:
+                kf = MyStratifiedKFold(targets, self.n_folds)
+            else:
+                kf = KFold(len(targets), self.n_folds)
             predictions = np.zeros(len(targets))
             for train, test in kf:
                 predictions[test] = tmp_svr.fit(data[train], targets[train]).predict(data[test])
