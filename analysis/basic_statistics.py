@@ -47,9 +47,11 @@ fig.savefig(os.path.join(results_path, 'glomeruli_per_stimulus.' + format))
 
 fig = plt.figure(figsize=(15, 7))
 ax = fig.add_subplot(111)
-ax.bar(range(len(glomeruli)), np.sum(~np.isnan(rm), axis=0))
+n_stimuli = np.sum(~np.isnan(rm), axis=0)
+sorted_idx = list(reversed(np.argsort(n_stimuli)))
+ax.bar(range(len(glomeruli)), n_stimuli[sorted_idx])
 ax.set_xticks(np.arange(len(glomeruli)) + 1)
-ax.set_xticklabels(glomeruli, rotation='45', ha='right')
+ax.set_xticklabels([glomeruli[i] for i in sorted_idx], rotation='45', ha='right')
 ax.set_title('number of stimuli available for a glomerulus')
 fig.savefig(os.path.join(results_path, 'stimuli_per_glomerulus.' + format))
 
