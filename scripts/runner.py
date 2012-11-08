@@ -49,21 +49,13 @@ reload(rdl)
 reload(flib)
 reload(llib)
 
-def run_runner(config):
-    """docstring for run"""
+def prepare_features(config):
+    """load and prepare the features, either conventional or spectral"""
 
-    # read from a config file, this might become a job file later
-    door2id = json.load(open(os.path.join(config['data_path'], 'door2id.json')))
-    csv_path = os.path.join(config['data_path'], 'response_matrix.csv')
-    cas_numbers, glomeruli, rm = rdl.load_response_matrix(csv_path, door2id)
-
-
-    # feature related stuff
     if config['features']['type'] == 'conventional':
         feature_file = os.path.join(config['data_path'], 'conventional_features',
                                     config['features']['descriptor'] + '.csv')
         features = rdl.read_feature_csv(feature_file)
-
     elif config['features']['type'] == 'spectral':
         feature_file = os.path.join(config['data_path'], 'spectral_features',
                                     config['features']['descriptor'], 'parsed.pckl')
@@ -72,10 +64,18 @@ def run_runner(config):
                                               spec_type=config['features']['spec_type'],
                                               use_intensity=config['features']['use_intensity'],
                                               kernel_widths=config['features']['kernel_width'])
-
     features = rdl.remove_invalid_features(features)
     if config['features']['normalize']:
         features = rdl.normalize_features(features)
+    return features
+
+
+def run_runner(config, features):
+    """docstring for run"""
+
+    door2id = json.load(open(os.path.join(config['data_path'], 'door2id.json')))
+    csv_path = os.path.join(config['data_path'], 'response_matrix.csv')
+    cas_numbers, glomeruli, rm = rdl.load_response_matrix(csv_path, door2id)
 
     res = defaultdict(dict)
     for glom in config['glomeruli']:
@@ -130,7 +130,8 @@ def run_runner(config):
 
 if __name__ == '__main__':
     config = json.load(open(sys.argv[1]))
-    res = run_runner(config)
+    features = prepare_features(config)
+    res = run_runner(config, features)
     timestamp = time.strftime("%d%m%Y_%H%M%S", time.localtime())
     json.dump(res, open(os.path.join(config['results_path'], timestamp + '.json'), 'w'))
     json.dump(config, open(os.path.join(config['results_path'], timestamp + '_config.json'), 'w'))

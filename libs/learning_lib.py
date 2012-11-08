@@ -28,7 +28,6 @@ class MyStratifiedKFold(StratifiedKFold):
         # because of the < instead of <= condition in digitize
         bins[-1] += np.finfo(targets.dtype).eps
         binned_targets = np.digitize(targets, bins)
-        print binned_targets
         super(MyStratifiedKFold, self).__init__(binned_targets, n_folds)
 
 
