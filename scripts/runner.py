@@ -76,57 +76,47 @@ def run_runner(config, features):
     door2id = json.load(open(os.path.join(config['data_path'], 'door2id.json')))
     csv_path = os.path.join(config['data_path'], 'response_matrix.csv')
     cas_numbers, glomeruli, rm = rdl.load_response_matrix(csv_path, door2id)
+    glom_idx = glomeruli.index(config['glomerulus'])
+    res = {}
 
-    res = defaultdict(dict)
-    for glom in config['glomeruli']:
+    # select molecules available for the glomerulus
+    targets , tmp_cas_numbers = rdl.get_avail_targets_for_glom(rm, cas_numbers, glom_idx)
+    molids = [str(door2id[cas_number][0]) for cas_number in tmp_cas_numbers]
+    assert len(molids) == len(targets)
 
-        print glom
-        glom_idx = glomeruli.index(glom)
+    # for some of them the spectra are not available
+    avail = [i for i in range(len(molids)) if molids[i] in features]
+    targets = np.array([targets[i] for i in avail])
+    data = np.array([features[molids[i]] for i in avail])
+    assert targets.shape[0] == data.shape[0]
 
-        # select molecules available for the glomerulus
-        targets , tmp_cas_numbers = rdl.get_avail_targets_for_glom(rm, cas_numbers, glom_idx)
-        molids = [str(door2id[cas_number][0]) for cas_number in tmp_cas_numbers]
-        assert len(molids) == len(targets)
+    if config['features']['normalize_samples']:
+        data = normalize(data, norm='l2', axis=1, copy=True)
 
-        # for some of them the spectra are not available
-        avail = [i for i in range(len(molids)) if molids[i] in features]
-        targets = np.array([targets[i] for i in avail])
-        data = np.array([features[molids[i]] for i in avail])
-        assert targets.shape[0] == data.shape[0]
+    # feature selection
+    if config['feature_selection']['method'] == 'linear':
+        sel_scores, _ = f_regression(data, targets)
+    elif config['feature_selection']['method'] == 'forest':
+        rfr_sel = RandomForestRegressor(compute_importances=True, random_state=0)
+        sel_scores = rfr_sel.fit(data, targets).feature_importances_
+    idx = flib.get_k_best(sel_scores, config['feature_selection']['k_best'])
+    data = data[:, idx]
 
-        if config['features']['normalize_samples']:
-            data = normalize(data, norm='l2', axis=1, copy=True)
-
-        # feature selection
-        if config['feature_selection']['method'] == 'linear':
-            sel_scores, _ = f_regression(data, targets)
-        elif config['feature_selection']['method'] == 'forest':
-            rfr_sel = RandomForestRegressor(compute_importances=True, random_state=0)
-            sel_scores = rfr_sel.fit(data, targets).feature_importances_
-        idx = flib.get_k_best(sel_scores, config['feature_selection']['k_best'])
-        data = data[:, idx]
-
-        # random forest
-        rfr = RandomForestRegressor(**config['methods']['forest'])
-        rfr.fit(data, targets)
-        res[glom]['forest'] = {'params': rfr.get_params(),
-                               'train_score': rfr.score(data, targets),
-                               'gen_score': rfr.oob_score_}
-        del(res[glom]['forest']['params']['random_state'])
-
-        # SVR
-        svr = llib.MySVR(**config['methods']['svr'])
-        svr.fit(data, targets)
-        res[glom]['svr'] = {'params': svr.get_params(),
-                            'train_score': svr.score(data, targets),
-                            'gen_score': svr.r2_score_}
-
-        svr_ens = llib.SVREnsemble(**config['methods']['svr_ens'])
-        svr_ens.fit(data, targets)
-        res[glom]['svr_ens'] = {'params': svr_ens.get_params(),
-                                'train_score': svr_ens.score(data, targets),
-                                'gen_score': svr_ens.oob_score_}
+    # train models and get results
+    rfr = RandomForestRegressor(**config['methods']['forest'])
+    rfr.fit(data, targets)
+    res['forest'] = {'train_score': rfr.score(data, targets),
+                     'gen_score': rfr.oob_score_}
+    svr = llib.MySVR(**config['methods']['svr'])
+    svr.fit(data, targets)
+    res['svr'] = {'train_score': svr.score(data, targets),
+                  'gen_score': svr.r2_score_}
+    svr_ens = llib.SVREnsemble(**config['methods']['svr_ens'])
+    svr_ens.fit(data, targets)
+    res['svr_ens'] = {'train_score': svr_ens.score(data, targets),
+                      'gen_score': svr_ens.oob_score_}
     return dict(res)
+
 
 if __name__ == '__main__':
     config = json.load(open(sys.argv[1]))
@@ -135,22 +125,4 @@ if __name__ == '__main__':
     timestamp = time.strftime("%d%m%Y_%H%M%S", time.localtime())
     json.dump(res, open(os.path.join(config['results_path'], timestamp + '.json'), 'w'))
     json.dump(config, open(os.path.join(config['results_path'], timestamp + '_config.json'), 'w'))
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 

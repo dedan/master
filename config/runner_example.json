@@ -31,5 +31,5 @@
     },
     "data_path": "/Users/dedan/projects/master/data",
     "results_path": "/Users/dedan/projects/master/results/models/",
-    "glomeruli" :["Or19a"]
+    "glomerulus": "Or19a"
 }
