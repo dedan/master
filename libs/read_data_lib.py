@@ -42,6 +42,8 @@ def read_feature_csv(feature_file):
             mol = row[molid_idx]
             for f_id in range(feature_start_idx, len(row)):
                 features[mol].append(float(row[f_id]))
+    for feature in features:
+        features[feature] = np.array(features[feature])
     mols = features.keys()
     for i in range(len(mols) -1):
         assert(len(features[mols[i]]) == len(features[mols[i+1]]))
