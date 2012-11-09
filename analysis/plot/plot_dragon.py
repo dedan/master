@@ -12,7 +12,7 @@ import json
 import pickle
 import numpy as np
 import pylab as plt
-from master.scripts import runner
+from master.libs import run_lib
 
 
 config = json.load(open('/Users/dedan/projects/master/config/runner_example.json'))

@@ -7,16 +7,16 @@ Copyright (c) 2012. All rights reserved.
 """
 import json
 import pickle
-from master.scripts import runner
+from master.libs import run_lib
 import numpy as np
 import pylab as plt
-reload(runner)
+reload(run_lib)
 import glob
 import os
 
 
 config = json.load(open('/Users/dedan/projects/master/config/runner_example.json'))
-features = runner.prepare_features(config)
+features = run_lib.prepare_features(config)
 n_features = len(features[features.keys()[0]])
 
 glomeruli = ['Or19a', 'Or22a', 'Or35a', 'Or43b', 'Or67a']
@@ -45,7 +45,7 @@ for f in files:
                     config['methods']['svr']['C'] = svr[i]
                     config['methods']['svr_ens']['C'] = svr[i]
                     config['methods']['forest']['max_depth'] = forest[i]
-                    tmp_res = runner.run_runner(config, features)
+                    tmp_res = run_lib.run_runner(config, features)
                     res[selection][glomerulus][k_b][forest[i]] = tmp_res
     pickle.dump(res, open(desc + '.pckl', 'w'))
 
