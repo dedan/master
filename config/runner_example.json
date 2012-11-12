@@ -21,8 +21,9 @@
         },
         "svr": {
             "cross_val": true,
-            "stratified": false,
-            "n_folds": 5
+            "C": 1.0,
+            "stratified": true,
+            "n_folds": 10
         },
         "svr_ens": {
             "n_estimators": 500,
