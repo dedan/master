@@ -16,9 +16,12 @@ import csv
 from scipy.stats import zscore
 import numpy as np
 import pylab as plt
-from rpy2.robjects.packages import importr
-import rpy2.robjects as robjects
-from rpy2.rinterface import NARealType
+try:
+    from rpy2.robjects.packages import importr
+    import rpy2.robjects as robjects
+    from rpy2.rinterface import NARealType
+except Exception, e:
+    print '!!! rpy2 not installed !!!'
 
 
 def read_feature_csv(feature_file):
