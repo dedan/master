@@ -14,13 +14,10 @@ reload(run_lib)
 
 outpath = '/Users/dedan/projects/master/results/param_search/conv_features'
 config = json.load(open('/Users/dedan/projects/master/config/runner_example.json'))
-features = run_lib.prepare_features(config)
-n_features = len(features[features.keys()[0]])
 
 sc = {
     'selection': ['linear', 'forest'],
     'glomeruli': ['Or19a', 'Or22a', 'Or35a', 'Or43b', 'Or67a'],
-    'k_best': [2**i for i in range(10) if 2**i < n_features ],
     'forest': [3, 5, 10, 100, 500],
     'svr': [0.01, 0.1, 1, 10, 100]
 }
@@ -34,6 +31,13 @@ for f in files:
         continue
 
     config['features']['descriptor'] = desc
+    config['features']['type'] = 'conventional'
+
+    # load the features
+    features = run_lib.prepare_features(config)
+    n_features = len(features[features.keys()[0]])
+    sc['k_best'] = [2**i for i in range(10) if 2**i < n_features]
+
     print 'working on: ', desc
 
     for selection in sc['selection']:
@@ -53,4 +57,4 @@ for f in files:
                     tmp_res = run_lib.run_runner(config, features)
                     tmp_res['n_features'] = n_features
                     res[selection][glomerulus][k_b][i] = tmp_res
-    json.dump({'sc': sc, 'res': res}, open(os.path.join(outpath  + desc + '.json'), 'w'))
+    json.dump({'sc': sc, 'res': res}, open(os.path.join(outpath, desc + '.json'), 'w'))
