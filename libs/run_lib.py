@@ -49,6 +49,10 @@ reload(rdl)
 reload(flib)
 reload(llib)
 
+ml_methods = {'forest': RandomForestRegressor,
+              'svr': llib.MySVR,
+              'svr_ens': llib.SVREnsemble}
+
 def prepare_features(config):
     """load and prepare the features, either conventional or spectral"""
 
@@ -93,6 +97,9 @@ def run_runner(config, features):
     if config['features']['normalize_samples']:
         data = normalize(data, norm='l2', axis=1, copy=True)
 
+    if config['randomization_test']:
+        map(np.random.shuffle, data.T)
+
     # feature selection
     if config['feature_selection']['method'] == 'linear':
         sel_scores, _ = f_regression(data, targets)
@@ -103,18 +110,11 @@ def run_runner(config, features):
     data = data[:, idx]
 
     # train models and get results
-    rfr = RandomForestRegressor(**config['methods']['forest'])
-    rfr.fit(data, targets)
-    res['forest'] = {'train_score': rfr.score(data, targets),
-                     'gen_score': rfr.oob_score_}
-    svr = llib.MySVR(**config['methods']['svr'])
-    svr.fit(data, targets)
-    res['svr'] = {'train_score': svr.score(data, targets),
-                  'gen_score': svr.r2_score_}
-    svr_ens = llib.SVREnsemble(**config['methods']['svr_ens'])
-    svr_ens.fit(data, targets)
-    res['svr_ens'] = {'train_score': svr_ens.score(data, targets),
-                      'gen_score': svr_ens.oob_score_}
+    for method in config['methods']:
+        regressor = ml_methods[method](**config['methods'][method])
+        regressor.fit(data, targets)
+        res[method] = {'train_score': regressor.score(data, targets),
+                       'gen_score': regressor.oob_score_}
     return dict(res)
 
 

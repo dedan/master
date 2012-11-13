@@ -39,6 +39,7 @@ class MySVR(SVR):
         self.cross_val = cross_val
         self.n_folds = n_folds
         self.r2_score_ = None
+        self.oob_score_ = None
         self.stratified = stratified
 
     def fit(self, data, targets):
@@ -54,6 +55,7 @@ class MySVR(SVR):
             for train, test in kf:
                 predictions[test] = tmp_svr.fit(data[train], targets[train]).predict(data[test])
             self.r2_score_ = r2_score(targets, predictions)
+            self.oob_score_ = self.r2_score_
         return self
 
 
