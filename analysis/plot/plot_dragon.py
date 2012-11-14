@@ -25,16 +25,19 @@ plt.close('all')
 f_names = glob.glob(os.path.join(inpath, "*.json"))
 for i_file, f_name in enumerate(f_names):
 
+    print f_name
     js = json.load(open(f_name))
     res = js['res']
     sc = js['sc']
 
     for method in ['svr', 'svr_ens', 'forest']:
-        fig = plt.figure()
+        fig = plt.figure(figsize=(10,5))
         fig.suptitle('model: {0}'.format(method))
         if not method in max_overview:
-            max_overview[method] = {k: np.zeros((len(f_names), len(sc['glomeruli'])))
-                                    for k in sc['selection']}
+            max_overview[method] = {}
+            for selection in sc['selection']:
+                max_overview[method][selection] = {'max': np.zeros((len(f_names), len(sc['glomeruli']))),
+                                                   'k_best': np.zeros((len(f_names), len(sc['glomeruli'])))}
 
         for i_sel, selection in enumerate(sc['selection']):
             for i_glom, glom in enumerate(res[selection]):
@@ -44,7 +47,8 @@ for i_file, f_name in enumerate(f_names):
                     for i in range(len(sc['forest'])):
                         mat[j,i] = res[selection][glom][str(k_b)][str(i)][method]['gen_score']
                 res[selection][glom]['mat'] = mat
-                max_overview[method][selection][i_file, i_glom] = np.max(mat)
+                max_overview[method][selection]['max'][i_file, i_glom] = np.max(mat)
+                max_overview[method][selection]['k_best'][i_file, i_glom] = np.argmax(np.max(mat, axis=1))
 
                 ax = fig.add_subplot(len(res), len(sc['glomeruli']), i_sel * len(sc['glomeruli']) + i_glom + 1)
                 ax.imshow(mat, interpolation='nearest')
@@ -66,6 +70,39 @@ for i_file, f_name in enumerate(f_names):
         desc_name = os.path.splitext(os.path.basename(f_name))[0]
         fig.savefig(os.path.join(outpath, desc_name + '_' + method + '.' + format))
 
+
+# feature selection comparison plot
+fig = plt.figure()
+for i_meth, method in enumerate(max_overview):
+    ax = fig.add_subplot(1, len(max_overview), i_meth + 1)
+    flat_lin = max_overview[method]['linear']['max'].flatten()
+    flat_for = max_overview[method]['forest']['max'].flatten()
+    ax.plot(flat_lin, flat_for, 'x')
+    plt.axis('scaled')
+    ax.set_xticks([0, ax.get_xticks()[-1]])
+    ax.set_yticks([0, ax.get_yticks()[-1]])
+    ax.set_title(method)
+    if i_meth == 0:
+        ax.set_xlabel('linear')
+        ax.set_ylabel('forest')
+    ax.plot([0, 1], [0, 1], '-', color='0.6')
+
+fig = plt.figure()
+for i_meth, method in enumerate(max_overview):
+    ax = fig.add_subplot(2, len(max_overview), i_meth + 1)
+    flat_lin = max_overview[method]['linear']['k_best'].flatten()
+    counts_lin, _ = np.histogram(flat_lin, bins=len(sc['k_best']))
+    counts_for, _ = np.histogram(flat_for, bins=len(sc['k_best']))
+    ax.bar(range(len(sc['k_best'])), counts_lin, color='r', label='linear')
+    plt.hold(True)
+    ax.bar(range(len(sc['k_best'])), -counts_for, color='b', label='forest')
+    ax.set_xticks(np.arange(len(sc['k_best'])) + .5)
+    ax.set_xticklabels(sc['k_best'], rotation='90', ha='left')
+
+plt.show()
+
+
+
 fig = plt.figure()
 desc_names = [os.path.splitext(os.path.basename(f_name))[0].lower() for f_name in f_names]
 glom_names = [glom for glom in res[res.keys()[0]]]
@@ -74,7 +111,7 @@ for i_meth, method in enumerate(max_overview):
     for i_sel, selection in enumerate(max_overview[method]):
 
         ax = fig.add_subplot(4, len(max_overview), (i_sel * 6) + i_meth + 1)
-        ax.imshow(max_overview[method][selection][:], interpolation='nearest')
+        ax.imshow(max_overview[method][selection]['max'], interpolation='nearest')
         if i_meth == 0:
             ax.set_yticks(range(len(desc_names)))
             ax.set_yticklabels(desc_names)
@@ -82,7 +119,7 @@ for i_meth, method in enumerate(max_overview):
             ax.set_yticks([])
 
         ax = fig.add_subplot(4, len(max_overview), (i_sel * 6) + i_meth + 4)
-        ax.hist(max_overview[method][selection].flatten())
+        ax.hist(max_overview[method][selection]['max'].flatten())
         ax.set_xlim([0, 1])
 
 fig.savefig(os.path.join(outpath, 'max_overview.' + format))
