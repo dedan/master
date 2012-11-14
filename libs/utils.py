@@ -18,3 +18,14 @@ def max_in_values(value_dict):
     stacker = lambda x,y: np.hstack((x,y))
     all_values = reduce(stacker, value_dict.values(), np.array([]))
     return np.max(all_values[~np.isnan(all_values)])
+
+def run_from_ipython():
+    """check if a script is run in ipython
+
+    this can be used e.g. to show plots only when run in ipython
+    """
+    try:
+        __IPYTHON__
+        return True
+    except NameError:
+        return False
