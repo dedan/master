@@ -1,0 +1,30 @@
+{
+    "runner_config": "/Users/dedan/projects/master/config/runner_example.json",
+    "outpath": "/Users/dedan/projects/master/results/param_search/conv_features",
+    "selection": [
+        "linear",
+        "forest"
+    ],
+    "glomeruli": [
+        "Or19a",
+        "Or22a",
+        "Or35a",
+        "Or43b",
+        "Or67a",
+        "Or9a"
+    ],
+    "forest": [
+        3,
+        5,
+        10,
+        100,
+        500
+    ],
+    "svr": [
+        0.01,
+        0.10000000000000001,
+        1,
+        10,
+        100
+    ]
+}

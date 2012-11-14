@@ -6,32 +6,28 @@ Created by  on 2012-01-27.
 Copyright (c) 2012. All rights reserved.
 '''
 import glob
+import sys
 import os
 import json
 from master.libs import run_lib
 import numpy as np
 reload(run_lib)
 
-outpath = '/Users/dedan/projects/master/results/param_search/conv_features'
-config = json.load(open('/Users/dedan/projects/master/config/runner_example.json'))
+# search config
+sc = json.load(open(sys.argv[1]))
+config = json.load(open(sc['runner_config']))
 
-sc = {
-    'selection': ['linear', 'forest'],
-    'glomeruli': ['Or19a', 'Or22a', 'Or35a', 'Or43b', 'Or67a', 'Or9a'],
-    'forest': [3, 5, 10, 100, 500],
-    'svr': [0.01, 0.1, 1, 10, 100]
-}
-
-files = glob.glob('/Users/dedan/projects/master/data/conventional_features/*.csv')
+feature_path = os.path.join(os.path.dirname(__file__), '..', 'data', 'conventional_features')
+files = glob.glob(os.path.join(feature_path, '*.csv'))
 for f in files:
     desc = os.path.splitext(os.path.basename(f))[0]
     config['features']['descriptor'] = desc
     config['features']['type'] = 'conventional'
 
     # if result file already exists, load it to append new glomeruli
-    if os.path.exists(os.path.join(outpath, desc + '.json')):
+    if os.path.exists(os.path.join(sc['outpath'], desc + '.json')):
         print('load existing results from: {}'.format(desc))
-        res = json.load(open(os.path.join(outpath, desc + '.json')))["res"]
+        res = json.load(open(os.path.join(sc['outpath'], desc + '.json')))["res"]
     else:
         res = {sel: {} for sel in sc['selection']}
 
@@ -62,4 +58,4 @@ for f in files:
                     tmp_res['n_features'] = n_features
                     res[selection][glomerulus][k_b][i] = tmp_res
             print('param search for {} done'.format(glomerulus))
-    json.dump({'sc': sc, 'res': res}, open(os.path.join(outpath, desc + '.json'), 'w'))
+    json.dump({'sc': sc, 'res': res}, open(os.path.join(sc['outpath'], desc + '.json'), 'w'))
