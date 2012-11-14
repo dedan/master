@@ -102,26 +102,41 @@ for i_meth, method in enumerate(max_overview):
 fig.savefig(os.path.join(outpath, 'max_overview.' + format))
 
 
-fig = plt.figure()
+
 desc_names = [os.path.splitext(os.path.basename(f_name))[0].lower() for f_name in f_names]
 glom_names = [glom for glom in res[res.keys()[0]]]
 for i_meth, method in enumerate(max_overview):
 
     for i_sel, selection in enumerate(max_overview[method]):
 
-        ax = fig.add_subplot(4, len(max_overview), (i_sel * 6) + i_meth + 1)
-        ax.imshow(max_overview[method][selection]['max'], interpolation='nearest')
-        if i_meth == 0:
-            ax.set_yticks(range(len(desc_names)))
-            ax.set_yticklabels(desc_names)
-        else:
-            ax.set_yticks([])
+        filename = 'max_overview_{}_{}.'.format(method, selection)
+        fig = plt.figure()
+        fig.suptitle(filename)
+        ax1 = fig.add_subplot(2, 2, 1)
+        ax1.imshow(max_overview[method][selection]['max'], interpolation='nearest')
+        ax1.set_xticks(range(len(glom_names)))
+        ax1.set_xticklabels(glom_names, rotation='45')
+        ax1.set_aspect('auto')
 
-        ax = fig.add_subplot(4, len(max_overview), (i_sel * 6) + i_meth + 4)
+        ax = fig.add_subplot(2, 2, 2, sharey=ax1)
+        ax.barh(range(len(desc_names)),
+               np.mean(max_overview[method][selection]['max'], axis=1),
+               xerr=np.std(max_overview[method][selection]['max'], axis=1),
+               height=0.2)
+        ax.spines['top'].set_visible(False)
+        ax.spines['right'].set_visible(False)
+        ax.get_xaxis().tick_bottom()
+        ax.get_yaxis().tick_left()
+        ax1.set_yticks(range(len(desc_names)))
+        ax1.set_yticklabels(desc_names)
+        plt.setp(ax.get_yticklabels(), visible=False)
+
+        ax = fig.add_subplot(2, 2, 3)
         ax.hist(max_overview[method][selection]['max'].flatten())
         ax.set_xlim([0, 1])
+        fig.subplots_adjust(hspace=0.35, wspace=0.02)
 
-fig.savefig(os.path.join(outpath, 'max_overview.' + format))
+        fig.savefig(os.path.join(outpath, filename + format))
 if utils.run_from_ipython():
     plt.show()
 
