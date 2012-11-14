@@ -74,33 +74,32 @@ for i_file, f_name in enumerate(f_names):
 # feature selection comparison plot
 fig = plt.figure()
 for i_meth, method in enumerate(max_overview):
-    ax = fig.add_subplot(1, len(max_overview), i_meth + 1)
+    ax = fig.add_subplot(2, len(max_overview), i_meth + 1)
     flat_lin = max_overview[method]['linear']['max'].flatten()
     flat_for = max_overview[method]['forest']['max'].flatten()
+    counts_lin, _ = np.histogram(flat_lin, bins=len(sc['k_best']))
+    counts_for, _ = np.histogram(flat_for, bins=len(sc['k_best']))
+
+    # scatter plot of max values
     ax.plot(flat_lin, flat_for, 'x')
     plt.axis('scaled')
     ax.set_xticks([0, ax.get_xticks()[-1]])
     ax.set_yticks([0, ax.get_yticks()[-1]])
     ax.set_title(method)
+    ax.set_xlabel('linear')
     if i_meth == 0:
-        ax.set_xlabel('linear')
         ax.set_ylabel('forest')
     ax.plot([0, 1], [0, 1], '-', color='0.6')
 
-fig = plt.figure()
-for i_meth, method in enumerate(max_overview):
-    ax = fig.add_subplot(2, len(max_overview), i_meth + 1)
-    flat_lin = max_overview[method]['linear']['k_best'].flatten()
-    counts_lin, _ = np.histogram(flat_lin, bins=len(sc['k_best']))
-    counts_for, _ = np.histogram(flat_for, bins=len(sc['k_best']))
+    # k_best histogram plot
+    ax = fig.add_subplot(2, len(max_overview), i_meth + 4)
     ax.bar(range(len(sc['k_best'])), counts_lin, color='r', label='linear')
     plt.hold(True)
     ax.bar(range(len(sc['k_best'])), -counts_for, color='b', label='forest')
     ax.set_xticks(np.arange(len(sc['k_best'])) + .5)
     ax.set_xticklabels(sc['k_best'], rotation='90', ha='left')
-
-plt.show()
-
+    fig.subplots_adjust(hspace=0.4)
+fig.savefig(os.path.join(outpath, 'max_overview.' + format))
 
 
 fig = plt.figure()
