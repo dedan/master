@@ -16,6 +16,7 @@ reload(run_lib)
 # search config
 sc = json.load(open(sys.argv[1]))
 config = json.load(open(sc['runner_config']))
+out_string = 'search for {} with k_best {} and regularization {} already done'
 
 feature_path = os.path.join(os.path.dirname(__file__), '..', 'data', 'conventional_features')
 files = glob.glob(os.path.join(feature_path, '*.csv'))
@@ -42,20 +43,23 @@ for f in files:
         print selection
         config['feature_selection']['method'] = selection
         for glomerulus in sc['glomeruli']:
-            if glomerulus in res[selection]:
-                print('search for {} already done'.format(glomerulus))
-                continue
-            res[selection][glomerulus] = {}
+            if not glomerulus in res[selection]:
+                res[selection][glomerulus] = {}
             config['glomerulus'] = glomerulus
             for k_b in sc['k_best']:
-                res[selection][glomerulus][k_b] = {}
+                if not str(k_b) in res[selection][glomerulus]:
+                    res[selection][glomerulus][str(k_b)] = {}
                 config['feature_selection']['k_best'] = k_b
                 for i in range(len(sc['forest'])):
+                    if str(i) in res[selection][glomerulus][str(k_b)]:
+                        print(out_string.format(glomerulus, k_b, i))
+                        continue
                     config['methods']['svr']['C'] = sc['svr'][i]
                     config['methods']['svr_ens']['C'] = sc['svr'][i]
                     config['methods']['forest']['max_depth'] = sc['forest'][i]
+                    print('running {} {} {}'.format(glomerulus, k_b, i))
                     tmp_res = run_lib.run_runner(config, features)
                     tmp_res['n_features'] = n_features
-                    res[selection][glomerulus][k_b][i] = tmp_res
+                    res[selection][glomerulus][str(k_b)][str(i)] = tmp_res
             print('param search for {} done'.format(glomerulus))
     json.dump({'sc': sc, 'res': res}, open(os.path.join(sc['outpath'], desc + '.json'), 'w'))
