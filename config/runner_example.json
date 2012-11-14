@@ -32,5 +32,6 @@
     },
     "data_path": "/Users/dedan/projects/master/data",
     "results_path": "/Users/dedan/projects/master/results/models/",
-    "glomerulus": "Or19a"
+    "glomerulus": "Or19a",
+    "randomization_test": false
 }
