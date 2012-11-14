@@ -13,6 +13,7 @@ import json
 import numpy as np
 import pylab as plt
 from master.libs import run_lib
+from master.libs import utils
 
 inpath = '/Users/dedan/projects/master/results/param_search/conv_features'
 outpath = os.path.join(inpath, 'plots')
@@ -64,7 +65,6 @@ for i_file, f_name in enumerate(f_names):
                 ax.set_xlabel('max: %.2f' % np.max(mat))
         desc_name = os.path.splitext(os.path.basename(f_name))[0]
         fig.savefig(os.path.join(outpath, desc_name + '_' + method + '.' + format))
-        plt.show()
 
 fig = plt.figure()
 desc_names = [os.path.splitext(os.path.basename(f_name))[0].lower() for f_name in f_names]
@@ -86,6 +86,8 @@ for i_meth, method in enumerate(max_overview):
         ax.set_xlim([0, 1])
 
 fig.savefig(os.path.join(outpath, 'max_overview.' + format))
+if utils.run_from_ipython():
+    plt.show()
 
 
 
