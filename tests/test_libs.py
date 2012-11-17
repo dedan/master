@@ -7,18 +7,16 @@ Copyright (c) 2012. All rights reserved.
 """
 import unittest, sys, os
 import master.libs.read_data_lib as rdl
+import master.libs.features_lib as flib
 import numpy as np
+reload(flib)
 
-class TestFeatureLib(unittest.TestCase):
+class TestLibs(unittest.TestCase):
 
     def setUp(self):
         path = os.path.join(os.path.dirname(__file__), 'data', 'features')
         self.tmp_path = os.path.join(os.path.dirname(__file__), 'data')
-        self.features = rdl.read_feature_csvs(path)
-
-    def test_feature_set_loaded(self):
-        """name of the CSV file should be key in the features dict"""
-        self.assertIn('test_features', self.features)
+        self.features = flib.read_feature_csv(os.path.join(path, 'test_features.csv'))
 
     def test_error_removed(self):
         """for some molecules the descriptor could not be computed
@@ -26,23 +24,23 @@ class TestFeatureLib(unittest.TestCase):
         this is marked by *Error* in the identifiere column and this molecules
         should not be in the result of read_feature_csvs
         """
-        test_features = self.features['test_features']
-        for feature_name in test_features:
-            self.assertNotIn('297', test_features[feature_name])
+        for feature_name in self.features:
+            self.assertNotIn('297', self.features[feature_name])
 
     def test_invalid_column_removed(self):
         """features with zero variance should be removed"""
-        self.assertIn('C-005', self.features['test_features'])
-        features = rdl.remove_invalid_features(self.features)
-        self.assertNotIn('C-005', features)
+        self.assertEqual(np.array(self.features.values()).shape[1], 8)
+        features = flib.remove_invalid_features(self.features)
+        self.assertEqual(np.array(self.features.values()).shape[1], 6)
 
     def test_normalization(self):
         """normalize to zero mean and unit variance"""
-        unnormed_features = rdl.remove_invalid_features(self.features)
-        features = rdl.normalize_features(unnormed_features)['test_features']
-        for fname in features:
-            self.assertAlmostEqual(np.var(features[fname].values()), 1.0, 5)
-            self.assertAlmostEqual(np.mean(features[fname].values()), 0, 5)
+        unnormed_features = flib.remove_invalid_features(self.features)
+        features = flib.normalize_features(unnormed_features)
+        feature_mat = np.array(self.features.values())
+        for i in range(feature_mat.shape[1]):
+            self.assertAlmostEqual(np.var(feature_mat[:, i]), 1.0, 5)
+            self.assertAlmostEqual(np.mean(feature_mat[:, i]), 0, 5)
 
     def test_get_cas_numbers(self):
         """read the CAS numbers from the R package (rownames)"""
