@@ -58,18 +58,22 @@ for i_file, f_name in enumerate(f_names):
                     ax.set_yticks(range(len(sc['k_best'])))
                     ax.set_yticklabels(sc['k_best'])
                     ax.set_ylabel(selection)
+                    ax.set_xlabel('max: %.2f' % np.max(mat))
                 else:
                     ax.set_yticks([])
+                    ax.set_xlabel('%.2f' % np.max(mat))
 
                 ax.set_xticks(range(len(sc['svr'])))
                 if 'linear' in selection:
                     ax.set_xticklabels(sc['svr'], rotation='45')
                 else:
                     ax.set_xticklabels(sc['forest'], rotation='45')
-                ax.set_xlabel('max: %.2f' % np.max(mat))
+                for tick in ax.xaxis.get_major_ticks():
+                    tick.label.set_fontsize(10)
+                for tick in ax.yaxis.get_major_ticks():
+                    tick.label.set_fontsize(10)
         desc_name = os.path.splitext(os.path.basename(f_name))[0]
         fig.savefig(os.path.join(outpath, desc_name + '_' + method + '.' + format))
-
 
 # feature selection comparison plot
 fig = plt.figure()
@@ -102,7 +106,7 @@ for i_meth, method in enumerate(max_overview):
 fig.savefig(os.path.join(outpath, 'max_overview.' + format))
 
 
-
+# descriptor method performance plots
 desc_names = [os.path.splitext(os.path.basename(f_name))[0].lower() for f_name in f_names]
 glom_names = [glom for glom in res[res.keys()[0]]]
 for i_meth, method in enumerate(max_overview):
@@ -110,7 +114,7 @@ for i_meth, method in enumerate(max_overview):
     for i_sel, selection in enumerate(max_overview[method]):
 
         filename = 'max_overview_{}_{}.'.format(method, selection)
-        fig = plt.figure()
+        fig = plt.figure(figsize=(15,10))
         fig.suptitle(filename)
         ax1 = fig.add_subplot(2, 2, 1)
         ax1.imshow(max_overview[method][selection]['max'], interpolation='nearest')
@@ -119,21 +123,23 @@ for i_meth, method in enumerate(max_overview):
         ax1.set_aspect('auto')
 
         ax = fig.add_subplot(2, 2, 2, sharey=ax1)
-        ax.barh(range(len(desc_names)),
+        ax.barh(np.arange(len(desc_names)) - 0.5,
                np.mean(max_overview[method][selection]['max'], axis=1),
                xerr=np.std(max_overview[method][selection]['max'], axis=1),
-               height=0.2)
+               height=0.7)
         ax.spines['top'].set_visible(False)
         ax.spines['right'].set_visible(False)
         ax.get_xaxis().tick_bottom()
         ax.get_yaxis().tick_left()
         ax1.set_yticks(range(len(desc_names)))
         ax1.set_yticklabels(desc_names)
+        ax.set_xlabel('average descriptor score')
         plt.setp(ax.get_yticklabels(), visible=False)
 
         ax = fig.add_subplot(2, 2, 3)
         ax.hist(max_overview[method][selection]['max'].flatten())
         ax.set_xlim([0, 1])
+        ax.set_xlabel('overall method score histogram')
         fig.subplots_adjust(hspace=0.35, wspace=0.02)
 
         fig.savefig(os.path.join(outpath, filename + format))
