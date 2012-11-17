@@ -59,7 +59,7 @@ def prepare_features(config):
     if config['features']['type'] == 'conventional':
         feature_file = os.path.join(config['data_path'], 'conventional_features',
                                     config['features']['descriptor'] + '.csv')
-        features = rdl.read_feature_csv(feature_file)
+        features = flib.read_feature_csv(feature_file)
     elif config['features']['type'] == 'spectral':
         feature_file = os.path.join(config['data_path'], 'spectral_features',
                                     config['features']['descriptor'], 'parsed.pckl')
@@ -68,9 +68,9 @@ def prepare_features(config):
                                               spec_type=config['features']['spec_type'],
                                               use_intensity=config['features']['use_intensity'],
                                               kernel_widths=config['features']['kernel_width'])
-    features = rdl.remove_invalid_features(features)
+    features = flib.remove_invalid_features(features)
     if config['features']['normalize']:
-        features = rdl.normalize_features(features)
+        features = flib.normalize_features(features)
     return features
 
 
