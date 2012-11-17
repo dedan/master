@@ -35,10 +35,8 @@ def read_feature_csv(feature_file):
             if 'Error' in row[identifiere_idx]:
                 continue
             mol = row[molid_idx]
-            for f_id in range(feature_start_idx, len(row)):
-                features[mol].append(float(row[f_id]))
-    for feature in features:
-        features[feature] = np.array(features[feature])
+            data_str = ','.join(row[feature_start_idx:])
+            features[mol] = np.fromstring(data_str, dtype=float, sep=',')
     mols = features.keys()
     for i in range(len(mols) -1):
         assert(len(features[mols[i]]) == len(features[mols[i+1]]))
