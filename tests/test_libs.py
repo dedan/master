@@ -18,6 +18,11 @@ class TestLibs(unittest.TestCase):
         self.tmp_path = os.path.join(os.path.dirname(__file__), 'data')
         self.features = flib.read_feature_csv(os.path.join(path, 'test_features.csv'))
 
+    def test_conventional_feature_correct(self):
+        """test at least the first line for correctness"""
+        self.assertTrue(np.array_equal(np.array([2., 2., 1., 0., -999., 0., 0., 0.]),
+                                       np.array(self.features.values())[0]))
+
     def test_error_removed(self):
         """for some molecules the descriptor could not be computed
 
