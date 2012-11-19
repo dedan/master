@@ -87,13 +87,16 @@ def get_features_for_molids(f_space, molids):
     mol_fspace = [elem if elem else [0] * len(f_space) for elem in mol_fspace]
     return np.array(mol_fspace), available
 
-def get_k_best(scores, k):
+def select_k_best(data, scores, k):
     """get indices for the k best features depending on the scores"""
     assert k > 0
     assert not (scores < 0).any()
     assert len(scores) >= k
     scores[np.isnan(scores)] = 0
-    return np.argsort(scores)[-k:]
+    idx = np.argsort(scores)[-k:]
+    data = data[:, idx]
+    return data
+
 
 def get_spectral_features(spectra, resolution, use_intensity=True,
                                                spec_type='ir',

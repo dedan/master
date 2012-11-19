@@ -76,14 +76,12 @@ def prepare_features(config):
     return features
 
 
-def run_runner(config, features):
-    """docstring for run"""
-
+def load_data_targets(config, features):
+    """load the targets for a glomerulus"""
     door2id = json.load(open(os.path.join(config['data_path'], 'door2id.json')))
     csv_path = os.path.join(config['data_path'], 'response_matrix.csv')
     cas_numbers, glomeruli, rm = rdl.load_response_matrix(csv_path, door2id)
     glom_idx = glomeruli.index(config['glomerulus'])
-    res = {}
 
     # select molecules available for the glomerulus
     targets , tmp_cas_numbers = rdl.get_avail_targets_for_glom(rm, cas_numbers, glom_idx)
@@ -95,21 +93,28 @@ def run_runner(config, features):
     targets = np.array([targets[i] for i in avail])
     data = np.array([features[molids[i]] for i in avail])
     assert targets.shape[0] == data.shape[0]
+    return data, targets
 
-    if config['features']['normalize_samples']:
-        data = normalize(data, norm='l2', axis=1, copy=True)
 
-    if config['randomization_test']:
-        map(np.random.shuffle, data.T)
-
+def get_selection_score(config, data, targets):
+    """select k_best features"""
     # feature selection
     if config['feature_selection']['method'] == 'linear':
         sel_scores, _ = f_regression(data, targets)
     elif config['feature_selection']['method'] == 'forest':
         rfr_sel = RandomForestRegressor(compute_importances=True, random_state=0)
         sel_scores = rfr_sel.fit(data, targets).feature_importances_
-    idx = flib.get_k_best(sel_scores, config['feature_selection']['k_best'])
-    data = data[:, idx]
+    return sel_scores
+
+
+def run_runner(config, data, targets):
+    """docstring for run"""
+
+    res = {}
+    if config['features']['normalize_samples']:
+        data = normalize(data, norm='l2', axis=1, copy=True)
+    if config['randomization_test']:
+        map(np.random.shuffle, data.T)
 
     # train models and get results
     for method in config['methods']:

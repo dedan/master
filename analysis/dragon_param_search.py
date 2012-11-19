@@ -10,8 +10,10 @@ import sys
 import os
 import json
 from master.libs import run_lib
+from master.libs import features_lib as flib
 import numpy as np
 reload(run_lib)
+reload(flib)
 
 # search config
 sc = json.load(open(sys.argv[1]))
@@ -46,6 +48,8 @@ for f in files:
             if not glomerulus in res[selection]:
                 res[selection][glomerulus] = {}
             config['glomerulus'] = glomerulus
+            data, targets = run_lib.load_data_targets(config, features)
+            sel_scores = run_lib.get_selection_score(config, data, targets)
             for k_b in sc['k_best']:
                 if not str(k_b) in res[selection][glomerulus]:
                     res[selection][glomerulus][str(k_b)] = {}
@@ -57,7 +61,8 @@ for f in files:
                     config['methods']['svr_ens']['C'] = sc['svr'][i]
                     config['methods']['forest']['max_depth'] = sc['forest'][i]
                     print('running {} {} {}'.format(glomerulus, k_b, i))
-                    tmp_res = run_lib.run_runner(config, features)
+                    data = flib.select_k_best(data, sel_scores, k_b)
+                    tmp_res = run_lib.run_runner(config, data, targets)
                     tmp_res['n_features'] = n_features
                     res[selection][glomerulus][str(k_b)][str(i)] = tmp_res
             print('param search for {} done'.format(glomerulus))
