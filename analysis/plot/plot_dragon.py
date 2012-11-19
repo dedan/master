@@ -117,20 +117,25 @@ for i_meth, method in enumerate(max_overview):
 
     for i_sel, selection in enumerate(max_overview[method]):
 
+        data = max_overview[method][selection]['max']
+        sort_x = np.argsort(np.mean(data, axis=0))
+        sort_y = np.argsort(np.mean(data, axis=1))
+        data = data[sort_y, :]
+        data = data[:, sort_x]
+
         filename = 'max_overview_{}_{}.'.format(method, selection)
         fig = plt.figure(figsize=(15,10))
         fig.suptitle(filename)
         ax1 = fig.add_subplot(2, 2, 1)
-        ax1.imshow(max_overview[method][selection]['max'], interpolation='nearest')
+        ax1.imshow(data, interpolation='nearest')
         ax1.set_xticks(range(len(glom_names)))
         ax1.set_xticklabels(glom_names, rotation='45')
         ax1.set_aspect('auto')
 
         ax = fig.add_subplot(2, 2, 2, sharey=ax1)
         ax.barh(np.arange(len(desc_names)) - 0.5,
-               np.mean(max_overview[method][selection]['max'], axis=1),
-               xerr=np.std(max_overview[method][selection]['max'], axis=1),
-               height=0.7)
+               np.mean(data, axis=1),
+               xerr=np.std(data, axis=1), height=0.7)
         ax.spines['top'].set_visible(False)
         ax.spines['right'].set_visible(False)
         ax.get_xaxis().tick_bottom()
@@ -141,7 +146,7 @@ for i_meth, method in enumerate(max_overview):
         plt.setp(ax.get_yticklabels(), visible=False)
 
         ax = fig.add_subplot(2, 2, 3)
-        ax.hist(max_overview[method][selection]['max'].flatten())
+        ax.hist(data.flatten())
         ax.set_xlim([0, 1])
         ax.set_xlabel('overall method score histogram')
         fig.subplots_adjust(hspace=0.35, wspace=0.02)
