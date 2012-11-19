@@ -69,6 +69,8 @@ def prepare_features(config):
                                               use_intensity=config['features']['use_intensity'],
                                               kernel_widths=config['features']['kernel_width'])
     features = flib.remove_invalid_features(features)
+    if config['features']['properties_to_add']:
+        flib.add_molecule_properties(features, config['features']['properties_to_add'])
     if config['features']['normalize']:
         features = flib.normalize_features(features)
     return features

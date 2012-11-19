@@ -16,6 +16,7 @@ reload(run_lib)
 # search config
 sc = json.load(open(sys.argv[1]))
 config = json.load(open(sc['runner_config']))
+config['features']['properties_to_add'] = sc['properties_to_add']
 
 feature_path = os.path.join(os.path.dirname(__file__), '..', 'data', 'conventional_features')
 files = glob.glob(os.path.join(feature_path, '*.csv'))
