@@ -18,6 +18,20 @@ class TestLibs(unittest.TestCase):
         self.tmp_path = os.path.join(os.path.dirname(__file__), 'data')
         self.features = flib.read_feature_csv(os.path.join(path, 'test_features.csv'))
 
+    def test_additional_properties_vp(self):
+        """test adding the vapor pressure"""
+        feat = flib.add_molecule_properties(self.features, ['vapor_pressure'])
+        self.assertEqual(feat['1'][-1], 0.0656)
+        self.assertEqual(np.array(feat.values()).shape[1], 9)
+
+    def test_additional_properties_list(self):
+        """test adding several additional properties"""
+        props_to_add = ['maximalProjectionArea', 'minimalProjectionArea']
+        correct = np.array([47.5674, 33.7124])
+        feat = flib.add_molecule_properties(self.features, props_to_add)
+        self.assertTrue(np.array_equal(feat['1'][-2:], correct))
+        self.assertEqual(np.array(feat.values()).shape[1], 10)
+
     def test_conventional_feature_correct(self):
         """test at least the first line for correctness"""
         self.assertTrue(np.array_equal(np.array([2., 2., 1., 0., -999., 0., 0., 0.]),

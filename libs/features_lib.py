@@ -15,6 +15,23 @@ import numpy as np
 from scipy.ndimage.filters import gaussian_filter
 from scipy.stats import zscore
 
+def add_molecule_properties(features, properties):
+    """add additional molecule properties like vapor pressure or size"""
+    feature_start_idx = 3
+    feature_file = os.path.join(os.path.dirname(__file__),
+                                '..', 'data', 'basic_molecule_properties.csv')
+    with open(feature_file) as f:
+        reader = csv.reader(f)
+        header = reader.next()
+
+        idx = [header.index(prop) for prop in properties]
+        for row in reader:
+            if row[0] in features:
+                data_str = ','.join([row[i] for i in idx])
+                to_add = np.fromstring(data_str, dtype=float, sep=',')
+                features[row[0]] = np.hstack((features[row[0]], to_add))
+    return features
+
 
 def read_feature_csv(feature_file):
     """read one feature CSV into a dictionary structure

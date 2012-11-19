@@ -1,6 +1,9 @@
 {
     "runner_config": "/Users/dedan/projects/master/config/runner_example.json",
     "outpath": "/Users/dedan/projects/master/results/param_search/conv_features",
+    "properties_to_add": [
+        "vapor_pressure"
+    ],
     "selection": [
         "linear",
         "forest"
@@ -11,6 +14,10 @@
         "Or35a",
         "Or43b",
         "Or67a",
+        "Or67b",
+        "Or7a",
+        "Or85b",
+        "Or98a",
         "Or9a"
     ],
     "forest": [
