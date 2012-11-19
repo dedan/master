@@ -15,14 +15,13 @@ import pylab as plt
 from master.libs import run_lib
 from master.libs import utils
 
-inpath = '/Users/dedan/projects/master/results/param_search/conv_features'
-outpath = os.path.join(inpath, 'plots')
-format = 'png'
+config = json.load(open(sys.argv[1]))
+outpath = os.path.join(config['inpath'], 'plots')
 
 max_overview = {}
 
 plt.close('all')
-f_names = glob.glob(os.path.join(inpath, "*.json"))
+f_names = glob.glob(os.path.join(config['inpath'], "*.json"))
 for i_file, f_name in enumerate(f_names):
 
     print f_name
@@ -31,8 +30,10 @@ for i_file, f_name in enumerate(f_names):
     sc = js['sc']
 
     for method in ['svr', 'svr_ens', 'forest']:
-        fig = plt.figure(figsize=(10,5))
-        fig.suptitle('model: {0}'.format(method))
+
+        if config['plot_param_space']:
+            fig = plt.figure(figsize=(10,5))
+            fig.suptitle('model: {0}'.format(method))
         if not method in max_overview:
             max_overview[method] = {}
             for selection in sc['selection']:
@@ -50,30 +51,33 @@ for i_file, f_name in enumerate(f_names):
                 max_overview[method][selection]['max'][i_file, i_glom] = np.max(mat)
                 max_overview[method][selection]['k_best'][i_file, i_glom] = np.argmax(np.max(mat, axis=1))
 
-                ax = fig.add_subplot(len(res), len(sc['glomeruli']), i_sel * len(sc['glomeruli']) + i_glom + 1)
-                ax.imshow(mat, interpolation='nearest')
-                if i_sel == 0:
-                    ax.set_title(glom)
-                if i_glom == 0:
-                    ax.set_yticks(range(len(sc['k_best'])))
-                    ax.set_yticklabels(sc['k_best'])
-                    ax.set_ylabel(selection)
-                    ax.set_xlabel('max: %.2f' % np.max(mat))
-                else:
-                    ax.set_yticks([])
-                    ax.set_xlabel('%.2f' % np.max(mat))
+                if config['plot_param_space']:
+                    ax = fig.add_subplot(len(res), len(sc['glomeruli']),
+                                         i_sel * len(sc['glomeruli']) + i_glom + 1)
+                    ax.imshow(mat, interpolation='nearest')
+                    if i_sel == 0:
+                        ax.set_title(glom)
+                    if i_glom == 0:
+                        ax.set_yticks(range(len(sc['k_best'])))
+                        ax.set_yticklabels(sc['k_best'])
+                        ax.set_ylabel(selection)
+                        ax.set_xlabel('max: %.2f' % np.max(mat))
+                    else:
+                        ax.set_yticks([])
+                        ax.set_xlabel('%.2f' % np.max(mat))
 
-                ax.set_xticks(range(len(sc['svr'])))
-                if 'linear' in selection:
-                    ax.set_xticklabels(sc['svr'], rotation='45')
-                else:
-                    ax.set_xticklabels(sc['forest'], rotation='45')
-                for tick in ax.xaxis.get_major_ticks():
-                    tick.label.set_fontsize(10)
-                for tick in ax.yaxis.get_major_ticks():
-                    tick.label.set_fontsize(10)
-        desc_name = os.path.splitext(os.path.basename(f_name))[0]
-        fig.savefig(os.path.join(outpath, desc_name + '_' + method + '.' + format))
+                    ax.set_xticks(range(len(sc['svr'])))
+                    if 'linear' in selection:
+                        ax.set_xticklabels(sc['svr'], rotation='45')
+                    else:
+                        ax.set_xticklabels(sc['forest'], rotation='45')
+                    for tick in ax.xaxis.get_major_ticks():
+                        tick.label.set_fontsize(10)
+                    for tick in ax.yaxis.get_major_ticks():
+                        tick.label.set_fontsize(10)
+        if config['plot_param_space']:
+            desc_name = os.path.splitext(os.path.basename(f_name))[0]
+            fig.savefig(os.path.join(outpath, desc_name + '_' + method + '.' + config['format']))
 
 # feature selection comparison plot
 fig = plt.figure()
@@ -103,7 +107,7 @@ for i_meth, method in enumerate(max_overview):
     ax.set_xticks(np.arange(len(sc['k_best'])) + .5)
     ax.set_xticklabels(sc['k_best'], rotation='90', ha='left')
     fig.subplots_adjust(hspace=0.4)
-fig.savefig(os.path.join(outpath, 'max_overview.' + format))
+fig.savefig(os.path.join(outpath, 'max_overview.' + config['format']))
 
 
 # descriptor method performance plots
@@ -142,7 +146,7 @@ for i_meth, method in enumerate(max_overview):
         ax.set_xlabel('overall method score histogram')
         fig.subplots_adjust(hspace=0.35, wspace=0.02)
 
-        fig.savefig(os.path.join(outpath, filename + format))
+        fig.savefig(os.path.join(outpath, filename + config['format']))
 if utils.run_from_ipython():
     plt.show()
 
