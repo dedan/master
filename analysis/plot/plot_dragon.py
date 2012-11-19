@@ -113,26 +113,26 @@ fig.savefig(os.path.join(outpath, 'max_overview.' + config['format']))
 # descriptor method performance plots
 desc_names = [os.path.splitext(os.path.basename(f_name))[0].lower() for f_name in f_names]
 glom_names = [glom for glom in res[res.keys()[0]]]
+fig = plt.figure(figsize=(15,30))
 for i_meth, method in enumerate(max_overview):
 
     for i_sel, selection in enumerate(max_overview[method]):
 
+        print('{}_{}.'.format(method, selection))
         data = max_overview[method][selection]['max']
         sort_x = np.argsort(np.mean(data, axis=0))
         sort_y = np.argsort(np.mean(data, axis=1))
         data = data[sort_y, :]
         data = data[:, sort_x]
 
-        filename = 'max_overview_{}_{}.'.format(method, selection)
-        fig = plt.figure(figsize=(15,10))
-        fig.suptitle(filename)
-        ax1 = fig.add_subplot(2, 2, 1)
+        plot_x = (i_sel * len(max_overview) + i_meth + 1) * 3 - 2
+        ax1 = fig.add_subplot(6, 3, plot_x)
         ax1.imshow(data, interpolation='nearest')
         ax1.set_xticks(range(len(glom_names)))
-        ax1.set_xticklabels(glom_names, rotation='45')
+        ax1.set_xticklabels([glom_names[i] for i in sort_x], rotation='45')
         ax1.set_aspect('auto')
 
-        ax = fig.add_subplot(2, 2, 2, sharey=ax1)
+        ax = fig.add_subplot(6, 3, plot_x + 1, sharey=ax1)
         ax.barh(np.arange(len(desc_names)) - 0.5,
                np.mean(data, axis=1),
                xerr=np.std(data, axis=1), height=0.7)
@@ -141,17 +141,22 @@ for i_meth, method in enumerate(max_overview):
         ax.get_xaxis().tick_bottom()
         ax.get_yaxis().tick_left()
         ax1.set_yticks(range(len(desc_names)))
-        ax1.set_yticklabels(desc_names)
+        ax1.set_yticklabels([desc_names[i] for i in sort_y])
         ax.set_xlabel('average descriptor score')
         plt.setp(ax.get_yticklabels(), visible=False)
 
-        ax = fig.add_subplot(2, 2, 3)
-        ax.hist(data.flatten())
+        ax = fig.add_subplot(6, 3, plot_x + 2)
+        bins = np.arange(0, 1, 0.05)
+        ax.hist(data.flatten(), bins=bins, color='b')
+        ax.set_xlim([0, 1])
+        ax.set_xlabel('overall method score histogram')
+        plt.hold(True)
+        ax.hist(data[-3:,:].flatten(), bins=bins, color='r')
         ax.set_xlim([0, 1])
         ax.set_xlabel('overall method score histogram')
         fig.subplots_adjust(hspace=0.35, wspace=0.02)
 
-        fig.savefig(os.path.join(outpath, filename + config['format']))
+        fig.savefig(os.path.join(outpath, 'desc_compariosn.' + config['format']))
 if utils.run_from_ipython():
     plt.show()
 
