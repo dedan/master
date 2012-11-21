@@ -9,15 +9,43 @@ more readable
 Created by  on 2012-01-27.
 Copyright (c) 2012. All rights reserved.
 """
-
+import os
+import json
+import glob
 import csv
 import numpy as np
+from collections import defaultdict
+from master.libs import utils
 try:
     from rpy2.robjects.packages import importr
     import rpy2.robjects as robjects
     from rpy2.rinterface import NARealType
 except Exception, e:
     print '!!! rpy2 not installed !!!'
+
+def read_paramsearch_results(path, methods):
+    """read the results from a parameter search for several descriptors"""
+    # variables for results
+    search_res = utils.recursive_defaultdict()
+    initializer = lambda: {'max': np.zeros((len(f_names), len(sc['glomeruli']))),
+                           'k_best': np.zeros((len(f_names), len(sc['glomeruli'])))}
+    max_overview = defaultdict(lambda: defaultdict(initializer))
+
+    # read data from files
+    f_names = glob.glob(os.path.join(path, "*.json"))
+    for i_file, f_name in enumerate(f_names):
+
+        desc = os.path.splitext(os.path.basename(f_name))[0]
+        js = json.load(open(f_name))
+        desc_res, sc = js['res'], js['sc']
+        for i_sel, selection in enumerate(sc['selection']):
+            for i_glom, glom in enumerate(desc_res[selection]):
+                for i_meth, method in enumerate(methods):
+                    mat = get_search_matrix(desc_res[selection][glom], method)
+                    search_res[desc][selection][glom][method] = mat
+                    max_overview[method][selection]['max'][i_file, i_glom] = np.max(mat)
+                    max_overview[method][selection]['k_best'][i_file, i_glom] = np.argmax(np.max(mat, axis=1))
+    return search_res, max_overview, sc
 
 
 def get_search_matrix(res, method):
