@@ -14,9 +14,44 @@ import numpy as np
 import pylab as plt
 from master.libs import run_lib
 from master.libs import utils
+from master.libs import plot_lib as plib
+reload(utils)
 
 config = json.load(open(sys.argv[1]))
 outpath = os.path.join(config['inpath'], 'plots')
+methods = ['svr', 'svr_ens', 'forest']
+
+def get_search_matrix(res, method):
+    """docstring for get_search_matrix"""
+    mat = np.zeros((len(res), len(res[res.keys()[0]])))
+    for j, k_b in enumerate(sorted(res, key=int)):
+        for i in res[k_b]:
+            mat[j, int(i)] = res[k_b][i][method]['gen_score']
+    return mat
+
+
+search_res = utils.recursive_defaultdict()
+f_names = glob.glob(os.path.join(config['inpath'], "*.json"))
+for i_file, f_name in enumerate(f_names):
+
+    desc = os.path.splitext(os.path.basename(f_name))[0]
+    js = json.load(open(f_name))
+    desc_res, sc = js['res'], js['sc']
+    fig = plt.figure()
+
+    for i_sel, selection in enumerate(sc['selection']):
+        for i_glom, glom in enumerate(desc_res[selection]):
+            for i_meth, method in enumerate(methods):
+                mat = get_search_matrix(desc_res[selection][glom], method)
+                search_res[desc][selection][glom][method] = mat
+
+
+if config['plot_param_space']:
+    for desc in search_res:
+        fig = plt.figure()
+        plib.plot_search_matrix(fig, search_res[desc], sc, methods)
+        fig.savefig(os.path.join(outpath, desc + '.' + config['format']))
+
 
 max_overview = {}
 
@@ -24,6 +59,8 @@ plt.close('all')
 f_names = glob.glob(os.path.join(config['inpath'], "*.json"))
 for i_file, f_name in enumerate(f_names):
 
+    if '_scores' in f_name:
+        continue
     print f_name
     js = json.load(open(f_name))
     res = js['res']
@@ -32,8 +69,6 @@ for i_file, f_name in enumerate(f_names):
     for method in ['svr', 'svr_ens', 'forest']:
 
         if config['plot_param_space']:
-            fig = plt.figure(figsize=(10,5))
-            fig.suptitle('model: {0}'.format(method))
         if not method in max_overview:
             max_overview[method] = {}
             for selection in sc['selection']:
@@ -118,7 +153,6 @@ for i_meth, method in enumerate(max_overview):
 
     for i_sel, selection in enumerate(max_overview[method]):
 
-        print('{}_{}.'.format(method, selection))
         data = max_overview[method][selection]['max']
         sort_x = np.argsort(np.mean(data, axis=0))
         sort_y = np.argsort(np.mean(data, axis=1))
@@ -131,6 +165,7 @@ for i_meth, method in enumerate(max_overview):
         ax1.set_xticks(range(len(glom_names)))
         ax1.set_xticklabels([glom_names[i] for i in sort_x], rotation='45')
         ax1.set_aspect('auto')
+        ax1.set_title('{}_{}.'.format(method, selection))
 
         ax = fig.add_subplot(6, 3, plot_x + 1, sharey=ax1)
         ax.barh(np.arange(len(desc_names)) - 0.5,

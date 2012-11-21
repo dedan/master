@@ -4,6 +4,12 @@
     some utilities for plotting and analysis
 """
 import numpy as np
+from collections import defaultdict
+
+def recursive_defaultdict():
+    """get a defaultdict of defaultdicts of defaultdicts of ..."""
+    l=lambda:defaultdict(l)
+    return l()
 
 def ceiled_root(value):
     """get the next larger integer root for a value
