@@ -1,0 +1,6 @@
+{
+    "inpath1": "/Users/dedan/mnt/numbercruncher/results/param_search/conv_features",
+    "inpath2": "/Users/dedan/mnt/numbercruncher/results/param_search/spec_features",
+    "outpath": "/Users/dedan/projects/master/results/param_search/comparisons",
+    "format": "png"
+}
