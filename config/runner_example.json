@@ -4,14 +4,15 @@
         "k_best": 100
     },
     "features": {
-        "type": "spectral",
-        "descriptor": "large_base",
+        "type": "conventional",
+        "descriptor": "haddad_desc",
         "normalize": true,
         "normalize_samples": false,
-        "kernel_width": [20, 50],
+        "kernel_width": 2,
         "resolution": 0.5,
-        "use_intensity": false,
-        "spec_type": "ir"
+        "use_intensity": true,
+        "spec_type": "ir",
+        "properties_to_add": []
     },
     "methods": {
         "forest": {

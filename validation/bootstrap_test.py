@@ -12,46 +12,56 @@
 Created by  on 2012-01-27.
 Copyright (c) 2012. All rights reserved.
 """
+import json
 import sys
 import os
 from master.libs import run_lib
+from master.libs import read_data_lib as rdl
+from master.libs import features_lib as flib
 import numpy as np
 import pylab as plt
 
 n_repetitions = 100
-config = {
-    "feature_selection": {
-        "method": "forest",
-        "k_best": 50
-    },
-    "features": {
-        "type": "conventional",
-        "descriptor": "BURDEN_EIGENVALUES_DESCRIPTORS",
-        "normalize": True,
-        "normalize_samples": False
-    },
-    "methods": {
-        "forest": {
-            "n_estimators": 500,
-            "oob_score": True,
-            "random_state": 0
-        },
-    },
-    "data_path": "/Users/dedan/projects/master/data",
-    "glomerulus": "Or19a"
-}
+desc = 'haddad_desc'
+selection = 'linear'
+method = 'svr'
+# TODO: maybe search for a good glomerulus
+glom = 'Or19a'
+path = '/Users/dedan/mnt/numbercruncher/results/param_search/conv_features/'
 
-# load a previous feature_selection-preprocessing-model combination (its config)
+# get the best parameters from the parameter search
+search_res, max_overview, sc = rdl.read_paramsearch_results(path, [method])
+
+# get the base config
+config = sc['runner_config_content']
+config['features']['descriptor'] = desc
+mat = search_res[desc][selection][glom][method]
+k_best_idx = np.argmax(np.max(mat, axis=1))
+reg_idx = np.argmax(np.max(mat, axis=0))
+print sc
+print 'svr' in sc
+if 'svr' in method:
+    config['methods'][method]['C'] = sc['svr'][reg_idx]
+else:
+    config[method]['n_estimators'] = sc['forest'][reg_idx]
+config['feature_selection']['method'] = selection
+
+
 config['randomization_test'] = False
 features = run_lib.prepare_features(config)
-true_res = run_lib.run_runner(config, features)
+data, targets = run_lib.load_data_targets(config, features)
+sel_scores = run_lib.get_selection_score(config, data, targets)
+data = flib.select_k_best(data, sel_scores, sc['k_best'][k_best_idx])
+true_res = run_lib.run_runner(config, data, targets)
 
 # add shuffle data to the config and run the runner for N times
 config['randomization_test'] = True
 rand_res = []
 for i in range(n_repetitions):
-    features = run_lib.prepare_features(config)
-    tmp_res = run_lib.run_runner(config, features)
+    data, targets = run_lib.load_data_targets(config, features)
+    sel_scores = run_lib.get_selection_score(config, data, targets)
+    data = flib.select_k_best(data, sel_scores, sc['k_best'][k_best_idx])
+    tmp_res = run_lib.run_runner(config, data, targets)
     rand_res.append(tmp_res['forest']['gen_score'])
 
 # readout the resulting files and analyze them
