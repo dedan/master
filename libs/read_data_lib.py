@@ -20,6 +20,14 @@ except Exception, e:
     print '!!! rpy2 not installed !!!'
 
 
+def get_search_matrix(res, method):
+    """helper method for reading data after parameter search"""
+    mat = np.zeros((len(res), len(res[res.keys()[0]])))
+    for j, k_b in enumerate(sorted(res, key=int)):
+        for i in res[k_b]:
+            mat[j, int(i)] = res[k_b][i][method]['gen_score']
+    return mat
+
 def get_data_from_r(path_to_csv):
     """extract the response matrix from the R package and save it as a CSV"""
     importr('DoOR.function')
