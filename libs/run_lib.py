@@ -107,7 +107,7 @@ def get_selection_score(config, data, targets):
     return sel_scores
 
 
-def run_runner(config, data, targets):
+def run_runner(config, data, targets, get_models=False):
     """docstring for run"""
 
     res = {}
@@ -122,7 +122,9 @@ def run_runner(config, data, targets):
         regressor.fit(data, targets)
         res[method] = {'train_score': regressor.score(data, targets),
                        'gen_score': regressor.oob_score_}
-    return dict(res)
+        if get_models:
+            res[method]['model'] = regressor
+    return res
 
 
 if __name__ == '__main__':
