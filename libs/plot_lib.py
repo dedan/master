@@ -59,15 +59,16 @@ def descriptor_performance_plot(fig, max_overview, sc):
 
 def feature_selection_comparison_plot(fig, max_overview, sc):
     """plot comparison between linear and forest feature selection"""
+    sparse_thresh_idx = 2
     for i_meth, method in enumerate(max_overview):
         ax = fig.add_subplot(2, len(max_overview), i_meth + 1)
         flat_lin = max_overview[method]['linear']['max'].flatten()
         flat_for = max_overview[method]['forest']['max'].flatten()
-        counts_lin, _ = np.histogram(flat_lin, bins=len(sc['k_best']))
-        counts_for, _ = np.histogram(flat_for, bins=len(sc['k_best']))
 
         # scatter plot of max values
-        ax.plot(flat_lin, flat_for, 'x')
+        lines = []
+        for i in range(len(flat_lin)):
+            lines.append(ax.plot(flat_lin[i], flat_for[i], 'xb')[0])
         plt.axis('scaled')
         ax.set_xticks([0, ax.get_xticks()[-1]])
         ax.set_yticks([0, ax.get_yticks()[-1]])
@@ -77,11 +78,21 @@ def feature_selection_comparison_plot(fig, max_overview, sc):
             ax.set_ylabel('forest')
         ax.plot([0, 1], [0, 1], '-', color='0.6')
 
+        flat_lin_kbest = max_overview[method]['linear']['k_best'].flatten()
+        flat_for_kbest = max_overview[method]['forest']['k_best'].flatten()
+        counts_lin, clb = np.histogram(flat_lin_kbest, bins=len(sc['k_best']))
+        counts_for, cfb = np.histogram(flat_for_kbest, bins=len(sc['k_best']))
+        idx = np.digitize(flat_for_kbest, cfb)
+        print np.where(idx == sparse_thresh_idx + 1)[0].shape
+        for i in np.where(idx == sparse_thresh_idx + 1)[0]:
+            ax.plot(flat_lin[i], flat_for[i], '.r')
+
         # k_best histogram plot
         ax = fig.add_subplot(2, len(max_overview), i_meth + 4)
         ax.bar(range(len(sc['k_best'])), counts_lin, color='r', label='linear')
         plt.hold(True)
-        ax.bar(range(len(sc['k_best'])), -counts_for, color='b', label='forest')
+        bla = ax.bar(range(len(sc['k_best'])), -counts_for, color='g', label='forest')
+        bla[sparse_thresh_idx].set_alpha(0.5)
         ax.set_xticks(np.arange(len(sc['k_best'])) + .5)
         ax.set_xticklabels(sc['k_best'], rotation='90', ha='left')
         fig.subplots_adjust(hspace=0.4)
@@ -102,4 +113,5 @@ def plot_search_matrix(fig, desc_res, sc, methods):
                     ax.set_ylabel('{}\n{}'.format(method,selection))
                 ax.set_yticks([])
                 ax.set_xticks([])
+                ax.set_xlabel('{:.2f}'.format(np.max(mat)))
     fig.subplots_adjust(hspace=0.4, wspace=0.3)
