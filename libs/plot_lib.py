@@ -11,12 +11,13 @@ import os
 import numpy as np
 import pylab as plt
 
-def descriptor_performance_plot(fig, max_overview, search_res, sc):
+def descriptor_performance_plot(fig, max_overview, sc):
     """compare performance of different descriptors for several glomeruli"""
     for i_meth, method in enumerate(max_overview):
 
         for i_sel, selection in enumerate(max_overview[method]):
 
+            desc_names = max_overview[method][selection]['desc_names']
             data = max_overview[method][selection]['max']
             sort_x = np.argsort(np.mean(data, axis=0))
             sort_y = np.argsort(np.mean(data, axis=1))
@@ -32,15 +33,15 @@ def descriptor_performance_plot(fig, max_overview, search_res, sc):
             ax1.set_title('{}_{}.'.format(method, selection))
 
             ax = fig.add_subplot(6, 3, plot_x + 1, sharey=ax1)
-            ax.barh(np.arange(len(search_res.keys())) - 0.5,
+            ax.barh(np.arange(len(desc_names)) - 0.5,
                    np.mean(data, axis=1),
                    xerr=np.std(data, axis=1), height=0.7)
             ax.spines['top'].set_visible(False)
             ax.spines['right'].set_visible(False)
             ax.get_xaxis().tick_bottom()
             ax.get_yaxis().tick_left()
-            ax1.set_yticks(range(len(search_res.keys())))
-            ax1.set_yticklabels([search_res.keys()[i] for i in sort_y])
+            ax1.set_yticks(range(len(desc_names)))
+            ax1.set_yticklabels([desc_names[i] for i in sort_y])
             ax.set_xlabel('average descriptor score')
             plt.setp(ax.get_yticklabels(), visible=False)
 

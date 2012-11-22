@@ -39,7 +39,7 @@ fig.savefig(os.path.join(outpath, 'max_overview.' + config['format']))
 
 # descriptor method performance plots
 fig = plt.figure(figsize=(15,30))
-plib.descriptor_performance_plot(fig, max_overview, search_res, sc)
+plib.descriptor_performance_plot(fig, max_overview, sc)
 fig.savefig(os.path.join(outpath, 'desc_compariosn.' + config['format']))
 if utils.run_from_ipython():
     plt.show()
