@@ -118,7 +118,11 @@ def run_runner(config, data, targets, get_models=False):
 
     # train models and get results
     for method in config['methods']:
-        regressor = ml_methods[method](**config['methods'][method])
+        method_params = config['methods'][method]
+        for p in method_params:
+            if isinstance(method_params[p], unicode):
+                method_params[p] = str(method_params[p])
+        regressor = ml_methods[method](**method_params)
         regressor.fit(data, targets)
         res[method] = {'train_score': regressor.score(data, targets),
                        'gen_score': regressor.oob_score_}
