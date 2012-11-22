@@ -79,15 +79,7 @@ class SVREnsemble(object):
             svr.fit(data[svr.indices_], targets[svr.indices_])
 
         if self.oob_score:
-            predictions = np.zeros(len(targets))
-            n_predictions = np.zeros(len(targets))
-            for svr in self.ensemble:
-                mask = np.ones(len(targets), dtype=np.bool)
-                mask[svr.indices_] = False
-                p_estimator = svr.predict(data[mask])
-                predictions[mask] += p_estimator
-                n_predictions[mask] += 1
-            predictions /= n_predictions
+            predictions = self.predict_oob(data)
             self.oob_score_ = r2_score(targets, predictions)
 
     def predict(self, data):
@@ -96,6 +88,23 @@ class SVREnsemble(object):
         for svr in self.ensemble:
             predictions += svr.predict(data)
         return predictions / len(self.ensemble)
+
+    def predict_oob(self, data):
+        """predictions for all datapoints but only from the parts
+
+           of the ensemble that never saw this point
+        """
+        n_observations = data.shape[0]
+        predictions = np.zeros(n_observations)
+        n_predictions = np.zeros(n_observations)
+        for svr in self.ensemble:
+            assert n_observations == len(svr.indices_)
+            mask = np.ones(n_observations, dtype=np.bool)
+            mask[svr.indices_] = False
+            p_estimator = svr.predict(data[mask])
+            predictions[mask] += p_estimator
+            n_predictions[mask] += 1
+        return predictions / n_predictions
 
     def score(self, data, targets):
         """docstring for score"""
