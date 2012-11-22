@@ -41,7 +41,6 @@ for f in files:
     sc['k_best'] = [2**i for i in range(10) if 2**i < n_features] + [n_features]
 
     print 'working on: ', desc
-
     for selection in sc['selection']:
         print selection
         config['feature_selection']['method'] = selection
@@ -62,8 +61,8 @@ for f in files:
                     config['methods']['svr_ens']['C'] = sc['svr'][i]
                     config['methods']['forest']['max_depth'] = sc['forest'][i]
                     print('running {} {} {}'.format(glomerulus, k_b, i))
-                    data = flib.select_k_best(data, sel_scores, k_b)
-                    tmp_res = run_lib.run_runner(config, data, targets)
+                    data_sel = flib.select_k_best(data, sel_scores, k_b)
+                    tmp_res = run_lib.run_runner(config, data_sel, targets)
                     tmp_res['n_features'] = n_features
                     res[selection][glomerulus][str(k_b)][str(i)] = tmp_res
             print('param search for {} done'.format(glomerulus))
