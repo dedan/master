@@ -66,4 +66,4 @@ for f in files:
                     tmp_res['n_features'] = n_features
                     res[selection][glomerulus][str(k_b)][str(i)] = tmp_res
             print('param search for {} done'.format(glomerulus))
-    json.dump({'sc': sc, 'res': res}, open(os.path.join(sc['outpath'], desc + '.json'), 'w'))
+            json.dump({'sc': sc, 'res': res}, open(os.path.join(sc['outpath'], desc + '.json'), 'w'))
