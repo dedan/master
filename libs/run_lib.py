@@ -114,6 +114,7 @@ def run_runner(config, data, targets, get_models=False):
     if config['features']['normalize_samples']:
         data = normalize(data, norm='l2', axis=1, copy=True)
     if config['randomization_test']:
+        np.random.seed()
         map(np.random.shuffle, data.T)
 
     # train models and get results
