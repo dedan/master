@@ -1,0 +1,86 @@
+{
+    "outpath": "/Users/dedan/projects/master/results/param_search/test1",
+    "selection": [
+        "linear",
+        "forest"
+    ],
+    "glomeruli": [
+        "Or19a",
+        "Or22a",
+        "Or35a",
+        "Or43b",
+        "Or67a",
+        "Or67b",
+        "Or7a",
+        "Or85b",
+        "Or98a",
+        "Or9a"
+    ],
+    "forest": [
+        3,
+        5,
+        10,
+        100,
+        500
+    ],
+    "svr": [
+        0.01,
+        0.10000000000000001,
+        1,
+        10,
+        100
+    ],
+    "kernel_widths": [
+        2,
+        5,
+        10,
+        20,
+        25,
+        30,
+        50,
+        [
+            5,
+            50
+        ],
+        [
+            20,
+            50
+        ],
+        [
+            2,
+            20
+        ]
+    ],
+    "runner_config_content": {
+        "feature_selection": {
+        },
+        "features": {
+            "type": "spectral",
+            "normalize": true,
+            "normalize_samples": false,
+            "kernel_width": 2,
+            "resolution": 0.5,
+            "use_intensity": true,
+            "spec_type": "ir",
+            "properties_to_add": []
+        },
+        "methods": {
+            "forest": {
+                "n_estimators": 500,
+                "oob_score": true,
+                "random_state": 0
+            },
+            "svr": {
+                "cross_val": true,
+                "C": 1.0,
+                "stratified": true,
+                "n_folds": 10
+            },
+            "svr_ens": {
+                "n_estimators": 500,
+                "oob_score": true
+            }
+        },
+        "randomization_test": false
+    }
+}

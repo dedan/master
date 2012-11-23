@@ -10,26 +10,40 @@ import sys
 import os
 import json
 from master.libs import run_lib
+from master.libs import features_lib as flib
 import numpy as np
 reload(run_lib)
+reload(flib)
 
+configs = []
 # search config
 sc = json.load(open(sys.argv[1]))
-config = json.load(open(sc['runner_config']))
-config['features']['properties_to_add'] = sc['properties_to_add']
+config = sc['runner_config_content']
+config['data_path'] = os.path.join(os.path.dirname(__file__), '..', 'data')
 
-config['features']['type'] = 'spectral'
-config['features']['use_intensity'] = sc['use_intensity']
-config['features']['spec_type'] = sc['spec_type']
+if config['features']['type'] == 'conventional':
+    files = glob.glob(os.path.join(config['data_path'], 'conventional_features', '*.csv'))
+    for f in files:
+        desc = os.path.splitext(os.path.basename(f))[0]
+        config['features']['descriptor'] = desc
+        config['run_name'] = desc
+        configs.append(dict(config))
+elif config['features']['type'] == 'spectral':
+    config['features']['descriptor'] = 'large_base'
+    for kwidth in sc['kernel_widths']:
+        config['features']['kernel_width'] = kwidth
+        config['run_name'] = repr(kwidth)
+        configs.append(dict(config))
+else:
+    assert False
 
-for kwidth in sc['kernel_widths']:
-    config['features']['kernel_width'] = kwidth
-    desc = repr(kwidth)
+
+for config in configs:
 
     # if result file already exists, load it to append new glomeruli
-    if os.path.exists(os.path.join(sc['outpath'], desc + '.json')):
-        print('load existing results from: {}'.format(desc))
-        res = json.load(open(os.path.join(sc['outpath'], desc + '.json')))["res"]
+    if os.path.exists(os.path.join(sc['outpath'], config['run_name'] + '.json')):
+        print('load existing results from: {}'.format(config['run_name']))
+        res = json.load(open(os.path.join(sc['outpath'], config['run_name'] + '.json')))["res"]
     else:
         res = {sel: {} for sel in sc['selection']}
 
@@ -38,8 +52,7 @@ for kwidth in sc['kernel_widths']:
     n_features = len(features[features.keys()[0]])
     sc['k_best'] = [2**i for i in range(10) if 2**i < n_features] + [n_features]
 
-    print 'working on: ', desc
-
+    print 'working on: ', config['run_name']
     for selection in sc['selection']:
         print selection
         config['feature_selection']['method'] = selection
@@ -47,6 +60,8 @@ for kwidth in sc['kernel_widths']:
             if not glomerulus in res[selection]:
                 res[selection][glomerulus] = {}
             config['glomerulus'] = glomerulus
+            data, targets = run_lib.load_data_targets(config, features)
+            sel_scores = run_lib.get_selection_score(config, data, targets)
             for k_b in sc['k_best']:
                 if not str(k_b) in res[selection][glomerulus]:
                     res[selection][glomerulus][str(k_b)] = {}
@@ -58,8 +73,9 @@ for kwidth in sc['kernel_widths']:
                     config['methods']['svr_ens']['C'] = sc['svr'][i]
                     config['methods']['forest']['max_depth'] = sc['forest'][i]
                     print('running {} {} {}'.format(glomerulus, k_b, i))
-                    tmp_res = run_lib.run_runner(config, features)
+                    data_sel = flib.select_k_best(data, sel_scores, k_b)
+                    tmp_res = run_lib.run_runner(config, data_sel, targets)
                     tmp_res['n_features'] = n_features
                     res[selection][glomerulus][str(k_b)][str(i)] = tmp_res
             print('param search for {} done'.format(glomerulus))
-    json.dump({'sc': sc, 'res': res}, open(os.path.join(sc['outpath'], desc + '.json'), 'w'))
+            json.dump({'sc': sc, 'res': res}, open(os.path.join(sc['outpath'], config['run_name'] + '.json'), 'w'))
