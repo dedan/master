@@ -123,7 +123,7 @@ def feature_selection_comparison_plot(fig, max_overview, sc):
             ax.plot(flat_lin[i], flat_for[i], '.r')
 
         # k_best histogram plot
-        ax = fig.add_subplot(3, len(max_overview), i_meth + 4)
+        ax = fig.add_subplot(3, len(max_overview), i_meth + len(max_overview) + 1)
         ax.bar(range(len(sc['k_best'])), counts_lin, color='r', label='linear')
         plt.hold(True)
         bla = ax.bar(range(len(sc['k_best'])), -counts_for, color='g', label='forest')
@@ -139,7 +139,7 @@ def feature_selection_comparison_plot(fig, max_overview, sc):
         values = nanmean(conti, axis=1)
         counts = np.sum(~np.isnan(conti), axis=1) / float(cur_lin['k_best'].shape[1])
         sort_idx = np.argsort(counts)
-        ax = fig.add_subplot(3, len(max_overview), i_meth + 7)
+        ax = fig.add_subplot(3, len(max_overview), i_meth + 2 * len(max_overview) + 1)
         ax.bar(np.arange(len(desc_names))*2, counts[sort_idx])
         ax.set_xticks(np.arange(len(desc_names)) *2 + 1)
         ax.set_xticklabels([desc_names[i] for i in sort_idx], rotation='90', fontsize=7)
