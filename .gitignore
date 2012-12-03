@@ -6,3 +6,5 @@ data/features.json
 data/spectra
 docs
 scratch
+*.pdf
+*.ttf

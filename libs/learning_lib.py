@@ -79,8 +79,7 @@ class SVREnsemble(object):
             svr.fit(data[svr.indices_], targets[svr.indices_])
 
         if self.oob_score:
-            predictions = self.predict_oob(data)
-            self.oob_score_ = r2_score(targets, predictions)
+            self.oob_score_ = self.score_oob(data, targets)
 
     def predict(self, data):
         """docstring for predict"""
@@ -109,6 +108,10 @@ class SVREnsemble(object):
     def score(self, data, targets):
         """docstring for score"""
         return r2_score(targets, self.predict(data))
+
+    def score_oob(self, data, targets):
+        """docstring for score"""
+        return r2_score(targets, self.predict_oob(data))
 
     def get_params(self):
         """docstring for get_params"""
