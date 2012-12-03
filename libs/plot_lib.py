@@ -11,6 +11,24 @@ import os
 import numpy as np
 import pylab as plt
 from scipy.stats.stats import nanmean
+from master.libs import utils
+
+structures_path = os.path.join(os.path.dirname(__file__), '..', 'data', 'structures')
+
+
+def structure_plot(fig, molids, activations=None):
+    """plot molecule structures"""
+    if activations != None:
+        assert len(activations) == len(molids)
+    cr = utils.ceiled_root(len(molids))
+    for i, molid in enumerate(molids):
+        ax = fig.add_subplot(cr, cr, i+1)
+        img = plt.imread(os.path.join(structures_path, molid + '.png'))
+        ax.imshow(img)
+        if activations != None:
+            ax.set_title('{:.2f}'.format(activations[i]))
+        plt.axis('off')
+
 
 def new_descriptor_performance_plot(fig, max_overview, sc):
     """compare performance of different descriptors for several glomeruli"""
