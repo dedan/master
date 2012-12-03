@@ -18,11 +18,12 @@ reload(rdl)
 
 config = json.load(open(sys.argv[1]))
 outpath = os.path.join(config['inpath'], 'plots')
-methods = ['svr', 'svr_ens', 'forest']
+if not os.path.exists(outpath):
+    os.mkdir(outpath)
 
 # variables for results
 plt.close('all')
-search_res, max_overview, sc = rdl.read_paramsearch_results(config['inpath'], methods)
+search_res, max_overview, sc = rdl.read_paramsearch_results(config['inpath'])
 
 if config['plot_param_space']:
     for desc in search_res:

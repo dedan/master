@@ -23,7 +23,7 @@ try:
 except Exception, e:
     print '!!! rpy2 not installed !!!'
 
-def read_paramsearch_results(path, methods):
+def read_paramsearch_results(path):
     """read the results from a parameter search for several descriptors"""
     # variables for results
     search_res = utils.recursive_defaultdict()
@@ -39,6 +39,8 @@ def read_paramsearch_results(path, methods):
         desc = os.path.splitext(os.path.basename(f_name))[0]
         js = json.load(open(f_name))
         desc_res, sc = js['res'], js['sc']
+        methods = sc['runner_config_content']['methods'].keys()
+
         for i_sel, selection in enumerate(sc['selection']):
             for i_glom, glom in enumerate(desc_res[selection]):
                 for i_meth, method in enumerate(methods):
