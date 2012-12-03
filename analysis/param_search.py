@@ -34,7 +34,7 @@ elif config['features']['type'] == 'spectral':
     for kwidth in sc['kernel_widths']:
         config['features']['kernel_width'] = kwidth
         config['run_name'] = repr(kwidth)
-        configs.append(dict(config))
+        configs.append(copy.deepcopy(config))
 else:
     assert False
 

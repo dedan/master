@@ -4,6 +4,7 @@ results
 data/response_matrix.csv
 data/features.json
 data/spectra
+data/structures
 docs
 scratch
 *.pdf
