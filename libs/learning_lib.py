@@ -26,7 +26,7 @@ class MyStratifiedKFold(StratifiedKFold):
     def __init__(self, targets, n_folds, n_bins=2):
         _, bins = np.histogram(targets, bins=n_bins)
         # because of the < instead of <= condition in digitize
-        bins[-1] += np.finfo(targets.dtype).eps
+        bins[-1] += 0.000001
         binned_targets = np.digitize(targets, bins)
         super(MyStratifiedKFold, self).__init__(binned_targets, n_folds)
 
