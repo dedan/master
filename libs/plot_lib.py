@@ -12,6 +12,35 @@ import numpy as np
 import pylab as plt
 from scipy.stats.stats import nanmean
 
+def new_descriptor_performance_plot(fig, max_overview, sc):
+    """compare performance of different descriptors for several glomeruli"""
+    for i_meth, method in enumerate(max_overview):
+
+        for i_sel, selection in enumerate(max_overview[method]):
+
+            desc_names = max_overview[method][selection]['desc_names']
+            data = max_overview[method][selection]['max']
+            sort_x = np.argsort(np.mean(data, axis=0))
+            sort_y = np.argsort(np.mean(data, axis=1))
+            data = data[sort_y, :]
+            data = data[:, sort_x]
+
+            plot_x = i_sel * len(max_overview) + i_meth + 1
+            ax = fig.add_subplot(1, 6, plot_x)
+            ax.set_title('{}_{}.'.format(method, selection))
+            ax.bar((np.arange(len(desc_names)) - 0.5) * 3,
+                   np.mean(data, axis=1),
+                   yerr=np.std(data, axis=1), width=1.7)
+            ax.spines['top'].set_visible(False)
+            ax.spines['right'].set_visible(False)
+            ax.get_xaxis().tick_bottom()
+            ax.get_yaxis().tick_left()
+            ax.set_xticks(np.arange(len(desc_names)) * 3)
+            ax.set_xticklabels([desc_names[i] for i in sort_y], rotation='90', fontsize=6)
+            if plot_x == 1:
+                ax.set_ylabel('average descriptor score')
+
+
 def descriptor_performance_plot(fig, max_overview, sc):
     """compare performance of different descriptors for several glomeruli"""
     for i_meth, method in enumerate(max_overview):
@@ -127,10 +156,10 @@ def plot_search_matrix(fig, desc_res, sc, methods):
                 ax = fig.add_subplot(6, len(sc['glomeruli']), ax_idx)
                 ax.imshow(mat, interpolation='nearest')
                 if i_sel + i_meth == 0:
-                    ax.set_title(glom, rotation='45')
+                    ax.set_title(glom, rotation='0')
                 if i_glom == 0:
                     ax.set_ylabel('{}\n{}'.format(method,selection))
                 ax.set_yticks([])
                 ax.set_xticks([])
                 ax.set_xlabel('{:.2f}'.format(np.max(mat)))
-    fig.subplots_adjust(hspace=0.4, wspace=0.3)
+    fig.subplots_adjust(hspace=0.5, wspace=0.3)
