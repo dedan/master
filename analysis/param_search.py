@@ -12,6 +12,7 @@ import json
 from master.libs import run_lib
 from master.libs import features_lib as flib
 import numpy as np
+import copy
 reload(run_lib)
 reload(flib)
 
@@ -27,7 +28,7 @@ if config['features']['type'] == 'conventional':
         desc = os.path.splitext(os.path.basename(f))[0]
         config['features']['descriptor'] = desc
         config['run_name'] = desc
-        configs.append(dict(config))
+        configs.append(copy.deepcopy(config))
 elif config['features']['type'] == 'spectral':
     config['features']['descriptor'] = 'large_base'
     for kwidth in sc['kernel_widths']:
@@ -69,9 +70,12 @@ for config in configs:
                 for i in range(len(sc['forest'])):
                     if str(i) in res[selection][glomerulus][str(k_b)]:
                         continue
-                    config['methods']['svr']['C'] = sc['svr'][i]
-                    config['methods']['svr_ens']['C'] = sc['svr'][i]
-                    config['methods']['forest']['max_depth'] = sc['forest'][i]
+                    if 'svr' in config['methods']:
+                        config['methods']['svr']['C'] = sc['svr'][i]
+                    if 'svr_ens' in config['methods']:
+                        config['methods']['svr_ens']['C'] = sc['svr'][i]
+                    if 'forest' in config['methods']:
+                        config['methods']['forest']['max_depth'] = sc['forest'][i]
                     print('running {} {} {}'.format(glomerulus, k_b, i))
                     data_sel = flib.select_k_best(data, sel_scores, k_b)
                     tmp_res = run_lib.run_runner(config, data_sel, targets)
