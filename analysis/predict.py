@@ -51,8 +51,6 @@ assert len(molids) == len(targets)
 fig = plt.figure()
 active_targets = np.where(targets > active_thresh)[0]
 plib.structure_plot(fig, [molids[i] for i in active_targets], targets[active_targets])
-plt.show()
-crash
 
 sel_scores = run_lib.get_selection_score(config, data, targets)
 data = flib.select_k_best(data, sel_scores, config['feature_selection']['k_best'])
@@ -61,8 +59,15 @@ model = tmp_res['svr_ens']['model']
 
 molids_to_predict = list(set(daniel_set_molid).difference(molids))
 data_to_predict = np.array([features[m] for m in molids_to_predict if len(features[m]) != 0 ])
+molids_to_predict = np.array([m for m in molids_to_predict if len(features[m]) != 0 ])
 data_to_predict = flib.select_k_best(data_to_predict, sel_scores, config['feature_selection']['k_best'])
+assert len(data_to_predict) == len(molids_to_predict)
 predictions = model.predict(data_to_predict)
+
+fig = plt.figure()
+active_predictions = np.where(predictions > active_thresh)[0]
+plib.structure_plot(fig, [molids_to_predict[i] for i in active_predictions],
+                         predictions[active_predictions])
 
 fig = plt.figure()
 ax = fig.add_subplot(211)
