@@ -23,6 +23,16 @@ try:
 except Exception, e:
     print '!!! rpy2 not installed !!!'
 
+
+def get_id2name():
+    """get molID to chemical name mapping from basic molecules CSV file"""
+    feature_file = os.path.join(os.path.dirname(__file__),
+                                '..', 'data', 'basic_molecule_properties.csv')
+    with open(feature_file) as f:
+        reader = csv.DictReader(f)
+        id2name = {entry['CdId']: entry['Name'] for entry in reader}
+    return id2name
+
 def read_paramsearch_results(path):
     """read the results from a parameter search for several descriptors"""
     # variables for results
