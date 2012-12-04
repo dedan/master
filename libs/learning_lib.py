@@ -16,6 +16,7 @@ from sklearn.cross_validation import KFold
 from sklearn.metrics import r2_score
 from sklearn.cross_validation import StratifiedKFold
 import numpy as np
+import random
 
 class MyStratifiedKFold(StratifiedKFold):
     """A StratifiedKFold for continous targets
@@ -29,6 +30,28 @@ class MyStratifiedKFold(StratifiedKFold):
         bins[-1] += 0.000001
         binned_targets = np.digitize(targets, bins)
         super(MyStratifiedKFold, self).__init__(binned_targets, n_folds)
+
+class StratifiedResampling(object):
+    """like stratified k-fold, but with repeated sampling"""
+    def __init__(self, targets, n_folds, n_bins=2):
+        self.targets = targets
+        self.n_folds = n_folds
+        self.n_bins = n_bins
+
+        self.counts, bins = np.histogram(targets, bins=n_bins)
+        # because of the < instead of <= condition in digitize
+        bins[-1] += 0.000001
+        self.binned_targets = np.digitize(targets, bins)
+
+    def __iter__(self):
+        for fold in range(self.n_folds):
+            indices = []
+            for i, target_type in enumerate(range(1, self.n_bins + 1)):
+                idx = np.where(self.binned_targets == target_type)[0]
+                sample = [random.choice(idx) for _ in range(self.counts[i])]
+                indices.extend(sample)
+            assert len(indices) == len(self.binned_targets)
+            yield indices
 
 
 class MySVR(SVR):
@@ -61,10 +84,11 @@ class MySVR(SVR):
 
 class SVREnsemble(object):
     """docstring for SVREnsemble"""
-    def __init__(self, n_estimators, oob_score, **kwargs):
+    def __init__(self, n_estimators, oob_score, stratified=False, **kwargs):
         super(SVREnsemble, self).__init__()
         self.n_estimators = n_estimators
         self.oob_score = oob_score
+        self.stratified = stratified
         self.oob_score_ = None
         np.random.seed(0)
         self.ensemble = []
@@ -73,9 +97,15 @@ class SVREnsemble(object):
 
     def fit(self, data, targets):
         """docstring for fit"""
-        for svr in self.ensemble:
-            indices = np.random.randint(0, len(targets), len(targets))
-            svr.indices_ = indices
+
+        if self.stratified:
+            indices = list(StratifiedResampling(targets, self.n_estimators))
+        else:
+            indices = np.random.randint(0, len(targets),
+                                        (self.n_estimators, len(targets)))
+
+        for svr, idx in zip(self.ensemble, indices):
+            svr.indices_ = idx
             svr.fit(data[svr.indices_], targets[svr.indices_])
 
         if self.oob_score:

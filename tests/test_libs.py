@@ -8,8 +8,19 @@ Copyright (c) 2012. All rights reserved.
 import unittest, sys, os
 import master.libs.read_data_lib as rdl
 import master.libs.features_lib as flib
+import master.libs.learning_lib as llib
 import numpy as np
 reload(flib)
+
+class TestLearning(unittest.TestCase):
+    """test my learning libs"""
+
+    def test_stratified_resampling(self):
+        """make sure it stratifies"""
+        test_targets = [1, 2, 1.4, 1.2, 10]
+        sr = llib.StratifiedResampling(test_targets, 10)
+        for indices in sr:
+            assert indices[-1] == 4
 
 class TestLibs(unittest.TestCase):
 
