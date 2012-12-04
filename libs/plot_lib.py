@@ -169,8 +169,9 @@ def feature_selection_comparison_plot(fig, max_overview, sc):
         ax.bar(np.arange(len(desc_names))*2+1, values[sort_idx], color='r')
 
 
-def plot_search_matrix(fig, desc_res, sc, methods):
+def plot_search_matrix(fig, desc_res, sc):
     """docstring for plot_search_matrix"""
+    methods = desc_res.values()[0].values()[0].keys()
     for i_sel, selection in enumerate(sc['selection']):
         for i_glom, glom in enumerate(desc_res[selection]):
             for i_meth, method in enumerate(methods):
