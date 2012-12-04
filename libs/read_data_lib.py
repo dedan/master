@@ -39,7 +39,9 @@ def read_paramsearch_results(path):
     search_res = utils.recursive_defaultdict()
     initializer = lambda: {'max': np.zeros((len(f_names), len(sc['glomeruli']))),
                            'k_best': np.zeros((len(f_names), len(sc['glomeruli']))),
-                           'desc_names': []}
+                           'c_best': np.zeros((len(f_names), len(sc['glomeruli']))),
+                           'desc_names': [],
+                           'glomeruli': []}
     max_overview = defaultdict(lambda: defaultdict(initializer))
 
     # read data from files
@@ -58,8 +60,12 @@ def read_paramsearch_results(path):
                     search_res[desc][selection][glom][method] = mat
                     max_overview[method][selection]['max'][i_file, i_glom] = np.max(mat)
                     max_overview[method][selection]['k_best'][i_file, i_glom] = np.argmax(np.max(mat, axis=1))
+                    max_overview[method][selection]['c_best'][i_file, i_glom] = np.argmax(np.max(mat, axis=0))
                     if i_glom == 0:
                         max_overview[method][selection]['desc_names'].append(desc)
+                    if i_meth == 0:
+                        max_overview[method][selection]['glomeruli'].append(glom)
+
     return search_res, max_overview, sc
 
 
