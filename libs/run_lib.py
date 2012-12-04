@@ -93,7 +93,7 @@ def load_data_targets(config, features):
     targets = np.array([targets[i] for i in avail])
     data = np.array([features[molids[i]] for i in avail])
     assert targets.shape[0] == data.shape[0]
-    return data, targets
+    return data, targets, molids
 
 
 def get_selection_score(config, data, targets):
