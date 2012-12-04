@@ -12,12 +12,14 @@ import numpy as np
 import pylab as plt
 from scipy.stats.stats import nanmean
 from master.libs import utils
+from master.libs import read_data_lib as rdl
 
 structures_path = os.path.join(os.path.dirname(__file__), '..', 'data', 'structures')
 
 
 def structure_plot(fig, molids, activations=None):
     """plot molecule structures"""
+    id2name = rdl.get_id2name()
     if activations != None:
         assert len(activations) == len(molids)
     cr = utils.ceiled_root(len(molids))
@@ -26,7 +28,8 @@ def structure_plot(fig, molids, activations=None):
         img = plt.imread(os.path.join(structures_path, molid + '.png'))
         ax.imshow(img)
         if activations != None:
-            ax.set_title('{:.2f}'.format(activations[i]))
+            ax.set_title('{}: {:.2f}'.format(id2name[molid], activations[i]),
+                         rotation='20')
         plt.axis('off')
 
 
