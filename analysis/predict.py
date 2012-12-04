@@ -22,35 +22,27 @@ reload(plib)
 
 plt.close('all')
 active_thresh = 0.5
+outpath = '/Users/dedan/projects/master/results/prediction'
+glomeruli = ['Or10a', 'Or42b', 'Or47b']
 
-# search config
 config = json.load(open(sys.argv[1]))
-daniel_set = json.load(open('/Users/dedan/projects/master/scratch/daniel_set.json'))
-
-# load the features
-features = run_lib.prepare_features(config)
 door2id = json.load(open(os.path.join(config['data_path'], 'door2id.json')))
+daniel_set = json.load(open(os.path.join(config['data_path'], 'daniel_set.json')))
 daniel_set_molid = [door2id[cas][0] for cas in daniel_set]
+features = run_lib.prepare_features(config)
 
-csv_path = os.path.join(config['data_path'], 'response_matrix.csv')
-cas_numbers, glomeruli, rm = rdl.load_response_matrix(csv_path, door2id)
-glom_idx = glomeruli.index(config['glomerulus'])
+for glom in glomeruli:
 
-# select molecules available for the glomerulus
-targets , tmp_cas_numbers = rdl.get_avail_targets_for_glom(rm, cas_numbers, glom_idx)
-molids = [str(door2id[cas_number][0]) for cas_number in tmp_cas_numbers]
-assert len(molids) == len(targets)
+    config['glomerulus'] = glom
+    data, targets, molids = run_lib.load_data_targets(config, features)
 
-# for some of them the spectra are not available
-avail = [i for i in range(len(molids)) if molids[i] in features]
-targets = np.array([targets[i] for i in avail])
-data = np.array([features[molids[i]] for i in avail])
-assert targets.shape[0] == data.shape[0]
-assert len(molids) == len(targets)
-
-fig = plt.figure()
-active_targets = np.where(targets > active_thresh)[0]
-plib.structure_plot(fig, [molids[i] for i in active_targets], targets[active_targets])
+    fig = plt.figure(figsize=(5,5))
+    active_targets = np.where(targets > active_thresh)[0]
+    plib.structure_plot(fig, [molids[i] for i in active_targets],
+                             targets[active_targets])
+    fig.suptitle(glom)
+    fig.savefig(os.path.join(outpath, glom + '.png'))
+plt.show()
 
 sel_scores = run_lib.get_selection_score(config, data, targets)
 data = flib.select_k_best(data, sel_scores, config['feature_selection']['k_best'])
