@@ -17,19 +17,7 @@ from sklearn.metrics import r2_score
 from sklearn.cross_validation import StratifiedKFold
 import numpy as np
 import random
-
-class MyStratifiedKFold(StratifiedKFold):
-    """A StratifiedKFold for continous targets
-
-       the target range is divided into n_bins bins which are used as
-       class labels
-    """
-    def __init__(self, targets, n_folds, n_bins=2):
-        _, bins = np.histogram(targets, bins=n_bins)
-        # because of the < instead of <= condition in digitize
-        bins[-1] += 0.000001
-        binned_targets = np.digitize(targets, bins)
-        super(MyStratifiedKFold, self).__init__(binned_targets, n_folds)
+import __builtin__
 
 class StratifiedResampling(object):
     """like stratified k-fold, but with repeated sampling"""
@@ -45,13 +33,14 @@ class StratifiedResampling(object):
 
     def __iter__(self):
         for fold in range(self.n_folds):
-            indices = []
+            train_idx = []
             for i, target_type in enumerate(range(1, self.n_bins + 1)):
                 idx = np.where(self.binned_targets == target_type)[0]
                 sample = [random.choice(idx) for _ in range(self.counts[i])]
-                indices.extend(sample)
-            assert len(indices) == len(self.binned_targets)
-            yield indices
+                train_idx.extend(sample)
+            assert len(train_idx) == len(self.binned_targets)
+            test_idx = [j for j in range(len(self.targets)) if not j in train_idx]
+            yield train_idx, test_idx
 
 
 class MySVR(SVR):
@@ -70,10 +59,7 @@ class MySVR(SVR):
         super(MySVR, self).fit(data, targets)
         tmp_svr = SVR(**self.kwargs)
         if self.cross_val:
-            if self.stratified:
-                kf = MyStratifiedKFold(targets, self.n_folds)
-            else:
-                kf = KFold(len(targets), self.n_folds)
+            kf = StratifiedResampling(targets, self.n_folds)
             predictions = np.zeros(len(targets))
             for train, test in kf:
                 predictions[test] = tmp_svr.fit(data[train], targets[train]).predict(data[test])
@@ -99,7 +85,8 @@ class SVREnsemble(object):
         """docstring for fit"""
 
         if self.stratified:
-            indices = list(StratifiedResampling(targets, self.n_estimators))
+            sr = StratifiedResampling(targets, self.n_estimators)
+            indices = __builtin__.sum([train_idx for train_idx, test_idx in sr], [])
         else:
             indices = np.random.randint(0, len(targets),
                                         (self.n_estimators, len(targets)))
