@@ -25,7 +25,7 @@ except Exception, e:
 
 def get_best_params(inpath, descriptor, glom, method, selection):
     """extract the best parameters from a parameter search"""
-    search_res, max_overview, sc = read_paramsearch_results(inpath)
+    search_res, max_overview, sc, k_best = read_paramsearch_results(inpath)
     config = sc['runner_config_content']
     config['features']['descriptor'] = descriptor
     config['glomerulus'] = glom
@@ -35,7 +35,7 @@ def get_best_params(inpath, descriptor, glom, method, selection):
     best_c_idx = int(cur_max['c_best'][desc_idx, glom_idx])
     best_kbest_idx = int(cur_max['k_best'][desc_idx, glom_idx])
     config['methods']['svr_ens']['C'] = sc['svr'][best_c_idx]
-    config['feature_selection']['k_best'] = sc['k_best'][best_kbest_idx]
+    config['feature_selection']['k_best'] = k_best[descriptor][best_kbest_idx]
     config['feature_selection']['method'] = selection
     return config
 
@@ -58,6 +58,7 @@ def read_paramsearch_results(path):
                            'desc_names': [],
                            'glomeruli': []}
     max_overview = defaultdict(lambda: defaultdict(initializer))
+    k_best = {}
 
     # read data from files
     f_names = glob.glob(os.path.join(path, "*.json"))
@@ -66,6 +67,7 @@ def read_paramsearch_results(path):
         desc = os.path.splitext(os.path.basename(f_name))[0]
         js = json.load(open(f_name))
         desc_res, sc = js['res'], js['sc']
+        k_best[desc] = sc['k_best']
         methods = sc['runner_config_content']['methods'].keys()
 
         for i_sel, selection in enumerate(sc['selection']):
@@ -81,7 +83,7 @@ def read_paramsearch_results(path):
                     if i_meth == 0:
                         max_overview[method][selection]['glomeruli'].append(glom)
 
-    return search_res, max_overview, sc
+    return search_res, max_overview, sc, k_best
 
 
 def get_search_matrix(res, method):

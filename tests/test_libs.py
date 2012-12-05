@@ -19,8 +19,8 @@ class TestLearning(unittest.TestCase):
         """make sure it stratifies"""
         test_targets = [1, 2, 1.4, 1.2, 10]
         sr = llib.StratifiedResampling(test_targets, 10)
-        for indices in sr:
-            assert indices[-1] == 4
+        for train_idx, test_idx in sr:
+            assert train_idx[-1] == 4
 
 class TestLibs(unittest.TestCase):
 
