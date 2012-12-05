@@ -62,7 +62,7 @@ def prepare_features(config):
         features = flib.read_feature_csv(feature_file)
     elif config['features']['type'] == 'spectral':
         feature_file = os.path.join(config['data_path'], 'spectral_features',
-                                    config['features']['descriptor'], 'parsed.pckl')
+                                    'large_base', 'parsed.pckl')
         spectra = pickle.load(open(feature_file))
         features = flib.get_spectral_features(spectra, config['features']['resolution'],
                                               spec_type=config['features']['spec_type'],
