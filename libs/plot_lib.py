@@ -19,18 +19,27 @@ structures_path = os.path.join(os.path.dirname(__file__), '..', 'data', 'structu
 
 def structure_plot(fig, molids, activations=None):
     """plot molecule structures"""
-    id2name = rdl.get_id2name()
     if activations != None:
-        assert len(activations) == len(molids)
-    cr = utils.ceiled_root(len(molids))
-    for i, molid in enumerate(molids):
+        assert len(activations[0]) == len(molids[0])
+        assert len(activations[1]) == len(molids[1])
+    id2name = rdl.get_id2name()
+    all_molids = molids[0] + molids[1]
+    all_activations = np.hstack(activations)
+    cr = utils.ceiled_root(len(all_molids))
+    for i, molid in enumerate(all_molids):
         ax = fig.add_subplot(cr, cr, i+1)
         img = plt.imread(os.path.join(structures_path, molid + '.png'))
         ax.imshow(img)
+        ax.set_xticks([])
+        ax.set_yticks([])
+        if i >= len(molids[0]):
+            for child in ax.get_children():
+                if isinstance(child, plt.matplotlib.spines.Spine):
+                    child.set_color('#ff0000')
         if activations != None:
-            ax.set_title('{}: {:.2f}'.format(id2name[molid], activations[i]),
+            ax.set_title('{}: {:.2f}'.format(id2name[molid], all_activations[i]),
                          rotation='20')
-        plt.axis('off')
+        # plt.axis('off')
 
 
 def new_descriptor_performance_plot(fig, max_overview, sc):

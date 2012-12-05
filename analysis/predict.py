@@ -40,15 +40,8 @@ daniel_set_molid = [door2id[cas][0] for cas in daniel_set]
 # get the best parameters from the search result
 config = rdl.get_best_params(inpath, descriptor, glom, method, selection)
 features = run_lib.prepare_features(config)
-
-# structure plot
 data, targets, molids = run_lib.load_data_targets(config, features)
-fig = plt.figure(figsize=(5,5))
-active_targets = np.where(targets > active_thresh)[0]
-act_molids = [molids[i] for i in active_targets]
-plib.structure_plot(fig, act_molids, targets[active_targets])
-fig.suptitle(glom)
-fig.savefig(os.path.join(outpath, glom + '.png'))
+
 
 # fit model
 print("use {} molecules for training".format(data.shape[0]))
@@ -68,13 +61,16 @@ data_to_predict = flib.select_k_best(data_to_predict, sel_scores,
 assert len(data_to_predict) == len(molids_to_predict)
 predictions = model.predict(data_to_predict)
 
-# structure plot for predictions
-fig = plt.figure()
+# structure plot for active targets and predictions
+active_targets = np.where(targets > active_thresh)[0]
+act_molids = [molids[i] for i in active_targets]
 active_predictions = np.where(predictions > active_thresh)[0]
 act_predict_molids = [molids_to_predict[i] for i in active_predictions]
-plib.structure_plot(fig, act_predict_molids, predictions[active_predictions])
+fig = plt.figure(figsize=(5,5))
+plib.structure_plot(fig, (act_molids, act_predict_molids),
+                         (targets[active_targets], predictions[active_predictions]))
 fig.suptitle(glom)
-fig.savefig(os.path.join(outpath, glom + '_prediction.png'))
+fig.savefig(os.path.join(outpath, glom + '_structures.png'))
 
 # targets and predictions histogram plot
 fig = plt.figure()
