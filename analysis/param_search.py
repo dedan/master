@@ -61,7 +61,7 @@ for config in configs:
             if not glomerulus in res[selection]:
                 res[selection][glomerulus] = {}
             config['glomerulus'] = glomerulus
-            data, targets = run_lib.load_data_targets(config, features)
+            data, targets, _ = run_lib.load_data_targets(config, features)
             sel_scores = run_lib.get_selection_score(config, data, targets)
             for k_b in sc['k_best']:
                 if not str(k_b) in res[selection][glomerulus]:
