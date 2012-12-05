@@ -69,7 +69,7 @@ for config in configs:
                 if not str(k_b) in res[selection][glomerulus]:
                     res[selection][glomerulus][str(k_b)] = {}
                 config['feature_selection']['k_best'] = k_b
-                for i in range(len(sc['forest'])):
+                for i in range(len(sc['svr'])):
                     if str(i) in res[selection][glomerulus][str(k_b)]:
                         continue
                     if 'svr' in config['methods']:
