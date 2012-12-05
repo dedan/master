@@ -23,6 +23,21 @@ try:
 except Exception, e:
     print '!!! rpy2 not installed !!!'
 
+def get_best_params(inpath, descriptor, glom, method, selection):
+    """extract the best parameters from a parameter search"""
+    search_res, max_overview, sc = read_paramsearch_results(inpath)
+    config = sc['runner_config_content']
+    config['features']['descriptor'] = descriptor
+    config['glomerulus'] = glom
+    cur_max = max_overview[method][selection]
+    desc_idx = cur_max['desc_names'].index(descriptor)
+    glom_idx = cur_max['glomeruli'].index(glom)
+    best_c_idx = int(cur_max['c_best'][desc_idx, glom_idx])
+    best_kbest_idx = int(cur_max['k_best'][desc_idx, glom_idx])
+    config['methods']['svr_ens']['C'] = sc['svr'][best_c_idx]
+    config['feature_selection']['k_best'] = sc['k_best'][best_kbest_idx]
+    config['feature_selection']['method'] = selection
+    return config
 
 def get_id2name():
     """get molID to chemical name mapping from basic molecules CSV file"""
