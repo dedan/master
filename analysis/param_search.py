@@ -26,6 +26,8 @@ if config['features']['type'] == 'conventional':
     files = glob.glob(os.path.join(config['data_path'], 'conventional_features', '*.csv'))
     for f in files:
         desc = os.path.splitext(os.path.basename(f))[0]
+        if 'descriptors' in sc and not desc in sc['descriptors']:
+            continue
         config['features']['descriptor'] = desc
         config['run_name'] = desc
         configs.append(copy.deepcopy(config))
