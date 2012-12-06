@@ -1,8 +1,28 @@
 {
-    "outpath": "/Users/dedan/projects/master/results/param_search/test1",
+    "outpath": "/Users/dedan/projects/master/results/param_search/test",
+    "descriptors": [
+        "ATOMCENTRED_FRAGMENTS",
+        "BURDEN_EIGENVALUES_DESCRIPTORS",
+        "CONNECTIVITY_INDICES",
+        "CONSTITUTIONAL",
+        "EDGE_ADJACENCY_INDICES",
+        "EIGENVALUE_INDICES",
+        "FUNCTIONAL_GROUP_COUNTS",
+        "GEOMETRICAL",
+        "GETAWAY",
+        "INFORMATION_INDICES",
+        "MOLECULAR_PROPERTIES",
+        "RANDIC_MOLECULAR PROFILES",
+        "RDF",
+        "THREEDMORSE",
+        "TOPOLOGICAL",
+        "TOPOLOGICAL_CHARGE_INDICES",
+        "TWOD_AUTOCORRELATIONS",
+        "WALK_PATH_COUNTS",
+        "WHIM"
+    ],
     "selection": [
-        "linear",
-        "forest"
+        "linear"
     ],
     "glomeruli": [
         "Or19a",
@@ -16,13 +36,6 @@
         "Or98a",
         "Or9a"
     ],
-    "forest": [
-        3,
-        5,
-        10,
-        100,
-        500
-    ],
     "svr": [
         0.01,
         0.10000000000000001,
@@ -30,32 +43,11 @@
         10,
         100
     ],
-    "kernel_widths": [
-        2,
-        5,
-        10,
-        20,
-        25,
-        30,
-        50,
-        [
-            5,
-            50
-        ],
-        [
-            20,
-            50
-        ],
-        [
-            2,
-            20
-        ]
-    ],
     "runner_config_content": {
         "feature_selection": {
         },
         "features": {
-            "type": "spectral",
+            "type": "conventional",
             "normalize": true,
             "normalize_samples": false,
             "kernel_width": 2,
@@ -65,20 +57,10 @@
             "properties_to_add": []
         },
         "methods": {
-            "forest": {
-                "n_estimators": 500,
-                "oob_score": true,
-                "random_state": 0
-            },
             "svr": {
                 "cross_val": true,
                 "C": 1.0,
-                "stratified": true,
                 "n_folds": 10
-            },
-            "svr_ens": {
-                "n_estimators": 500,
-                "oob_score": true
             }
         },
         "randomization_test": false
