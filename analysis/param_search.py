@@ -53,7 +53,8 @@ for config in configs:
     # load the features
     features = run_lib.prepare_features(config)
     n_features = len(features[features.keys()[0]])
-    sc['k_best'] = [2**i for i in range(np.floor(np.log2(n_features)))] + [n_features]
+    max_expo = int(np.floor(np.log2(n_features)))
+    sc['k_best'] = [2**i for i in range(max_expo)] + [n_features]
 
     print 'working on: ', config['run_name']
     for selection in sc['selection']:
