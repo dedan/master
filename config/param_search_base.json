@@ -22,7 +22,8 @@
         "WHIM"
     ],
     "selection": [
-        "linear"
+        "linear",
+        "forest"
     ],
     "glomeruli": [
         "Or19a",
@@ -43,6 +44,13 @@
         10,
         100
     ],
+    "forest": [
+        3,
+        5,
+        10,
+        100,
+        500
+    ],
     "runner_config_content": {
         "feature_selection": {
         },
@@ -61,6 +69,15 @@
                 "cross_val": true,
                 "C": 1.0,
                 "n_folds": 10
+            },
+            "forest": {
+                "n_estimators": 500,
+                "oob_score": true,
+                "random_state": 0
+            },
+            "svr_ens": {
+                "n_estimators": 500,
+                "oob_score": true
             }
         },
         "randomization_test": false
