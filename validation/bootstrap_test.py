@@ -33,7 +33,7 @@ glom = "Or22a"
 path = '/Users/dedan/mnt/numbercruncher/results/param_search/conv_features/'
 
 # get the best parameters from the parameter search
-search_res, max_overview, sc = rdl.read_paramsearch_results(path, [method])
+search_res, max_overview, sc, _ = rdl.read_paramsearch_results(path)
 
 # get the base config
 config_orig = sc['runner_config_content']
@@ -58,7 +58,7 @@ for method in config_orig['methods']:
             del(config['methods'][m])
     config['randomization_test'] = False
     features = run_lib.prepare_features(config)
-    data, targets = run_lib.load_data_targets(config, features)
+    data, targets, _ = run_lib.load_data_targets(config, features)
     sel_scores = run_lib.get_selection_score(config, data, targets)
     data = flib.select_k_best(data, sel_scores, sc['k_best'][k_best_idx])
     true_res = run_lib.run_runner(config, data, targets)
@@ -70,7 +70,7 @@ for method in config_orig['methods']:
     fig.suptitle(method)
     ax = fig.add_subplot(211)
     for i in range(n_repetitions):
-        orig_data, orig_targets = run_lib.load_data_targets(config, features)
+        orig_data, orig_targets, _ = run_lib.load_data_targets(config, features)
         data, targets = orig_data.copy(), orig_targets.copy()
         sel_scores = run_lib.get_selection_score(config, data, targets)
         data = flib.select_k_best(data, sel_scores, sc['k_best'][k_best_idx])

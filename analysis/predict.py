@@ -32,7 +32,6 @@ glomeruli = ['Or10a', 'Or42b', 'Or47b']
 glom = 'Or42b'
 
 # load stuff
-config = json.load(open(sys.argv[1]))
 door2id = json.load(open(os.path.join(data_path, 'door2id.json')))
 daniel_set = json.load(open(os.path.join(data_path, 'daniel_set.json')))
 daniel_set_molid = [door2id[cas][0] for cas in daniel_set]
