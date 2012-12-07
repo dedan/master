@@ -49,7 +49,7 @@ for glomerulus in sc['glomeruli']:
 json.dump(res, open(os.path.join(sc['outpath'], 'true.json'), 'w'))
 
 # add shuffle data to the config and run the runner for N times
-config['randomization_test'] = False
+config['randomization_test'] = True
 for i in range(sc['n_repetitions']):
     print('randomized run nr: {}'.format(i+1))
     for glomerulus in sc['glomeruli']:
