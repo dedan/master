@@ -27,11 +27,6 @@ Created by  on 2012-01-27.
 Copyright (c) 2012. All rights reserved.
 """
 
-
-"""
-    !!! move everything in small functions, with many options this script might
-    !!! become very complex later
-"""
 import sys
 import os
 import json
@@ -52,6 +47,30 @@ reload(llib)
 ml_methods = {'forest': RandomForestRegressor,
               'svr': llib.MySVR,
               'svr_ens': llib.SVREnsemble}
+
+def do_paramsearch(sc, config, features):
+    """docstring for do_paramsearch"""
+    tmp_res = {}
+    data, targets, _ = load_data_targets(config, features)
+    sel_scores = get_selection_score(config, data, targets)
+    for k_b in sc['k_best']:
+        if not str(k_b) in tmp_res:
+            tmp_res[str(k_b)] = {}
+        config['feature_selection']['k_best'] = k_b
+        for i in range(len(sc['svr'])):
+            if str(i) in tmp_res[str(k_b)]:
+                continue
+            if 'svr' in config['methods']:
+                config['methods']['svr']['C'] = sc['svr'][i]
+            if 'svr_ens' in config['methods']:
+                config['methods']['svr_ens']['C'] = sc['svr'][i]
+            if 'forest' in config['methods']:
+                config['methods']['forest']['max_depth'] = sc['forest'][i]
+            print('running {} {} {}'.format(config['glomerulus'], k_b, i))
+            data_sel = flib.select_k_best(data, sel_scores, k_b)
+            tmp = run_runner(config, data_sel, targets)
+            tmp_res[str(k_b)][str(i)] = tmp
+    return tmp_res
 
 def randomization_test(config, n_repetitions):
     """validate results via randomization_test"""

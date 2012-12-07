@@ -64,25 +64,6 @@ for config in configs:
             if not glomerulus in res[selection]:
                 res[selection][glomerulus] = {}
             config['glomerulus'] = glomerulus
-            data, targets, _ = run_lib.load_data_targets(config, features)
-            sel_scores = run_lib.get_selection_score(config, data, targets)
-            for k_b in sc['k_best']:
-                if not str(k_b) in res[selection][glomerulus]:
-                    res[selection][glomerulus][str(k_b)] = {}
-                config['feature_selection']['k_best'] = k_b
-                for i in range(len(sc['svr'])):
-                    if str(i) in res[selection][glomerulus][str(k_b)]:
-                        continue
-                    if 'svr' in config['methods']:
-                        config['methods']['svr']['C'] = sc['svr'][i]
-                    if 'svr_ens' in config['methods']:
-                        config['methods']['svr_ens']['C'] = sc['svr'][i]
-                    if 'forest' in config['methods']:
-                        config['methods']['forest']['max_depth'] = sc['forest'][i]
-                    print('running {} {} {}'.format(glomerulus, k_b, i))
-                    data_sel = flib.select_k_best(data, sel_scores, k_b)
-                    tmp_res = run_lib.run_runner(config, data_sel, targets)
-                    tmp_res['n_features'] = n_features
-                    res[selection][glomerulus][str(k_b)][str(i)] = tmp_res
+            res[selection][glomerulus] = run_lib.do_paramsearch(sc, config, features)
             print('param search for {} done'.format(glomerulus))
             json.dump({'sc': sc, 'res': res}, open(os.path.join(sc['outpath'], config['run_name'] + '.json'), 'w'))
