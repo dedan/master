@@ -72,29 +72,6 @@ def do_paramsearch(sc, config, features):
             tmp_res[str(k_b)][str(i)] = tmp
     return tmp_res
 
-def randomization_test(config, n_repetitions):
-    """validate results via randomization_test"""
-    assert len(config['methods']) == 1  # only one method a time
-    config['randomization_test'] = False
-    k_best = config['feature_selection']['k_best']
-    features = prepare_features(config)
-    data, targets, _ = load_data_targets(config, features)
-    print data.shape
-    sel_scores = get_selection_score(config, data, targets)
-    data = flib.select_k_best(data, sel_scores, k_best)
-    true_res = run_runner(config, data, targets).values()[0]['gen_score']
-
-    # add shuffle data to the config and run the runner for N times
-    config['randomization_test'] = True
-    rand_res = []
-    orig_data, orig_targets, _ = load_data_targets(config, features)
-    for i in range(n_repetitions):
-        data, targets = orig_data.copy(), orig_targets.copy()
-        sel_scores = get_selection_score(config, data, targets)
-        data = flib.select_k_best(data, sel_scores, k_best)
-        tmp_res = run_runner(config, data, targets)
-        rand_res.append(tmp_res.values()[0]['gen_score'])
-    return rand_res, true_res
 
 def prepare_features(config):
     """load and prepare the features, either conventional or spectral"""

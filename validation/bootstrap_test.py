@@ -15,30 +15,47 @@ Copyright (c) 2012. All rights reserved.
 import json
 import sys
 import os
+import time
 from master.libs import run_lib
+from master.libs import read_data_lib as rdl
+import numpy as np
 import pylab as plt
 reload(run_lib)
 
 plt.close('all')
-n_repetitions = 100
-outpath = '/Users/dedan/projects/master/results/validations/'
-name = 'svr_lin_saito'
-glomeruli = ["Or19a", "Or22a", "Or35a", "Or43b", "Or67a", "Or67b", "Or7a", "Or85b", "Or98a", "Or9a"]
-config = json.load(open(sys.argv[1]))
 
-fig = plt.figure()
-for i, glom in enumerate(glomeruli):
+# repeat paramsearch N times with randomization_test set to true
+# only for one descriptor
+# record all the results from the different runs
+res = {}
+sc = json.load(open(sys.argv[1]))
+config = sc['runner_config_content']
+config['data_path'] = os.path.join(os.path.dirname(__file__), '..', 'data')
+json.dump(sc, open(os.path.join(sc['outpath'], 'sc_config.json'), 'w'))
+assert len(config['methods']) == 1  # only one method a time
 
-    config['glomerulus'] = glom
-    rand_res, true_res = run_lib.randomization_test(config, n_repetitions)
+# load the features
+features = run_lib.prepare_features(config)
+n_features = len(features[features.keys()[0]])
+max_expo = int(np.floor(np.log2(n_features)))
+sc['k_best'] = [2**i for i in range(max_expo)] + [n_features]
 
-    # create a plot of the resulting distribution and the original value
-    ax = fig.add_subplot(len(glomeruli), 1, i+1)
-    ax.hist(rand_res)
-    ax.plot([true_res], [1], 'r*')
-    ax.set_ylabel(glom)
-    ax.set_xlim([-2, 0.8])
-fig.subplots_adjust(h_space=0.3)
-fig.savefig(os.path.join(outpath, name + '.png'))
-plt.show()
+print('true run')
+config['randomization_test'] = False
+for glomerulus in sc['glomeruli']:
+    config['glomerulus'] = glomerulus
+    res[glomerulus] = run_lib.do_paramsearch(sc, config, features)
+    print('param search for {} done'.format(glomerulus))
+json.dump(res, open(os.path.join(sc['outpath'], 'true.json'), 'w'))
+
+# add shuffle data to the config and run the runner for N times
+config['randomization_test'] = False
+for i in range(sc['n_repetitions']):
+    print('randomized run nr: {}'.format(i+1))
+    for glomerulus in sc['glomeruli']:
+        config['glomerulus'] = glomerulus
+        res[glomerulus] = run_lib.do_paramsearch(sc, config, features)
+        print('param search for {} done'.format(glomerulus))
+    run_name = 'run_' + time.strftime("%d%m%Y_%H%M%S", time.localtime())
+    json.dump(res, open(os.path.join(sc['outpath'], run_name + '.json'), 'w'))
 
