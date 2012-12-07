@@ -66,7 +66,6 @@ def do_paramsearch(sc, config, features):
                 config['methods']['svr_ens']['C'] = sc['svr'][i]
             if 'forest' in config['methods']:
                 config['methods']['forest']['max_depth'] = sc['forest'][i]
-            print('running {} {} {}'.format(config['glomerulus'], k_b, i))
             data_sel = flib.select_k_best(data, sel_scores, k_b)
             tmp = run_runner(config, data_sel, targets)
             tmp_res[str(k_b)][str(i)] = tmp
