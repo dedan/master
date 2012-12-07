@@ -187,7 +187,7 @@ def plot_search_matrix(fig, desc_res, sc):
                 mat = desc_res[selection][glom][method]
                 ax_idx = i_meth * len(sc['glomeruli']) * 2 + len(sc['glomeruli']) * i_sel + i_glom + 1
                 ax = fig.add_subplot(6, len(sc['glomeruli']), ax_idx)
-                ax.imshow(mat, interpolation='nearest')
+                ax.imshow(mat, interpolation='nearest', vmin=0)
                 if i_sel + i_meth == 0:
                     ax.set_title(glom, rotation='0')
                 if i_glom == 0:
