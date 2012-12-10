@@ -32,6 +32,7 @@ import os
 import json
 import pickle
 import time
+import glob
 from collections import defaultdict
 from master.libs import read_data_lib as rdl
 from master.libs import features_lib as flib
@@ -76,9 +77,26 @@ def prepare_features(config):
     """load and prepare the features, either conventional or spectral"""
 
     if config['features']['type'] == 'conventional':
-        feature_file = os.path.join(config['data_path'], 'conventional_features',
-                                    config['features']['descriptor'] + '.csv')
-        features = flib.read_feature_csv(feature_file)
+        features_path = os.path.join(config['data_path'], 'conventional_features')
+        if config['features']['descriptor'] == 'all':
+            all_features = defaultdict(lambda: np.array([]))
+            feature_files = glob.glob(os.path.join(features_path, '*.csv'))
+            for feature_file in feature_files:
+                if 'haddad' in feature_file or 'saito' in feature_file:
+                    continue
+                features = flib.read_feature_csv(feature_file)
+                for key, value in features.items():
+                    all_features[key] = np.hstack((all_features[key], value))
+            features = all_features
+            max_len = max([len(val) for val in features.values()])
+            for key in list(features.keys()):
+                if len(features[key]) < max_len:
+                    del features[key]
+                    print 'deleted a molecule because not all features available'
+        else:
+            feature_file = os.path.join(config['data_path'], 'conventional_features',
+                                        config['features']['descriptor'] + '.csv')
+            features = flib.read_feature_csv(feature_file)
     elif config['features']['type'] == 'spectral':
         feature_file = os.path.join(config['data_path'], 'spectral_features',
                                     'large_base', 'parsed.pckl')
