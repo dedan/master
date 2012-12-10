@@ -10,6 +10,7 @@ import sys
 import os
 import numpy as np
 import pylab as plt
+from collections import defaultdict
 from scipy.stats.stats import nanmean
 from master.libs import utils
 from master.libs import read_data_lib as rdl
@@ -22,13 +23,16 @@ def structure_plot(fig, molids, activations=None):
     if activations != None:
         assert len(activations[0]) == len(molids[0])
         assert len(activations[1]) == len(molids[1])
-    id2name = rdl.get_id2name()
+    id2name = defaultdict(str, rdl.get_id2name())
     all_molids = molids[0] + molids[1]
     all_activations = np.hstack(activations)
     cr = utils.ceiled_root(len(all_molids))
     for i, molid in enumerate(all_molids):
         ax = fig.add_subplot(cr, cr, i+1)
-        img = plt.imread(os.path.join(structures_path, molid + '.png'))
+        try:
+            img = plt.imread(os.path.join(structures_path, molid + '.png'))
+        except Exception, e:
+            img = np.zeros(img.shape)
         ax.imshow(img)
         ax.set_xticks([])
         ax.set_yticks([])

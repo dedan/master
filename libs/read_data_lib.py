@@ -14,6 +14,7 @@ import json
 import glob
 import csv
 import numpy as np
+import pybel
 from collections import defaultdict
 from master.libs import utils
 try:
@@ -40,12 +41,12 @@ def get_best_params(inpath, descriptor, glom, method, selection):
     return config
 
 def get_id2name():
-    """get molID to chemical name mapping from basic molecules CSV file"""
-    feature_file = os.path.join(os.path.dirname(__file__),
-                                '..', 'data', 'basic_molecule_properties.csv')
-    with open(feature_file) as f:
-        reader = csv.DictReader(f)
-        id2name = {entry['CdId']: entry['Name'] for entry in reader}
+    """get molID to chemical name mapping from sdf file"""
+    mol_file = os.path.join(os.path.dirname(__file__),
+                            '..', 'data', 'molecules.sdf')
+    molecules = pybel.readfile('sdf', mol_file)
+    id2name = {mol.data['CdId']: mol.data['Name']
+               for mol in molecules if 'Name' in mol.data}
     return id2name
 
 def read_paramsearch_results(path):
