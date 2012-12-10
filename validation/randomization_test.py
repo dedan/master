@@ -42,6 +42,8 @@ sc['k_best'] = [2**i for i in range(max_expo)] + [n_features]
 
 print('true run')
 config['randomization_test'] = False
+if 'svr' in config['methods']:
+    config['methods']['svr']['n_folds'] = 500
 for glomerulus in sc['glomeruli']:
     config['glomerulus'] = glomerulus
     res[glomerulus] = run_lib.do_paramsearch(sc, config, features)
@@ -49,6 +51,8 @@ for glomerulus in sc['glomeruli']:
 json.dump(res, open(os.path.join(sc['outpath'], 'true.json'), 'w'))
 
 # add shuffle data to the config and run the runner for N times
+if 'svr' in config['methods']:
+    config['methods']['svr']['n_folds'] = 10
 config['randomization_test'] = True
 for i in range(sc['n_repetitions']):
     print('randomized run nr: {}'.format(i+1))

@@ -42,7 +42,6 @@
             "svr": {
                 "cross_val": true,
                 "C": 1.0,
-                "stratified": true,
                 "n_folds": 10
             }
         },
