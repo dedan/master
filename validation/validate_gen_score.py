@@ -22,7 +22,6 @@ from master.libs import run_lib
 from master.libs import utils
 
 plt.close('all')
-outpath = '/Users/dedan/projects/master/results/validation/gen_score_stability'
 n_folds_list = [10, 20, 50, 200, 500]
 n_repetitions = 5
 res = utils.recursive_defaultdict()
@@ -40,7 +39,7 @@ sc['k_best'] = [2**i for i in range(max_expo)] + [n_features]
 for glom in sc['glomeruli']:
 
     print(glom)
-    config['glomerulus'] = glomerulus
+    config['glomerulus'] = glom
 
     for i, n_folds in enumerate(n_folds_list):
         print(n_folds)
@@ -49,7 +48,7 @@ for glom in sc['glomeruli']:
             tmp_res = run_lib.do_paramsearch(sc, config, features)
             mat = rdl.get_search_matrix(tmp_res, 'svr')
             res[glom][n_folds][j] = mat.tolist()
-json.dump(res, open(os.path.join(sc['outpath'], 'res.json'), 'w'))
+    json.dump(res, open(os.path.join(sc['outpath'], 'res.json'), 'w'))
 
 gridshape = (len(n_folds_list) + 1, n_repetitions)
 for glom in sc['glomeruli']:
