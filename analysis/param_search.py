@@ -43,6 +43,7 @@ else:
 
 for config in configs:
 
+    sc['runner_config_content'] = config
     # if result file already exists, load it to append new glomeruli
     if os.path.exists(os.path.join(sc['outpath'], config['run_name'] + '.json')):
         print('load existing results from: {}'.format(config['run_name']))
