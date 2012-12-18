@@ -32,6 +32,7 @@ outpath = '/Users/dedan/projects/master/results/predict'
 data_path = "/Users/dedan/projects/master/data"
 glomeruli = ['Or10a', 'Or42b', 'Or47b']
 glom = 'Or42b'
+glom = sys.argv[1]
 
 # load stuff
 id2name = defaultdict(str, rdl.get_id2name())
@@ -96,7 +97,6 @@ ax.set_xlim([0,1])
 ax.set_xlabel('predictions histogram')
 fig.subplots_adjust(hspace=0.4)
 fig.savefig(os.path.join(outpath, glom + '_histos.png'))
-plt.show()
 
 
 #############################
@@ -147,7 +147,6 @@ ax.set_xlim([0,1])
 ax.set_xlabel('predictions histogram')
 fig.subplots_adjust(hspace=0.4)
 fig.savefig(os.path.join(outpath, glom + '_histos_all.png'))
-plt.show()
 
 
 
