@@ -129,7 +129,9 @@ def load_data_targets(config, features):
     avail = [i for i in range(len(molids)) if molids[i] in features]
     targets = np.array([targets[i] for i in avail])
     data = np.array([features[molids[i]] for i in avail])
+    molids = [m for i, m in enumerate(molids) if i in avail]
     assert targets.shape[0] == data.shape[0]
+    assert targets.shape[0] == len(molids)
     return data, targets, molids
 
 
