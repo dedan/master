@@ -49,24 +49,3 @@ for glom in sc['glomeruli']:
             mat = rdl.get_search_matrix(tmp_res, 'svr')
             res[glom][n_folds][j] = mat.tolist()
     json.dump(res, open(os.path.join(sc['outpath'], 'res.json'), 'w'))
-
-gridshape = (len(n_folds_list) + 1, n_repetitions)
-for glom in sc['glomeruli']:
-    fig = plt.figure()
-    maxes = np.zeros((len(n_folds_list), n_repetitions))
-    for i, n_folds in enumerate(n_folds_list):
-        config['methods']['svr']['n_folds'] = n_folds
-
-        for j in range(n_repetitions):
-
-            ax = plt.subplot2grid(gridshape, (i, j))
-            mat = np.array(res[glom][n_folds][j])
-            ax.imshow(mat, interpolation='nearest', vmin=0)
-            maxes[i, j] = np.max(mat)
-            ax.set_xlabel('{:.2f}'.format(np.max(mat)))
-
-    ax = plt.subplot2grid(gridshape, (len(n_folds_list), 0), colspan=n_repetitions)
-    ax.boxplot(maxes.T)
-    ax.set_xticklabels(n_folds_list)
-    fig.savefig(os.path.join(sc['outpath'], glom + '.png'))
-plt.show()
