@@ -6,6 +6,15 @@
 import numpy as np
 from collections import defaultdict
 
+def pdist_1d(values):
+    """like pdist but for 1-d lists"""
+    res = []
+    for i in range(len(values)):
+        for j in range(i+1, len(values)):
+            res.append(np.abs(values[i] - values[j]))
+    return res
+
+
 def recursive_defaultdict():
     """get a defaultdict of defaultdicts of defaultdicts of ..."""
     l=lambda:defaultdict(l)
