@@ -128,6 +128,9 @@ def feature_selection_comparison_plot(fig, max_overview, sc):
     sparse_thresh_idx = 2
     for i_meth, method in enumerate(max_overview):
 
+        if not ('linear' in max_overview[method] and 'forest' in max_overview[method]):
+            print 'comparison not possible, not both methods available'
+            continue
         cur_lin = max_overview[method]['linear']
         cur_for = max_overview[method]['forest']
         desc_names = cur_lin['desc_names']
