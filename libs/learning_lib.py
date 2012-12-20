@@ -70,6 +70,8 @@ class MySVR(SVR):
                 all_targets.extend(targets[test])
             self.r2_score_ = r2_score(all_targets, all_predictions)
             self.oob_score_ = self.r2_score_
+            self.all_predictions = all_predictions
+            self.all_targets = all_targets
         return self
 
 
