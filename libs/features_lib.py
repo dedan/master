@@ -15,6 +15,8 @@ import numpy as np
 from scipy.ndimage.filters import gaussian_filter
 from scipy.stats import zscore
 
+MAX_FREQ = 4000
+
 def add_molecule_properties(features, properties):
     """add additional molecule properties like vapor pressure or size"""
     feature_start_idx = 3
@@ -100,7 +102,8 @@ def select_k_best(data, scores, k):
 
 def get_spectral_features(spectra, resolution, use_intensity=True,
                                                spec_type='ir',
-                                               kernel_widths=1):
+                                               kernel_widths=1,
+                                               bin_width=1):
     """bining after convolution
 
         combine several binings if kernel_width is a list of widths
@@ -111,8 +114,9 @@ def get_spectral_features(spectra, resolution, use_intensity=True,
     for k_width in kernel_widths:
         as_vectors = _place_waves_in_vector(spectra, resolution, use_intensity, spec_type)
         as_vectors = gaussian_filter(as_vectors, [0, k_width], 0)
-        bined = _bining(as_vectors, k_width)
-        combined = np.hstack((combined, bined))
+        bined = _bining(as_vectors, bin_width)
+        # combined = np.hstack((combined, bined))
+    combined = bined
     features = {}
     for i, molid in enumerate(spectra):
         features[molid] = combined[i]
@@ -121,10 +125,8 @@ def get_spectral_features(spectra, resolution, use_intensity=True,
 
 def _place_waves_in_vector(spectra, resolution, use_intensity, spec_type):
     """from gaussian we only get the wavenumbers, place them in vector for convolution"""
-    all_freq = __builtin__.sum([spectra[molid]['freq'] for molid in spectra], [])
-    max_freq = np.max(all_freq)
 
-    x = np.zeros((len(spectra), int(np.ceil(max_freq/resolution)) + 1))
+    x = np.zeros((len(spectra), int(np.ceil(MAX_FREQ/resolution))))
     for i, molid in enumerate(spectra):
         idx = np.round(np.array(spectra[molid]['freq']) / resolution).astype(int)
         if use_intensity:
