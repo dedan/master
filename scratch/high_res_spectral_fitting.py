@@ -32,6 +32,7 @@ config = {
         "spec_type": "ir",
         "use_intensity": True,
         "kernel_width": 1,
+        "bin_width": 1,
         "properties_to_add": []
     },
     "methods": {
@@ -39,10 +40,10 @@ config = {
             "cross_val": True,
             "C": 1.0,
             "n_folds": 10
-        },
-        "svr_ens": {
-            "n_estimators": 500,
-            "oob_score": True
+        # },
+        # "svr_ens": {
+        #     "n_estimators": 500,
+        #     "oob_score": True
         }
     },
     "data_path": "/Users/dedan/projects/master/data",
@@ -50,24 +51,8 @@ config = {
     "randomization_test": False
 }
 
-# only get features for available molecules, otherwise matrix too large
-fpath = '/Users/dedan/projects/master/data/spectral_features/large_base/'
-door2id = json.load(open(os.path.join(data_path, 'door2id.json')))
-csv_path = os.path.join(data_path, 'response_matrix.csv')
-cas_numbers, glomeruli, rm = rdl.load_response_matrix(csv_path, door2id)
-glom_idx = glomeruli.index(config['glomerulus'])
-targets , tmp_cas_numbers = rdl.get_avail_targets_for_glom(rm, cas_numbers, glom_idx)
-molids = [str(door2id[cas_number][0]) for cas_number in tmp_cas_numbers]
 
-# spectra = pickle.load(open(os.path.join(fpath, 'parsed.pckl')))
-# spectra = {k: v for k, v in spectra.items() if k in molids}
-# features = flib.get_spectral_features(spectra, 0.5, use_intensity=True,
-#                                                spec_type='ir',
-#                                                kernel_widths=1)
-# features = flib.remove_invalid_features(features)
-# features = flib.normalize_features(features)
 features = run_lib.prepare_features(config)
-
 data, targets, molids = run_lib.load_data_targets(config, features)
 
 # some molids map to two CAS numbers for some molecules, use only first
@@ -86,4 +71,4 @@ assert len(molids) == len(targets) == data.shape[0]
 sel_scores = run_lib.get_selection_score(config, data, targets)
 data = flib.select_k_best(data, sel_scores, 2**9)
 tmp_res = run_lib.run_runner(config, data, targets, get_models=True)
-model = tmp_res['svr_ens']['model']
+model = tmp_res['svr']['model']
