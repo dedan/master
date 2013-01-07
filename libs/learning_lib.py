@@ -13,9 +13,8 @@ import sys
 import os
 from sklearn.svm import SVR
 from sklearn.ensemble import RandomForestRegressor
-from sklearn.cross_validation import KFold
 from sklearn.metrics import r2_score
-from sklearn.cross_validation import StratifiedKFold
+from sklearn.feature_selection import f_regression
 import numpy as np
 import random
 import __builtin__
@@ -45,14 +44,14 @@ class StratifiedResampling(object):
             yield train_idx, test_idx
 
 
-def _k_best_indeces(data, selection_method, k):
+def _k_best_indeces(data, targets, selection_method, k):
     """get indices for the k best features depending on the scores"""
     assert k > 0
     if selection_method == 'linear':
-        sel_scores, _ = f_regression(data, targets)
+        scores, _ = f_regression(data, targets)
     elif selection_method == 'forest':
         rfr_sel = RandomForestRegressor(compute_importances=True, random_state=0)
-        sel_scores = rfr_sel.fit(data, targets).feature_importances_
+        scores = rfr_sel.fit(data, targets).feature_importances_
     assert not (scores < 0).any()
     assert len(scores) >= k
     scores[np.isnan(scores)] = 0
@@ -71,18 +70,20 @@ class MySVR(SVR):
     def fit(self, data, targets, selection_method, k_best):
         """docstring for fit"""
         assert data.shape[0] == len(targets)
-        self.best_idx = _k_best_indeces(data, selection_method, k_best)
-        super(MySVR, self).fit(data_sel[:, self.best_idx], targets)
+        self.best_idx = _k_best_indeces(data, targets, selection_method, k_best)
+        super(MySVR, self).fit(data[:, self.best_idx], targets)
         tmp_svr = SVR(**self.kwargs)
         if self.cross_val:
             kf = StratifiedResampling(targets, self.n_folds)
             all_predictions, all_targets = [], []
             for train, test in kf:
-                best_idx = _k_best_indeces(data[train], selection_method, k_best)
-                all_predictions.extend(tmp_svr.fit(data[train, best_idx], targets[train])
-                                              .predict(data[test, best_idx]))
+                best_idx = _k_best_indeces(data[train], targets[train], selection_method, k_best)
+                tmp_svr.fit(data[np.ix_(train, best_idx)], targets[train])
+                all_predictions.extend(tmp_svr.predict(data[np.ix_(test, best_idx)]))
                 all_targets.extend(targets[test])
             self.gen_score = r2_score(all_targets, all_predictions)
+            self.all_predictions = all_predictions
+            self.all_targets = all_targets
         return self
 
     def predict(data):
@@ -109,7 +110,7 @@ class SVREnsemble(object):
         """docstring for fit"""
         assert data.shape[0] == len(targets)
         sr = StratifiedResampling(targets, self.n_estimators)
-        self.best_idx = _k_best_indeces(data, selection_method, k_best)
+        self.best_idx = _k_best_indeces(data, targets, selection_method, k_best)
         for svr, (train_idx, _) in zip(self.ensemble, sr):
             svr.indices_ = train_idx
             svr.fit(data[svr.indices_, self.best_idx], targets[svr.indices_])
@@ -146,7 +147,7 @@ class MyRFR(RandomForestRegressor):
 
     def fit(self, data, targets, selection_method, k_best):
         """fit on selected features"""
-        self.best_idx = _k_best_indeces(data, selection_method, k_best)
+        self.best_idx = _k_best_indeces(data, targets, selection_method, k_best)
         super(MyRFR, self).fit(data[:,self.best_idx], targets)
         if self.cross_val:
             self.gen_score = self.oob_score_
