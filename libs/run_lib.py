@@ -37,8 +37,6 @@ from collections import defaultdict
 from master.libs import read_data_lib as rdl
 from master.libs import features_lib as flib
 from master.libs import learning_lib as llib
-from sklearn.ensemble import RandomForestRegressor
-from sklearn.feature_selection import f_regression, SelectKBest
 from sklearn.preprocessing import normalize
 import numpy as np
 reload(rdl)
@@ -53,7 +51,6 @@ def do_paramsearch(sc, config, features):
     """docstring for do_paramsearch"""
     tmp_res = {}
     data, targets, _ = load_data_targets(config, features)
-    sel_scores = get_selection_score(config, data, targets)
     for k_b in sc['k_best']:
         if not str(k_b) in tmp_res:
             tmp_res[str(k_b)] = {}
@@ -67,8 +64,7 @@ def do_paramsearch(sc, config, features):
                 config['methods']['svr_ens']['C'] = sc['svr'][i]
             if 'forest' in config['methods']:
                 config['methods']['forest']['max_depth'] = sc['forest'][i]
-            data_sel = flib.select_k_best(data, sel_scores, k_b)
-            tmp = run_runner(config, data_sel, targets)
+            tmp = run_runner(config, data, targets)
             tmp_res[str(k_b)][str(i)] = tmp
     return tmp_res
 
@@ -137,24 +133,21 @@ def load_data_targets(config, features):
 
 def run_runner(config, data, targets, get_models=False):
     """docstring for run"""
-
     res = {}
     if config['features']['normalize_samples']:
         data = normalize(data, norm='l2', axis=1, copy=True)
     if config['randomization_test']:
         np.random.seed()
         map(np.random.shuffle, data.T)
-
     # train models and get results
     for method in config['methods']:
-        method_params = config['methods'][method]
-        for p in method_params:
-            if isinstance(method_params[p], unicode):
-                method_params[p] = str(method_params[p])
+        method_params = {k: str(v) for k, v in config['methods'][method].items()}
         regressor = ml_methods[method](**method_params)
-        regressor.fit(data, targets)
+        regressor.fit(data, targets,
+                      config['feature_selection']['method'],
+                      config['feature_selection']['k_best'])
         res[method] = {'train_score': regressor.score(data, targets),
-                       'gen_score': regressor.oob_score_}
+                       'gen_score': regressor.gen_score}
         if get_models:
             res[method]['model'] = regressor
     return res
