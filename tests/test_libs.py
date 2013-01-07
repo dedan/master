@@ -15,12 +15,28 @@ reload(flib)
 class TestLearning(unittest.TestCase):
     """test my learning libs"""
 
+    def setUp(self):
+        """docstring for setUp"""
+        np.random.seed(0)
+        self.data = np.array([range(10), range(10)]).T + np.random.randn(10, 2) * 0.01
+        self.targets = np.array(range(20, 30))
+
     def test_stratified_resampling(self):
         """make sure it stratifies"""
         test_targets = [1, 2, 1.4, 1.2, 10]
         sr = llib.StratifiedResampling(test_targets, 10)
         for train_idx, test_idx in sr:
             assert train_idx[-1] == 4
+
+    def test_svr(self):
+        svr = llib.MySVR(kernel='linear')
+        svr.fit(self.data, self.targets, 'linear', 2)
+        self.assertTrue(svr.gen_score > 0.95)
+        np.random.seed(0)
+        map(np.random.shuffle, self.data.T)
+        svr.fit(self.data, self.targets, 'linear', 2)
+        self.assertTrue(svr.gen_score < 0.05)
+
 
 class TestFlib(unittest.TestCase):
     """test my feature lib"""
