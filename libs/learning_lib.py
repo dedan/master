@@ -12,6 +12,7 @@ Copyright (c) 2012. All rights reserved.
 import sys
 import os
 from sklearn.svm import SVR
+from sklearn.ensemble import RandomForestRegressor
 from sklearn.cross_validation import KFold
 from sklearn.metrics import r2_score
 from sklearn.cross_validation import StratifiedKFold
@@ -65,14 +66,13 @@ class MySVR(SVR):
         self.kwargs = kwargs
         self.cross_val = cross_val
         self.n_folds = n_folds
-        self.r2_score_ = None
-        self.oob_score_ = None
+        self.gen_score = None
 
     def fit(self, data, targets, selection_method, k_best):
         """docstring for fit"""
         assert data.shape[0] == len(targets)
-        best_idx = _k_best_indeces(data, selection_method, k_best)
-        super(MySVR, self).fit(data_sel[:, best_idx], targets)
+        self.best_idx = _k_best_indeces(data, selection_method, k_best)
+        super(MySVR, self).fit(data_sel[:, self.best_idx], targets)
         tmp_svr = SVR(**self.kwargs)
         if self.cross_val:
             kf = StratifiedResampling(targets, self.n_folds)
@@ -82,76 +82,85 @@ class MySVR(SVR):
                 all_predictions.extend(tmp_svr.fit(data[train, best_idx], targets[train])
                                               .predict(data[test, best_idx]))
                 all_targets.extend(targets[test])
-            self.r2_score_ = r2_score(all_targets, all_predictions)
-            self.oob_score_ = self.r2_score_
-            self.all_predictions = all_predictions
-            self.all_targets = all_targets
+            self.gen_score = r2_score(all_targets, all_predictions)
         return self
+
+    def predict(data):
+        """predict after feature selection"""
+        super(MySVR, self).predict(data[:, self.best_idx])
+
+    def score(data):
+        """score after feature selection"""
+        super(MySVR, self).score(data[:, self.best_idx])
 
 
 class SVREnsemble(object):
     """docstring for SVREnsemble"""
-    def __init__(self, n_estimators, oob_score, stratified=False, **kwargs):
-        super(SVREnsemble, self).__init__()
+    def __init__(self, n_estimators, cross_val=True, n_folds=10, **kwargs):
         self.n_estimators = n_estimators
-        self.oob_score = oob_score
-        self.stratified = stratified
+        self.cross_val = cross_val
         self.oob_score_ = None
         np.random.seed(0)
         self.ensemble = []
         for i in range(self.n_estimators):
             self.ensemble.append(SVR(**kwargs))
 
-    def fit(self, data, targets):
+    def fit(self, data, targets, selection_method, k_best):
         """docstring for fit"""
         assert data.shape[0] == len(targets)
-
-        if self.stratified:
-            sr = StratifiedResampling(targets, self.n_estimators)
-            indices = __builtin__.sum([train_idx for train_idx, test_idx in sr], [])
-        else:
-            indices = np.random.randint(0, len(targets),
-                                        (self.n_estimators, len(targets)))
-
-        for svr, idx in zip(self.ensemble, indices):
-            svr.indices_ = idx
-            svr.fit(data[svr.indices_], targets[svr.indices_])
-
-        if self.oob_score:
-            self.oob_score_ = self.score_oob(data, targets)
+        sr = StratifiedResampling(targets, self.n_estimators)
+        self.best_idx = _k_best_indeces(data, selection_method, k_best)
+        for svr, (train_idx, _) in zip(self.ensemble, sr):
+            svr.indices_ = train_idx
+            svr.fit(data[svr.indices_, self.best_idx], targets[svr.indices_])
+        if self.cross_val:
+            kf = StratifiedResampling(targets, self.n_folds)
+            all_predictions, all_targets = [], []
+            for train, test in kf:
+                test_ensemble = SVREnsemble(self.n_estimators, cross_val=False)
+                test_ensemble.fit(data[train], targets[train], selection_method, k_best)
+                all_predictions.extend(test_ensemble.predict(data[test]))
+                all_targets.extend(targets[test])
+            self.gen_score = r2_score(all_targets, all_predictions)
+        return self
 
     def predict(self, data):
-        """docstring for predict"""
-        predictions = np.zeros(data.shape[0])
+        """prediction on selected features"""
+        data_sel = data[:, self.best_idx]
+        predictions = np.zeros(data_sel.shape[0])
         for svr in self.ensemble:
-            predictions += svr.predict(data)
+            predictions += svr.predict(data_sel)
         return predictions / len(self.ensemble)
 
-    def predict_oob(self, data):
-        """predictions for all datapoints but only from the parts
-
-           of the ensemble that never saw this point
-        """
-        n_observations = data.shape[0]
-        predictions = np.zeros(n_observations)
-        n_predictions = np.zeros(n_observations)
-        for svr in self.ensemble:
-            assert n_observations == len(svr.indices_)
-            mask = np.ones(n_observations, dtype=np.bool)
-            mask[svr.indices_] = False
-            p_estimator = svr.predict(data[mask])
-            predictions[mask] += p_estimator
-            n_predictions[mask] += 1
-        return predictions / n_predictions
-
     def score(self, data, targets):
-        """docstring for score"""
+        """score on selected features"""
         return r2_score(targets, self.predict(data))
 
-    def score_oob(self, data, targets):
-        """docstring for score"""
-        return r2_score(targets, self.predict_oob(data))
+class MyRFR(RandomForestRegressor):
+    """overwrite RFR to include feature selection during fitting"""
+    def __init__(self, n_estimators, cross_val=True, **kwargs):
+        super(MyRFR, self).__init__(oob_score=cross_val, **kwargs)
+        self.n_estimators = n_estimators
+        self.cross_val = cross_val
+        self.gen_score = None
 
-    def get_params(self):
-        """docstring for get_params"""
-        return self.ensemble[0].get_params()
+    def fit(self, data, targets, selection_method, k_best):
+        """fit on selected features"""
+        self.best_idx = _k_best_indeces(data, selection_method, k_best)
+        super(MyRFR, self).fit(data[:,self.best_idx], targets)
+        if self.cross_val:
+            self.gen_score = self.oob_score_
+
+    def predict(data):
+        """predict after feature selection"""
+        super(MySVR, self).predict(data[:, self.best_idx])
+
+    def score(data):
+        """score after feature selection"""
+        super(MySVR, self).score(data[:, self.best_idx])
+
+
+
+
+
+
