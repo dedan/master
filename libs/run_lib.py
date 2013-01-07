@@ -135,17 +135,6 @@ def load_data_targets(config, features):
     return data, targets, molids
 
 
-def get_selection_score(config, data, targets):
-    """select k_best features"""
-    # feature selection
-    if config['feature_selection']['method'] == 'linear':
-        sel_scores, _ = f_regression(data, targets)
-    elif config['feature_selection']['method'] == 'forest':
-        rfr_sel = RandomForestRegressor(compute_importances=True, random_state=0)
-        sel_scores = rfr_sel.fit(data, targets).feature_importances_
-    return sel_scores
-
-
 def run_runner(config, data, targets, get_models=False):
     """docstring for run"""
 

@@ -44,6 +44,20 @@ class StratifiedResampling(object):
             yield train_idx, test_idx
 
 
+def _k_best_indeces(data, selection_method, k):
+    """get indices for the k best features depending on the scores"""
+    assert k > 0
+    if selection_method == 'linear':
+        sel_scores, _ = f_regression(data, targets)
+    elif selection_method == 'forest':
+        rfr_sel = RandomForestRegressor(compute_importances=True, random_state=0)
+        sel_scores = rfr_sel.fit(data, targets).feature_importances_
+    assert not (scores < 0).any()
+    assert len(scores) >= k
+    scores[np.isnan(scores)] = 0
+    return np.argsort(scores)[-k:]
+
+
 class MySVR(SVR):
     """docstring for MySVR"""
     def __init__(self, cross_val=True, n_folds=10, **kwargs):
@@ -54,19 +68,19 @@ class MySVR(SVR):
         self.r2_score_ = None
         self.oob_score_ = None
 
-    def fit(self, data, targets):
+    def fit(self, data, targets, selection_method, k_best):
         """docstring for fit"""
         assert data.shape[0] == len(targets)
-        print "fit data shape: {}".format(data.shape)
-
-        super(MySVR, self).fit(data, targets)
+        best_idx = _k_best_indeces(data, selection_method, k_best)
+        super(MySVR, self).fit(data_sel[:, best_idx], targets)
         tmp_svr = SVR(**self.kwargs)
         if self.cross_val:
             kf = StratifiedResampling(targets, self.n_folds)
             all_predictions, all_targets = [], []
             for train, test in kf:
-                all_predictions.extend(tmp_svr.fit(data[train], targets[train])
-                                              .predict(data[test]))
+                best_idx = _k_best_indeces(data[train], selection_method, k_best)
+                all_predictions.extend(tmp_svr.fit(data[train, best_idx], targets[train])
+                                              .predict(data[test, best_idx]))
                 all_targets.extend(targets[test])
             self.r2_score_ = r2_score(all_targets, all_predictions)
             self.oob_score_ = self.r2_score_
