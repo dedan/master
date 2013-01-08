@@ -154,6 +154,8 @@ class MyRFR(RandomForestRegressor):
         self.best_idx = _k_best_indeces(data, targets, selection_method, k_best)
         super(MyRFR, self).fit(data[:,self.best_idx], targets)
         if self.cross_val:
+            self.all_predictions = self.oob_prediction_
+            self.all_targets = targets
             self.gen_score = self.oob_score_
 
     def predict(data):
