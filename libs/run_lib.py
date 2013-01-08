@@ -98,10 +98,11 @@ def prepare_features(config):
         feature_file = os.path.join(config['data_path'], 'spectral_features',
                                     'large_base', 'parsed.pckl')
         spectra = pickle.load(open(feature_file))
-        features = flib.get_spectral_features(spectra, config['features']['resolution'],
+        features = flib.get_spectral_features(spectra,
                                               spec_type=config['features']['spec_type'],
                                               use_intensity=config['features']['use_intensity'],
-                                              kernel_widths=config['features']['kernel_width'])
+                                              kernel_widths=config['features']['kernel_width'],
+                                              bin_width=config['features']['bin_width'])
     features = flib.remove_invalid_features(features)
     if config['features']['properties_to_add']:
         flib.add_molecule_properties(features, config['features']['properties_to_add'])

@@ -61,15 +61,7 @@ class TestLearning(unittest.TestCase):
 
 class TestFlib(unittest.TestCase):
     """test my feature lib"""
-
-    def test_place_waves(self):
-        """test if the wavefunctions are place in the correct positions"""
-        correct_places = np.array([10, 11, 399900, 19, 20])
-        test = {'1': {'freq': [0.1, 0.11, 3999]}, '2': {'freq': [0.19, 0.2]}}
-        res = flib._place_waves_in_vector(test, 0.01, False, '')
-        assert(res.shape[1] == 400000)
-        assert((np.where(res == 1.0)[1] == correct_places).all())
-
+    pass
 
 class TestLibs(unittest.TestCase):
 
