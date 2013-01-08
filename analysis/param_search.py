@@ -83,6 +83,6 @@ for config in configs:
                 res[selection][glomerulus] = {}
             config['glomerulus'] = glomerulus
             print('param search for {}..'.format(glomerulus))
-            res[selection][glomerulus] = run_lib.do_paramsearch(sc, config, features)
+            res[selection][glomerulus] = run_lib.do_paramsearch(sc, config, features, res[selection][glomerulus])
             print('param search for {} done'.format(glomerulus))
             json.dump({'sc': sc, 'res': res}, open(os.path.join(sc['outpath'], config['run_name'] + '.json'), 'w'))

@@ -33,6 +33,7 @@ import json
 import pickle
 import time
 import glob
+import copy
 from collections import defaultdict
 from master.libs import read_data_lib as rdl
 from master.libs import features_lib as flib
@@ -47,27 +48,30 @@ ml_methods = {'forest': llib.MyRFR,
               'svr': llib.MySVR,
               'svr_ens': llib.SVREnsemble}
 
-def do_paramsearch(sc, config, features):
+def do_paramsearch(sc, config, features, res):
     """docstring for do_paramsearch"""
-    tmp_res = {}
     data, targets, _ = load_data_targets(config, features)
     for k_b in sc['k_best']:
-        if not str(k_b) in tmp_res:
-            tmp_res[str(k_b)] = {}
+        if not str(k_b) in res:
+            res[str(k_b)] = {}
         config['feature_selection']['k_best'] = k_b
         for i in range(len(sc['svr'])):
-            if str(i) in tmp_res[str(k_b)]:
-                continue
-            if 'svr' in config['methods']:
-                config['methods']['svr']['C'] = sc['svr'][i]
-            if 'svr_ens' in config['methods']:
-                config['methods']['svr_ens']['C'] = sc['svr'][i]
-            if 'forest' in config['methods']:
-                config['methods']['forest']['max_depth'] = sc['forest'][i]
+            if not str(i) in res[str(k_b)]:
+                res[str(k_b)][str(i)] = {}
+            tmp_config = copy.deepcopy(config)
+            for already_done in res[str(k_b)][str(i)]:
+                if already_done in tmp_config['methods']:
+                    del tmp_config['methods'][already_done]
+            if 'svr' in tmp_config['methods']:
+                tmp_config['methods']['svr']['C'] = sc['svr'][i]
+            if 'svr_ens' in tmp_config['methods']:
+                tmp_config['methods']['svr_ens']['C'] = sc['svr'][i]
+            if 'forest' in tmp_config['methods']:
+                tmp_config['methods']['forest']['max_depth'] = sc['forest'][i]
             print('running for {} - {}'.format(k_b, sc['svr'][i]))
-            tmp = run_runner(config, data, targets)
-            tmp_res[str(k_b)][str(i)] = tmp
-    return tmp_res
+            tmp = run_runner(tmp_config, data, targets)
+            res[str(k_b)][str(i)].update(tmp)
+    return res
 
 
 def prepare_features(config):
