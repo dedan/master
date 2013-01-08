@@ -106,10 +106,12 @@ def get_spectral_features(spectra, use_intensity=True, spec_type='ir',
         kernel_widths = [kernel_widths]
     features = defaultdict(list)
     for molid, spectrum in spectra.items():
+        tmp = []
         for k_width in kernel_widths:
             intensities = spectrum[spec_type] if use_intensity else np.ones(len(spectrum[spec_type]))
             sampled = _sum_of_gaussians(x_range, spectrum['freq'], intensities, k_width)
-            features[molid] += sampled
+            tmp += sampled
+        features[molid] = np.array(tmp)
     assert(len(spectra) == len(features))
     return features
 
