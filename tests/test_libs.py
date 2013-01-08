@@ -15,12 +15,49 @@ reload(flib)
 class TestLearning(unittest.TestCase):
     """test my learning libs"""
 
+    def setUp(self):
+        """docstring for setUp"""
+        np.random.seed(0)
+        N = 100
+        self.data = np.array([range(N), range(N)]).T + np.random.randn(N, 2) * 0.01
+        self.targets = np.array(range(N))
+
     def test_stratified_resampling(self):
         """make sure it stratifies"""
         test_targets = [1, 2, 1.4, 1.2, 10]
         sr = llib.StratifiedResampling(test_targets, 10)
         for train_idx, test_idx in sr:
             assert train_idx[-1] == 4
+
+    def test_svr(self):
+        """test my cross validation implementation for the SVR"""
+        svr = llib.MySVR(kernel='linear')
+        svr.fit(self.data, self.targets, 'linear', 2)
+        self.assertTrue(svr.gen_score > 0.95)
+        np.random.seed(0)
+        map(np.random.shuffle, self.data.T)
+        svr.fit(self.data, self.targets, 'linear', 2)
+        self.assertTrue(svr.gen_score < 0.05)
+
+    def test_svrens(self):
+        """test my cross validation implementation for the SVR"""
+        svr_ens = llib.SVREnsemble(n_estimators=10, kernel='linear')
+        svr_ens.fit(self.data, self.targets, 'linear', 2)
+        self.assertTrue(svr_ens.gen_score > 0.95)
+        np.random.seed(0)
+        map(np.random.shuffle, self.data.T)
+        svr_ens.fit(self.data, self.targets, 'linear', 2)
+        self.assertTrue(svr_ens.gen_score < 0.05)
+
+    def test_rfr(self):
+        """test my cross validation implementation for the RFR"""
+        rfr = llib.MyRFR(n_estimators=100, cross_val=True)
+        rfr.fit(self.data, self.targets, 'linear', 2)
+        self.assertTrue(rfr.gen_score > 0.95)
+        np.random.seed(0)
+        map(np.random.shuffle, self.data.T)
+        rfr.fit(self.data, self.targets, 'linear', 2)
+        self.assertTrue(rfr.gen_score < 0.05)
 
 class TestFlib(unittest.TestCase):
     """test my feature lib"""
