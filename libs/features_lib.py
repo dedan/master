@@ -89,47 +89,29 @@ def get_features_for_molids(f_space, molids):
     mol_fspace = [elem if elem else [0] * len(f_space) for elem in mol_fspace]
     return np.array(mol_fspace), available
 
+def _gaussian(x, mu, sigma):
+    """docstring for gaussian"""
+    return 1 / (sigma * np.sqrt(2 * np.pi)) * np.exp(-0.5 * ((x-mu)/sigma)**2)
 
-def get_spectral_features(spectra, resolution, use_intensity=True,
-                                               spec_type='ir',
-                                               kernel_widths=1,
-                                               bin_width=1):
-    """bining after convolution
+def _sum_of_gaussians(x_range, positions, heights, sigma):
+    """docstring for sum_of_gaussians"""
+    assert len(positions) == len(heights)
+    pos_h = zip(positions, heights)
+    return [np.sum([h * _gaussian(x, pos, sigma) for pos, h in pos_h]) for x in x_range]
 
-        combine several binings if kernel_width is a list of widths
-    """
+
+def get_spectral_features(spectra, use_intensity=True, spec_type='ir',
+                          kernel_widths=10, bin_width=10, BFS_max=4000):
+    """ sum of gaussians, sampled at regular intervals """
+    x_range = range(0, BFS_max, bin_width)
     if not isinstance(kernel_widths, list):
         kernel_widths = [kernel_widths]
-    combined = np.zeros((len(spectra),0))
-    for k_width in kernel_widths:
-        as_vectors = _place_waves_in_vector(spectra, resolution, use_intensity, spec_type)
-        as_vectors = gaussian_filter(as_vectors, [0, k_width], 0)
-        bined = _bining(as_vectors, bin_width)
-        # combined = np.hstack((combined, bined))
-    combined = bined
-    features = {}
-    for i, molid in enumerate(spectra):
-        features[molid] = combined[i]
+    features = defaultdict(list)
+    for molid, spectrum in spectra.items():
+        for k_width in kernel_widths:
+            intensities = spectrum[spec_type] if use_intensity else np.ones(len(spectrum[spec_type]))
+            sampled = _sum_of_gaussians(x_range, spectrum['freq'], intensities, k_width)
+            features[molid] += sampled
     assert(len(spectra) == len(features))
     return features
 
-def _place_waves_in_vector(spectra, resolution, use_intensity, spec_type):
-    """from gaussian we only get the wavenumbers, place them in vector for convolution"""
-
-    x = np.zeros((len(spectra), int(np.ceil(MAX_FREQ/resolution))))
-    for i, molid in enumerate(spectra):
-        idx = np.round(np.array(spectra[molid]['freq']) / resolution).astype(int)
-        if use_intensity:
-            x[i, idx] = spectra[molid][spec_type]
-        else:
-            x[i, idx] = 1
-    return x
-
-def _bining(vectors, kernel_width):
-    """divide the *continous* spectrum into bins"""
-    factor = vectors.shape[1] / kernel_width
-    rest = vectors.shape[1] % kernel_width
-    if rest:
-        return np.mean(vectors[:,:-rest].reshape((vectors.shape[0], factor, -1)), axis=2)
-    else:
-        return np.mean(vectors.reshape((vectors.shape[0], factor, -1)), axis=2)
