@@ -96,9 +96,7 @@ def _gaussian(x, mu, sigma):
 def _sum_of_gaussians(x_range, positions, heights, sigma):
     """docstring for sum_of_gaussians"""
     assert len(positions) == len(heights)
-    pos_h = zip(positions, heights)
-    return [np.sum([h * _gaussian(x, pos, sigma) for pos, h in pos_h]) for x in x_range]
-
+    return [np.sum([heights * _gaussian(x, positions, sigma)]) for x in x_range]
 
 def get_spectral_features(spectra, use_intensity=True, spec_type='ir',
                           kernel_widths=10, bin_width=10, BFS_max=4000):
