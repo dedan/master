@@ -86,13 +86,13 @@ class MySVR(SVR):
             self.all_targets = all_targets
         return self
 
-    def predict(data):
+    def predict(self, data):
         """predict after feature selection"""
-        super(MySVR, self).predict(data[:, self.best_idx])
+        return super(MySVR, self).predict(data[:, self.best_idx])
 
-    def score(data):
+    def score(self, data, targets):
         """score after feature selection"""
-        super(MySVR, self).score(data[:, self.best_idx])
+        return super(MySVR, self).score(data, targets)
 
 
 class SVREnsemble(object):
@@ -158,13 +158,13 @@ class MyRFR(RandomForestRegressor):
             self.all_targets = targets
             self.gen_score = self.oob_score_
 
-    def predict(data):
+    def predict(self, data):
         """predict after feature selection"""
-        super(MySVR, self).predict(data[:, self.best_idx])
+        return super(MyRFR, self).predict(data[:, self.best_idx])
 
-    def score(data):
+    def score(self, data, targets):
         """score after feature selection"""
-        super(MySVR, self).score(data[:, self.best_idx])
+        return super(MyRFR, self).score(data, targets)
 
 
 
