@@ -35,6 +35,7 @@ elif config['features']['type'] == 'spectral':
     config['features']['descriptor'] = 'large_base'
     for kwidth in sc['kernel_widths']:
         config['features']['kernel_width'] = kwidth
+        config['features']['bin_width'] = int(kwidth * 1.5)
         config['run_name'] = repr(kwidth)
         configs.append(copy.deepcopy(config))
 else:
@@ -52,6 +53,7 @@ for config in configs:
         res = {sel: {} for sel in sc['selection']}
 
     # load the features
+    print('preparing features..')
     features = run_lib.prepare_features(config)
     n_features = len(features[features.keys()[0]])
     max_expo = int(np.floor(np.log2(n_features)))
