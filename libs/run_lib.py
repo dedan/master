@@ -43,7 +43,7 @@ reload(rdl)
 reload(flib)
 reload(llib)
 
-ml_methods = {'forest': RandomForestRegressor,
+ml_methods = {'forest': llib.MyRFR,
               'svr': llib.MySVR,
               'svr_ens': llib.SVREnsemble}
 
@@ -64,6 +64,7 @@ def do_paramsearch(sc, config, features):
                 config['methods']['svr_ens']['C'] = sc['svr'][i]
             if 'forest' in config['methods']:
                 config['methods']['forest']['max_depth'] = sc['forest'][i]
+            print('running for {} - {}'.format(k_b, sc['svr'][i]))
             tmp = run_runner(config, data, targets)
             tmp_res[str(k_b)][str(i)] = tmp
     return tmp_res
@@ -141,8 +142,7 @@ def run_runner(config, data, targets, get_models=False):
         map(np.random.shuffle, data.T)
     # train models and get results
     for method in config['methods']:
-        method_params = {k: str(v) for k, v in config['methods'][method].items()}
-        regressor = ml_methods[method](**method_params)
+        regressor = ml_methods[method](**config['methods'][method])
         regressor.fit(data, targets,
                       config['feature_selection']['method'],
                       config['feature_selection']['k_best'])
