@@ -99,8 +99,10 @@ class SVREnsemble(object):
     """docstring for SVREnsemble"""
     def __init__(self, n_estimators, cross_val=True, n_folds=10, **kwargs):
         self.n_estimators = n_estimators
+        self.n_folds = n_folds
         self.cross_val = cross_val
-        self.oob_score_ = None
+        self.gen_score = None
+        self.kwargs = kwargs
         np.random.seed(0)
         self.ensemble = []
         for i in range(self.n_estimators):
@@ -113,16 +115,18 @@ class SVREnsemble(object):
         self.best_idx = _k_best_indeces(data, targets, selection_method, k_best)
         for svr, (train_idx, _) in zip(self.ensemble, sr):
             svr.indices_ = train_idx
-            svr.fit(data[svr.indices_, self.best_idx], targets[svr.indices_])
+            svr.fit(data[np.ix_(svr.indices_, self.best_idx)], targets[svr.indices_])
         if self.cross_val:
-            kf = StratifiedResampling(targets, self.n_folds)
+            sr_val = StratifiedResampling(targets, self.n_folds)
             all_predictions, all_targets = [], []
-            for train, test in kf:
-                test_ensemble = SVREnsemble(self.n_estimators, cross_val=False)
+            for train, test in sr_val:
+                test_ensemble = SVREnsemble(self.n_estimators, cross_val=False, **self.kwargs)
                 test_ensemble.fit(data[train], targets[train], selection_method, k_best)
                 all_predictions.extend(test_ensemble.predict(data[test]))
                 all_targets.extend(targets[test])
             self.gen_score = r2_score(all_targets, all_predictions)
+            self.all_predictions = all_predictions
+            self.all_targets = all_targets
         return self
 
     def predict(self, data):

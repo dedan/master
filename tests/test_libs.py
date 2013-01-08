@@ -29,6 +29,7 @@ class TestLearning(unittest.TestCase):
             assert train_idx[-1] == 4
 
     def test_svr(self):
+        """test my cross validation implementation for the SVR"""
         svr = llib.MySVR(kernel='linear')
         svr.fit(self.data, self.targets, 'linear', 2)
         self.assertTrue(svr.gen_score > 0.95)
@@ -36,6 +37,18 @@ class TestLearning(unittest.TestCase):
         map(np.random.shuffle, self.data.T)
         svr.fit(self.data, self.targets, 'linear', 2)
         self.assertTrue(svr.gen_score < 0.05)
+
+    def test_svrens(self):
+        """test my cross validation implementation for the SVR"""
+        svr_ens = llib.SVREnsemble(n_estimators=10, kernel='linear')
+        svr_ens.fit(self.data, self.targets, 'linear', 2)
+        print svr_ens.gen_score
+        self.assertTrue(svr_ens.gen_score > 0.95)
+        np.random.seed(0)
+        map(np.random.shuffle, self.data.T)
+        svr_ens.fit(self.data, self.targets, 'linear', 2)
+        self.assertTrue(svr_ens.gen_score < 0.05)
+
 
 
 class TestFlib(unittest.TestCase):
