@@ -59,7 +59,6 @@
             "normalize": true,
             "normalize_samples": false,
             "kernel_width": 2,
-            "resolution": 0.5,
             "use_intensity": true,
             "spec_type": "ir",
             "properties_to_add": []
@@ -67,18 +66,14 @@
         "methods": {
             "forest": {
                 "n_estimators": 500,
-                "oob_score": true,
                 "random_state": 0
             },
             "svr": {
-                "cross_val": true,
                 "C": 1.0,
-                "stratified": true,
                 "n_folds": 10
             },
             "svr_ens": {
-                "n_estimators": 500,
-                "oob_score": true
+                "n_estimators": 500
             }
         },
         "randomization_test": false
