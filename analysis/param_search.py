@@ -1,6 +1,16 @@
 #!/usr/bin/env python
 # encoding: utf-8
 '''
+This is used to perform the parameter search.
+
+An example config file is given in the config folder as param_search_base.json
+
+* to run only some of the conventional descriptors but not all add a list
+  containing the descriptors to the config
+    {"descriptors": ["ATOMCENTRED_FRAGMENTS", "BLA_SUPER_DESCRIPTOR"]}
+* to combine all conventional features into one huge descriptor add 'all' to list
+    {"descriptors": ["all", "ATOMCENTRED_FRAGMENTS", "BLA_SUPER_DESCRIPTOR"]}
+
 
 Created by  on 2012-01-27.
 Copyright (c) 2012. All rights reserved.
@@ -30,6 +40,11 @@ if config['features']['type'] == 'conventional':
             continue
         config['features']['descriptor'] = desc
         config['run_name'] = desc
+        configs.append(copy.deepcopy(config))
+    if 'all' in sc['descriptors']:
+        print('using all descriptors together')
+        config['features']['descriptor'] = 'all'
+        config['run_name'] = 'all'
         configs.append(copy.deepcopy(config))
 elif config['features']['type'] == 'spectral':
     config['features']['descriptor'] = 'large_base'
