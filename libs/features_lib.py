@@ -104,7 +104,7 @@ def get_spectral_features(spectra, use_intensity=True, spec_type='ir',
     x_range = range(0, BFS_max, bin_width)
     if not isinstance(kernel_widths, list):
         kernel_widths = [kernel_widths]
-    if not isinstance(kernel_widths, list):
+    if not isinstance(spec_type, list):
         spec_type = [spec_type]
     features = defaultdict(list)
     for molid, spectrum in spectra.items():
