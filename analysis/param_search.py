@@ -50,7 +50,7 @@ elif config['features']['type'] == 'spectral':
     config['features']['descriptor'] = 'large_base'
     for kwidth in sc['kernel_widths']:
         config['features']['kernel_width'] = kwidth
-        config['features']['bin_width'] = int(np.min(kwidth) * config['sigma_l_ratio'])
+        config['features']['bin_width'] = int(np.min(kwidth) * sc['sigma_l_ratio'])
         config['run_name'] = repr(kwidth)
         configs.append(copy.deepcopy(config))
 else:
