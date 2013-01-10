@@ -43,9 +43,9 @@ class StratifiedResampling(object):
             assert len(set(train_idx).intersection(test_idx)) == 0
             yield train_idx, test_idx
 
-
 def _k_best_indeces(data, targets, selection_method, k):
     """get indices for the k best features depending on the scores"""
+    return range(data.shape[1])
     assert k > 0
     if selection_method == 'linear':
         scores, _ = f_regression(data, targets)

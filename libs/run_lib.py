@@ -136,6 +136,21 @@ def load_data_targets(config, features):
     assert targets.shape[0] == len(molids)
     return data, targets, molids
 
+def best_idx_max_var(data, k):
+    """select frequency with max variance and remove the band around it
+
+        iterate this method until nothing remains
+    """
+    l = data.shape[1]
+    var = np.var(data, axis=0)
+    mask = np.ones(data.shape[1], dtype=bool)
+    res = []
+    while mask.any():
+        var_peak = np.where(np.logical_and(mask, var == np.max(var[mask])))[0]
+        var_peak = var_peak[0]
+        mask[np.max([0,var_peak-k/2]):np.min([l, var_peak+k/2])] = 0
+        res.append(var_peak)
+    return res
 
 def run_runner(config, data, targets, get_models=False):
     """docstring for run"""
@@ -145,13 +160,17 @@ def run_runner(config, data, targets, get_models=False):
     if config['randomization_test']:
         np.random.seed()
         map(np.random.shuffle, data.T)
+
+    best_idx = best_idx_max_var(data, config['features']['kernel_width'])
+    data_tmp = data[:, best_idx[:np.max([len(best_idx), config['feature_selection']['k_best']])]]
+
     # train models and get results
     for method in config['methods']:
         regressor = ml_methods[method](**config['methods'][method])
-        regressor.fit(data, targets,
+        regressor.fit(data_tmp, targets,
                       config['feature_selection']['method'],
-                      config['feature_selection']['k_best'])
-        res[method] = {'train_score': regressor.score(data, targets),
+                      data.shape[1])
+        res[method] = {'train_score': regressor.score(data_tmp, targets),
                        'gen_score': regressor.gen_score}
         if get_models:
             res[method]['model'] = regressor
