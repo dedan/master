@@ -46,19 +46,22 @@ if 'svr' in config['methods']:
     config['methods']['svr']['n_folds'] = 500
 for glomerulus in sc['glomeruli']:
     config['glomerulus'] = glomerulus
-    res[glomerulus] = run_lib.do_paramsearch(sc, config, features)
+    if not glomerulus in res:
+        res[glomerulus] = {}
+    res[glomerulus] = run_lib.do_paramsearch(sc, config, features, res[glomerulus])
     print('param search for {} done'.format(glomerulus))
 json.dump(res, open(os.path.join(sc['outpath'], 'true.json'), 'w'))
 
 # add shuffle data to the config and run the runner for N times
-if 'svr' in config['methods']:
-    config['methods']['svr']['n_folds'] = 10
 config['randomization_test'] = True
 for i in range(sc['n_repetitions']):
     print('randomized run nr: {}'.format(i+1))
+    res = {}
     for glomerulus in sc['glomeruli']:
         config['glomerulus'] = glomerulus
-        res[glomerulus] = run_lib.do_paramsearch(sc, config, features)
+        if not glomerulus in res:
+            res[glomerulus] = {}
+        res[glomerulus] = run_lib.do_paramsearch(sc, config, features, res[glomerulus])
         print('param search for {} done'.format(glomerulus))
     run_name = 'run_' + time.strftime("%d%m%Y_%H%M%S", time.localtime())
     json.dump(res, open(os.path.join(sc['outpath'], run_name + '.json'), 'w'))

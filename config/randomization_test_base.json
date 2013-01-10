@@ -29,13 +29,16 @@
     ],
     "runner_config_content": {
         "feature_selection": {
-        	"method": "linear"
+        	"method": "forest"
         },
         "features": {
-            "type": "conventional",
-            "descriptor": "saito_desc",
-            "normalize": true,
+            "type": "spectral",
+            "normalize": false,
             "normalize_samples": false,
+            "kernel_width": 30,
+            "bin_width": 45,
+            "use_intensity": true,
+            "spec_type": "ir",
             "properties_to_add": []
         },
         "methods": {
