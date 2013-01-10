@@ -59,6 +59,17 @@ class TestLearning(unittest.TestCase):
         rfr.fit(self.data, self.targets, 'linear', 2)
         self.assertTrue(rfr.gen_score < 0.05)
 
+    def test_rfr_reduced(self):
+        """test if the RFR also works with feature selection"""
+        rfr = llib.MyRFR(n_estimators=100, cross_val=True)
+        rfr.fit(self.data, self.targets, 'linear', 1)
+        self.assertTrue(rfr.gen_score > 0.95)
+        np.random.seed(0)
+        map(np.random.shuffle, self.data.T)
+        rfr.fit(self.data, self.targets, 'linear', 1)
+        self.assertTrue(rfr.gen_score < 0.05)
+
+
 class TestFlib(unittest.TestCase):
     """test my feature lib"""
     pass

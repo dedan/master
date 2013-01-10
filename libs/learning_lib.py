@@ -162,7 +162,7 @@ class MyRFR(RandomForestRegressor):
             for train, test in sr_val:
                 best_idx = _k_best_indeces(data[train], targets[train], selection_method, k_best)
                 test_rfr.fit(data[np.ix_(train, best_idx)], targets[train])
-                all_predictions.extend(test_rfr.predict(data[test]))
+                all_predictions.extend(test_rfr.predict(data[np.ix_(test, best_idx)]))
                 all_targets.extend(targets[test])
             self.gen_score = r2_score(all_targets, all_predictions)
             self.all_predictions = all_predictions
