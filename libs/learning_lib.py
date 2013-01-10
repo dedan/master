@@ -143,10 +143,12 @@ class SVREnsemble(object):
 
 class MyRFR(RandomForestRegressor):
     """overwrite RFR to include feature selection during fitting"""
-    def __init__(self, n_estimators, cross_val=True, **kwargs):
-        super(MyRFR, self).__init__(oob_score=cross_val, **kwargs)
+    def __init__(self, n_estimators, cross_val=True, n_folds=10, **kwargs):
+        super(MyRFR, self).__init__(**kwargs)
         self.n_estimators = n_estimators
         self.cross_val = cross_val
+        self.n_folds = n_folds
+        self.kwargs = kwargs
         self.gen_score = None
 
     def fit(self, data, targets, selection_method, k_best):
@@ -154,9 +156,18 @@ class MyRFR(RandomForestRegressor):
         self.best_idx = _k_best_indeces(data, targets, selection_method, k_best)
         super(MyRFR, self).fit(data[:,self.best_idx], targets)
         if self.cross_val:
-            self.all_predictions = self.oob_prediction_
-            self.all_targets = targets
-            self.gen_score = self.oob_score_
+            sr_val = StratifiedResampling(targets, self.n_folds)
+            all_predictions, all_targets = [], []
+            test_rfr = RandomForestRegressor(self.n_estimators, **self.kwargs)
+            for train, test in sr_val:
+                best_idx = _k_best_indeces(data[train], targets[train], selection_method, k_best)
+                test_rfr.fit(data[np.ix_(train, best_idx)], targets[train])
+                all_predictions.extend(test_rfr.predict(data[test]))
+                all_targets.extend(targets[test])
+            self.gen_score = r2_score(all_targets, all_predictions)
+            self.all_predictions = all_predictions
+            self.all_targets = all_targets
+        return self
 
     def predict(self, data):
         """predict after feature selection"""
