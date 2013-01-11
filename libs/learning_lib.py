@@ -142,9 +142,21 @@ class SVREnsemble(object):
         return r2_score(targets, self.predict(data))
 
 class MyRFR(RandomForestRegressor):
-    """overwrite RFR to include feature selection during fitting"""
-    def __init__(self, n_estimators, cross_val=True, n_folds=10, **kwargs):
-        super(MyRFR, self).__init__(**kwargs)
+    """overwrite RFR to include feature selection during fitting
+
+        cross_val can be set to:
+            * False -> nothing done, gen_score remains None
+            * 'xval' -> proper cross validation done
+            * 'oob' -> only oob_score used to estimate generalization
+
+        these options exist because real cross validation is extremely slow
+        and the oob score is already a good estimate
+    """
+    def __init__(self, n_estimators, cross_val='xval', n_folds=10, **kwargs):
+        if cross_val == 'oob':
+            super(MyRFR, self).__init__(oob_score=True, **kwargs)
+        else:
+            super(MyRFR, self).__init__(**kwargs)
         self.n_estimators = n_estimators
         self.cross_val = cross_val
         self.n_folds = n_folds
@@ -155,7 +167,11 @@ class MyRFR(RandomForestRegressor):
         """fit on selected features"""
         self.best_idx = _k_best_indeces(data, targets, selection_method, k_best)
         super(MyRFR, self).fit(data[:,self.best_idx], targets)
-        if self.cross_val:
+        if self.cross_val == 'oob':
+            self.gen_score = self.oob_score_
+            self.all_predictions = self.oob_prediction_
+            self.all_targets = targets
+        elif self.cross_val == 'xval':
             sr_val = StratifiedResampling(targets, self.n_folds)
             all_predictions, all_targets = [], []
             test_rfr = RandomForestRegressor(self.n_estimators, **self.kwargs)
@@ -167,6 +183,8 @@ class MyRFR(RandomForestRegressor):
             self.gen_score = r2_score(all_targets, all_predictions)
             self.all_predictions = all_predictions
             self.all_targets = all_targets
+        else:
+            raise ValueError
         return self
 
     def predict(self, data):
