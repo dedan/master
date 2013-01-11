@@ -41,7 +41,7 @@ if config['features']['type'] == 'conventional':
         config['features']['descriptor'] = desc
         config['run_name'] = desc
         configs.append(copy.deepcopy(config))
-    if 'all' in sc['descriptors']:
+    if 'descriptors' in sc and 'all' in sc['descriptors']:
         print('using all descriptors together')
         config['features']['descriptor'] = 'all'
         config['run_name'] = 'all'
