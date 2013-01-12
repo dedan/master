@@ -6,6 +6,37 @@
 import numpy as np
 from collections import defaultdict
 
+
+class RUDict(dict):
+    """code for this class from http://stackoverflow.com/a/8447781/515807"""
+
+    def __init__(self, *args, **kw):
+        super(RUDict,self).__init__(*args, **kw)
+
+    def update(self, E=None, **F):
+        if E is not None:
+            if 'keys' in dir(E) and callable(getattr(E, 'keys')):
+                for k in E:
+                    if k in self:  # existing ...must recurse into both sides
+                        self.r_update(k, E)
+                    else: # doesn't currently exist, just update
+                        self[k] = E[k]
+            else:
+                for (k, v) in E:
+                    self.r_update(k, {k:v})
+
+        for k in F:
+            self.r_update(k, {k:F[k]})
+
+    def r_update(self, key, other_dict):
+        if isinstance(self[key], dict) and isinstance(other_dict[key], dict):
+            od = RUDict(self[key])
+            nd = other_dict[key]
+            od.update(nd)
+            self[key] = od
+        else:
+            self[key] = other_dict[key]
+
 def pdist_1d(values):
     """like pdist but for 1-d lists"""
     res = []
