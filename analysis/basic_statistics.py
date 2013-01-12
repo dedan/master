@@ -27,7 +27,6 @@ percentile = 75
 percentile_thres = 0.2
 
 door2id = json.load(open(os.path.join(data_path, 'door2id.json')))
-features = json.load(open(os.path.join(data_path, 'features.json')))
 cas_numbers, glomeruli, rm = rdl.load_response_matrix(os.path.join(data_path, 'response_matrix.csv'))
 
 # which molecules are missing in door2id?
