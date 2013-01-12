@@ -1,5 +1,6 @@
 {
     "inpath": "/Users/dedan/projects/master/results/new_param_search/spec_features_wointenswonorm",
     "format": "png",
-    "plot_param_space": true
+    "plot_param_space": true,
+    "boxplot": false
 }
