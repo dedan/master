@@ -61,8 +61,8 @@ def _k_best_indeces(data, targets, selection_method, k):
 class MySVR(SVR):
     """docstring for MySVR"""
     def __init__(self, cross_val=True, n_folds=10, **kwargs):
-        super(MySVR, self).__init__(**kwargs)
-        self.kwargs = kwargs
+        self.kwargs = {str(k): str(v) for k, v in kwargs.items()}
+        super(MySVR, self).__init__(**self.kwargs)
         self.cross_val = cross_val
         self.n_folds = n_folds
         self.gen_score = None
