@@ -14,6 +14,7 @@ import glob
 import numpy as np
 import pylab as plt
 from master.libs import read_data_lib as rdl
+from master.libs import utils
 
 res = {}
 method = 'svr_ens'
@@ -52,5 +53,6 @@ for i, glom in enumerate(res):
         ax.set_xticks([])
 fig.subplots_adjust(hspace=0.3)
 fig.savefig(os.path.join(outpath, 'rand_test.png'))
-plt.show()
+if utils.run_from_ipython():
+    plt.show()
 
