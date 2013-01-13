@@ -11,13 +11,14 @@ Copyright (c) 2012. All rights reserved.
 
 import sys
 import os
-from sklearn.svm import SVR
+from sklearn import svm
 from sklearn.ensemble import RandomForestRegressor
 from sklearn.metrics import r2_score
 from sklearn.feature_selection import f_regression
 import numpy as np
 import random
 import __builtin__
+reload(svm)
 
 class StratifiedResampling(object):
     """like stratified k-fold, but with repeated sampling"""
@@ -57,11 +58,22 @@ def _k_best_indeces(data, targets, selection_method, k):
     scores[np.isnan(scores)] = 0
     return np.argsort(scores)[-k:]
 
+def _convert_kwargs(kwargs):
+    """kwargs are read from a json file and might contain unicode
 
-class MySVR(SVR):
+        convert them to string because sklearn params don't like unicode
+    """
+    res = {}
+    for k, v in kwargs.items():
+        new_k = str(k) if isinstance(k, unicode) else k
+        new_v = str(v) if isinstance(v, unicode) else v
+        res[new_k] = new_v
+    return res
+
+class MySVR(svm.SVR):
     """docstring for MySVR"""
     def __init__(self, cross_val=True, n_folds=10, **kwargs):
-        self.kwargs = {str(k): str(v) for k, v in kwargs.items()}
+        self.kwargs = _convert_kwargs(kwargs)
         super(MySVR, self).__init__(**self.kwargs)
         self.cross_val = cross_val
         self.n_folds = n_folds
@@ -72,7 +84,7 @@ class MySVR(SVR):
         assert data.shape[0] == len(targets)
         self.best_idx = _k_best_indeces(data, targets, selection_method, k_best)
         super(MySVR, self).fit(data[:, self.best_idx], targets)
-        tmp_svr = SVR(**self.kwargs)
+        tmp_svr = svm.SVR(**self.kwargs)
         if self.cross_val:
             kf = StratifiedResampling(targets, self.n_folds)
             all_predictions, all_targets = [], []
@@ -102,11 +114,11 @@ class SVREnsemble(object):
         self.n_folds = n_folds
         self.cross_val = cross_val
         self.gen_score = None
-        self.kwargs = kwargs
+        self.kwargs = _convert_kwargs(kwargs)
         np.random.seed(0)
         self.ensemble = []
         for i in range(self.n_estimators):
-            self.ensemble.append(SVR(**kwargs))
+            self.ensemble.append(svm.SVR(**self.kwargs))
 
     def fit(self, data, targets, selection_method, k_best):
         """docstring for fit"""
@@ -153,14 +165,14 @@ class MyRFR(RandomForestRegressor):
         and the oob score is already a good estimate
     """
     def __init__(self, n_estimators, cross_val='xval', n_folds=10, **kwargs):
+        self.kwargs = _convert_kwargs(kwargs)
         if cross_val == 'oob':
-            super(MyRFR, self).__init__(oob_score=True, **kwargs)
+            super(MyRFR, self).__init__(oob_score=True, **self.kwargs)
         else:
-            super(MyRFR, self).__init__(**kwargs)
+            super(MyRFR, self).__init__(**self.kwargs)
         self.n_estimators = n_estimators
         self.cross_val = cross_val
         self.n_folds = n_folds
-        self.kwargs = kwargs
         self.gen_score = None
 
     def fit(self, data, targets, selection_method, k_best):
