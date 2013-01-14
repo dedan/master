@@ -69,7 +69,8 @@ def do_paramsearch(sc, config, features, res):
             if 'forest' in tmp_config['methods']:
                 tmp_config['methods']['forest']['max_depth'] = sc['forest'][i]
             print('running for {} - {}'.format(k_b, sc['svr'][i]))
-            tmp = run_runner(tmp_config, data, targets, sc.get('get_models', False))
+            tmp = run_runner(tmp_config, data, targets, sc.get('get_models', False),
+                             sc.get('get_feature_selection', False))
             res[str(k_b)][str(i)].update(tmp)
     return res
 
@@ -140,7 +141,7 @@ def load_data_targets(config, features):
     return data, targets, molids
 
 
-def run_runner(config, data, targets, get_models=False):
+def run_runner(config, data, targets, get_models=False, get_feature_selection=False):
     """docstring for run"""
     res = {}
     if config['features']['normalize_samples']:
@@ -158,6 +159,8 @@ def run_runner(config, data, targets, get_models=False):
                        'gen_score': regressor.gen_score}
         if get_models:
             res[method]['model'] = regressor
+        if get_feature_selection:
+            res[method]['best_idx'] = list(regressor.best_idx)
     return res
 
 

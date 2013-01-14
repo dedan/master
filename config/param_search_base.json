@@ -1,6 +1,7 @@
 {
     "outpath": "/Users/dedan/projects/master/results/param_search/test1",
-    "get_models": true,
+    "get_models": false,
+    "get_feature_selection": true,
     "sigma_l_ratio": 1.5,
     "selection": [
         "linear",
