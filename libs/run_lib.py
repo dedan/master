@@ -69,7 +69,7 @@ def do_paramsearch(sc, config, features, res):
             if 'forest' in tmp_config['methods']:
                 tmp_config['methods']['forest']['max_depth'] = sc['forest'][i]
             print('running for {} - {}'.format(k_b, sc['svr'][i]))
-            tmp = run_runner(tmp_config, data, targets)
+            tmp = run_runner(tmp_config, data, targets, sc.get('get_models', False))
             res[str(k_b)][str(i)].update(tmp)
     return res
 

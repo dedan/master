@@ -6,6 +6,15 @@
 import numpy as np
 from collections import defaultdict
 
+def nested_remove_keys(d, key):
+    """traverse nested dict and remove all key, values with the given key"""
+    for subk, subv in d.items():
+        if subk == key:
+            del d[subk]
+        if isinstance(subv, dict):
+            nested_remove_keys(subv, key)
+    return d
+
 
 class RUDict(dict):
     """code for this class from http://stackoverflow.com/a/8447781/515807"""

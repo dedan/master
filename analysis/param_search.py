@@ -19,8 +19,10 @@ import glob
 import sys
 import os
 import json
+import pickle
 from master.libs import run_lib
 from master.libs import features_lib as flib
+from master.libs import utils
 import numpy as np
 import copy
 reload(run_lib)
@@ -59,11 +61,12 @@ else:
 
 for config in configs:
 
+    cur_outpath = os.path.join(sc['outpath'], config['run_name'] + '.json')
     sc['runner_config_content'] = config
     # if result file already exists, load it to append new glomeruli
-    if os.path.exists(os.path.join(sc['outpath'], config['run_name'] + '.json')):
+    if os.path.exists(cur_outpath):
         print('load existing results from: {}'.format(config['run_name']))
-        res = json.load(open(os.path.join(sc['outpath'], config['run_name'] + '.json')))["res"]
+        res = json.load(open(cur_outpath))["res"]
     else:
         res = {sel: {} for sel in sc['selection']}
 
@@ -85,4 +88,8 @@ for config in configs:
             print('param search for {}..'.format(glomerulus))
             res[selection][glomerulus] = run_lib.do_paramsearch(sc, config, features, res[selection][glomerulus])
             print('param search for {} done'.format(glomerulus))
-            json.dump({'sc': sc, 'res': res}, open(os.path.join(sc['outpath'], config['run_name'] + '.json'), 'w'))
+            if sc['get_models']:
+                cur_outpath_pckl = os.path.splitext(cur_outpath)[0] + '.pckl'
+                pickle.dump(res, open(cur_outpath_pckl, 'w'))
+            json_res = utils.nested_remove_keys(copy.deepcopy(res), 'model')
+            json.dump({'sc': sc, 'res': json_res}, open(cur_outpath, 'w'))
