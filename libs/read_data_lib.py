@@ -35,7 +35,7 @@ def get_best_params(inpath, descriptor, glom, method, selection):
     glom_idx = cur_max['glomeruli'].index(glom)
     best_c_idx = int(cur_max['c_best'][desc_idx, glom_idx])
     best_kbest_idx = int(cur_max['k_best'][desc_idx, glom_idx])
-    config['methods']['svr_ens']['C'] = sc['svr'][best_c_idx]
+    config['methods'][method]['regularization'] = sc[method][best_c_idx]
     config['feature_selection']['k_best'] = k_best[descriptor][best_kbest_idx]
     config['feature_selection']['method'] = selection
     return config
