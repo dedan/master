@@ -44,16 +44,6 @@ ax.set_xticklabels(bla, rotation='90', ha='right')
 ax.set_title('number of glomeruli available for a stimulus')
 fig.savefig(os.path.join(results_path, 'glomeruli_per_stimulus.' + format))
 
-fig = plt.figure(figsize=(15, 7))
-ax = fig.add_subplot(111)
-n_stimuli = np.sum(~np.isnan(rm), axis=0)
-sorted_idx = list(reversed(np.argsort(n_stimuli)))
-ax.bar(range(len(glomeruli)), n_stimuli[sorted_idx])
-ax.set_xticks(np.arange(len(glomeruli)) + 1)
-ax.set_xticklabels([glomeruli[i] for i in sorted_idx], rotation='45', ha='right')
-ax.set_title('number of stimuli available for a glomerulus')
-fig.savefig(os.path.join(results_path, 'stimuli_per_glomerulus.' + format))
-
 # histograms for the glomeruli with more than N stimuli
 print '\n target distribution of glomeruli with more than %d stimuli' % N
 interesting = []
@@ -76,6 +66,22 @@ fig.savefig(os.path.join(results_path, 'target_quality.' + format))
 print ('\tlist of glomeruli with more than %d stimuli and %d percentile > %f' %
        (N, percentile, percentile_thres))
 print interesting
+
+# number of stimuli availabe for each glomerulus, colored according to selected or not
+fig = plt.figure(figsize=(15, 7))
+ax = fig.add_subplot(111)
+n_stimuli = np.sum(~np.isnan(rm), axis=0)
+sorted_idx = list(reversed(np.argsort(n_stimuli)))
+patches = ax.bar(range(len(glomeruli)), n_stimuli[sorted_idx])
+for i, p in enumerate(patches):
+    if glomeruli[sorted_idx[i]] in interesting:
+        p.set_facecolor('b')
+    else:
+        p.set_facecolor('r')
+ax.set_xticks(np.arange(len(glomeruli)) + 1)
+ax.set_xticklabels([glomeruli[i] for i in sorted_idx], rotation='45', ha='right')
+ax.set_title('number of stimuli available for a glomerulus')
+fig.savefig(os.path.join(results_path, 'stimuli_per_glomerulus.' + format))
 
 # number of molecules available for all glomeruli
 print 'glomerulus for which all stimuli are available'
