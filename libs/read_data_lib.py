@@ -24,9 +24,8 @@ try:
 except Exception, e:
     print '!!! rpy2 not installed !!!'
 
-def get_best_params(inpath, descriptor, glom, method, selection):
+def get_best_params(max_overview, sc, k_best, descriptor, glom, method, selection):
     """extract the best parameters from a parameter search"""
-    search_res, max_overview, sc, k_best = read_paramsearch_results(inpath)
     config = sc['runner_config_content']
     config['features']['descriptor'] = descriptor
     config['glomerulus'] = glom

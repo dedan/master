@@ -19,30 +19,24 @@ inpath = '/Users/dedan/projects/master/results/new_param_search/conv_features'
 method = 'svr'
 selection = 'linear'
 
-fnames = glob.glob(os.path.join(inpath, '*.json'))
-descriptors = [os.path.splitext(os.path.basename(fname))[0] for fname in fnames]
+search_res, max_overview, sc, k_best_dict = rdl.read_paramsearch_results(inpath)
 
 out_res = {}
-for i, descriptor in enumerate(descriptors):
+for i, descriptor in enumerate(search_res):
 
-    print descriptor
     res = json.load(open(os.path.join(inpath, descriptor + '.json')))
 
     # param selection values to compare against
     c_k_best = np.max(res['sc']['k_best'])
-    print 'max_kbest', c_k_best
     c_regularization = 1.0
-    c_reg_idx = res['sc'][method].index(c_regularization)
+    c_reg_idx = sc[method].index(c_regularization)
 
     best_genscore = []
     picked_genscore = []
-    for glom in res['res'][selection]:
-        print glom
-        search_res, max_overview, sc, k_best = rdl.read_paramsearch_results(inpath)
-        best_params = rdl.get_best_params(inpath, descriptor, glom, method, selection)
-
+    for glom in search_res[descriptor][selection]:
+        best_params = rdl.get_best_params(max_overview, sc, k_best_dict,
+                                          descriptor, glom, method, selection)
         k_best = best_params['feature_selection']['k_best']
-        print k_best
         reg_idx = res['sc'][method].index(best_params['methods'][method]['regularization'])
         best_res = res['res'][selection][glom][str(k_best)][str(reg_idx)]
         best_genscore.append(best_res[method]['gen_score'])
@@ -52,17 +46,19 @@ for i, descriptor in enumerate(descriptors):
                            'picked_genscore': picked_genscore,
                            'labels': res['res'][selection].keys()}
 
+
+fig = plt.figure(figsize=(10, 10))
+n_sub = utils.ceiled_root(len(out_res))
 for i, descriptor in enumerate(out_res):
-    fig = plt.figure()
-    ax = fig.add_subplot(111)
-    # ax = fig.add_subplot(len(out_res), 1, i + 1)
+    # ax = fig.add_subplot(111)
+    ax = fig.add_subplot(n_sub, n_sub, i + 1)
     n_gloms = len(out_res[descriptor]['best_genscore'])
     ax.bar(range(0, n_gloms*2, 2), out_res[descriptor]['best_genscore'], color='#D95B43')
     ax.bar(range(1, n_gloms*2 + 1, 2), out_res[descriptor]['picked_genscore'], color='#ECD078')
-    ax.set_ylabel(descriptor)
-    ax.set_xticks(np.arange(0, n_gloms*2, 2)+0.5)
-    ax.set_xticklabels(out_res[descriptor]['labels'], rotation='90')
-    ax.set_yticks([0, 0.5, 0])
+    ax.set_title(descriptor[:15], fontsize=8)
+    ax.set_xticks(np.arange(0, n_gloms*2, 2)+1.)
+    ax.set_xticklabels(out_res[descriptor]['labels'], rotation='90', fontsize=7)
+    ax.set_yticks([0, 0.5, 0]) if (i + 1) % n_sub == 1 else ax.set_yticks([])
     ax.set_ylim([0, 1])
-fig.subplots_adjust(hspace=0.4)
+fig.subplots_adjust(hspace=0.7)
 plt.show()
