@@ -81,8 +81,7 @@ def read_paramsearch_results(path):
                     max_overview[method][selection]['c_best'][i_file, i_glom] = np.argmax(np.max(mat, axis=0))
                     if i_glom == 0:
                         max_overview[method][selection]['desc_names'].append(desc)
-                    if i_file == 0:
-                        max_overview[method][selection]['glomeruli'].append(glom)
+                    max_overview[method][selection]['glomeruli'] = desc_res[selection].keys()
 
     return search_res, max_overview, sc, k_best
 
