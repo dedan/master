@@ -33,7 +33,7 @@ for i, descriptor in enumerate(search_res):
 
     best_genscore = []
     picked_genscore = []
-    for glom in search_res[descriptor][selection]:
+    for glom in max_overview[method][selection]['glomeruli']:
         best_params = rdl.get_best_params(max_overview, sc, k_best_dict,
                                           descriptor, glom, method, selection)
         k_best = best_params['feature_selection']['k_best']
@@ -44,7 +44,7 @@ for i, descriptor in enumerate(search_res):
         picked_genscore.append(picked_res[method]['gen_score'])
     out_res[descriptor] = {'best_genscore': best_genscore,
                            'picked_genscore': picked_genscore,
-                           'labels': res['res'][selection].keys()}
+                           'labels': max_overview[method][selection]['glomeruli']}
 
 
 fig = plt.figure(figsize=(10, 10))

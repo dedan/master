@@ -71,7 +71,7 @@ def read_paramsearch_results(path):
         methods = sc['runner_config_content']['methods'].keys()
 
         for i_sel, selection in enumerate(sc['selection']):
-            for i_glom, glom in enumerate(desc_res[selection]):
+            for i_glom, glom in enumerate(sorted(desc_res[selection])):
                 for i_meth, method in enumerate(methods):
                     mat = get_search_matrix(desc_res[selection][glom], method)
                     search_res[desc][selection][glom][method] = mat
@@ -80,7 +80,7 @@ def read_paramsearch_results(path):
                     max_overview[method][selection]['c_best'][i_file, i_glom] = np.argmax(np.max(mat, axis=0))
                     if i_glom == 0:
                         max_overview[method][selection]['desc_names'].append(desc)
-                    max_overview[method][selection]['glomeruli'] = desc_res[selection].keys()
+                    max_overview[method][selection]['glomeruli'] = sorted(desc_res[selection])
 
     return search_res, max_overview, sc, k_best
 
