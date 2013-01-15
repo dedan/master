@@ -63,4 +63,5 @@ for i, (descriptor, results) in enumerate(sorted_out_res):
     ax.set_yticks([0, 0.5, 0]) if (i + 1) % n_sub == 1 else ax.set_yticks([])
     ax.set_ylim([0, 1])
 fig.subplots_adjust(hspace=0.7)
+fig.savefig(os.path.join(inpath, 'plots', 'param_selection_comp.png'))
 plt.show()
