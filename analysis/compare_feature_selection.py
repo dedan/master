@@ -49,15 +49,17 @@ for i, descriptor in enumerate(search_res):
 
 fig = plt.figure(figsize=(10, 10))
 n_sub = utils.ceiled_root(len(out_res))
-for i, descriptor in enumerate(out_res):
-    # ax = fig.add_subplot(111)
+sorted_out_res = sorted(out_res.items(),
+                        key=lambda (k, v): np.mean(v['best_genscore']),
+                        reverse=True)
+for i, (descriptor, results) in enumerate(sorted_out_res):
     ax = fig.add_subplot(n_sub, n_sub, i + 1)
-    n_gloms = len(out_res[descriptor]['best_genscore'])
-    ax.bar(range(0, n_gloms*2, 2), out_res[descriptor]['best_genscore'], color='#D95B43')
-    ax.bar(range(1, n_gloms*2 + 1, 2), out_res[descriptor]['picked_genscore'], color='#ECD078')
-    ax.set_title(descriptor[:15], fontsize=8)
+    n_gloms = len(results['best_genscore'])
+    ax.bar(range(0, n_gloms*2, 2), results['best_genscore'], color='#D95B43')
+    ax.bar(range(1, n_gloms*2 + 1, 2), results['picked_genscore'], color='#ECD078')
+    ax.set_title('{} ({:.2f})'.format(descriptor[:15], np.mean(results['best_genscore'])) , fontsize=8)
     ax.set_xticks(np.arange(0, n_gloms*2, 2)+1.)
-    ax.set_xticklabels(out_res[descriptor]['labels'], rotation='90', fontsize=7)
+    ax.set_xticklabels(results['labels'], rotation='90', fontsize=7)
     ax.set_yticks([0, 0.5, 0]) if (i + 1) % n_sub == 1 else ax.set_yticks([])
     ax.set_ylim([0, 1])
 fig.subplots_adjust(hspace=0.7)
