@@ -1,6 +1,11 @@
 #!/usr/bin/env python
 # encoding: utf-8
 """
+Compare the result of optimal feature selection and regularization values with
+the results for some fixed settings. I had a look at this because we had the
+feeling that for the SVR we don't need any feature selection and special
+regularization. It works already good with standard values, but still we want
+to see the drop of performance we'll have.
 
 Created by  on 2012-01-27.
 Copyright (c) 2012. All rights reserved.
@@ -10,6 +15,7 @@ import sys
 import os
 import json
 import glob
+import __builtin__
 import numpy as np
 import pylab as plt
 from master.libs import read_data_lib as rdl
@@ -64,4 +70,14 @@ for i, (descriptor, results) in enumerate(sorted_out_res):
     ax.set_ylim([0, 1])
 fig.subplots_adjust(hspace=0.7)
 fig.savefig(os.path.join(inpath, 'plots', 'param_selection_comp.png'))
+
+fig = plt.figure()
+ax = fig.add_subplot(111)
+all_best_genscores = __builtin__.sum([r['best_genscore'] for r in out_res.values()], [])
+all_picked_genscores = __builtin__.sum([r['picked_genscore'] for r in out_res.values()], [])
+ax.plot(all_best_genscores, all_picked_genscores, 'x')
+ax.plot([0, 0.8], [0, 0.8], color='0.5')
+fig.savefig(os.path.join(inpath, 'plots', 'param_selection_overview.png'))
 plt.show()
+
+
