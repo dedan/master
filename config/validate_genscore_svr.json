@@ -1,0 +1,22 @@
+{
+    "normed_responses": true,
+    "feature_selection": {
+        "method": "linear",
+        "k_best": "to_overwrite"
+    },
+    "features": {
+        "type": "conventional",
+        "descriptor": "haddad_desc",
+        "normalize": true,
+        "properties_to_add": []
+    },
+    "methods": {
+        "svr": {
+            "cross_val": true,
+            "C": 1.0,
+            "n_folds": "to_overwrite"
+        }
+    },
+    "glomerulus": "to_overwrite",
+    "randomization_test": false
+}
