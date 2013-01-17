@@ -64,7 +64,13 @@ def new_descriptor_performance_plot(fig, max_overview, sc, boxplot=True):
             ax = fig.add_subplot(1, n_plots, plot_x)
             ax.set_title('{}_{}.'.format(method, selection))
             if boxplot:
-                ax.boxplot(data.T)
+                boxes = ax.boxplot(data.T)
+                for whisk in boxes['whiskers']:
+                    whisk.set_linestyle('-')
+                for name, thing in boxes.items():
+                    for line in thing:
+                        if not name is 'medians':
+                            line.set_color('0.0')
             else:
                 ax.bar((np.arange(len(desc_names)) - 0.5) * 3,
                        np.mean(data, axis=1),
