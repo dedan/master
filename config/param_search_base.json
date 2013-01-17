@@ -61,7 +61,6 @@
         "features": {
             "type": "spectral",
             "normalize": true,
-            "normalize_samples": false,
             "kernel_width": 2,
             "use_intensity": true,
             "spec_type": "ir",

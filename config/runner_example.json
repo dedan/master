@@ -7,7 +7,6 @@
         "type": "conventional",
         "descriptor": "haddad_desc",
         "normalize": true,
-        "normalize_samples": false,
         "kernel_width": 2,
         "resolution": 0.5,
         "use_intensity": true,

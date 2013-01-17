@@ -144,8 +144,6 @@ def load_data_targets(config, features):
 def run_runner(config, data, targets, get_models=False, get_feature_selection=False):
     """docstring for run"""
     res = {}
-    if config['features']['normalize_samples']:
-        data = normalize(data, norm='l2', axis=1, copy=True)
     if config['randomization_test']:
         np.random.seed()
         map(np.random.shuffle, data.T)
