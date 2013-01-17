@@ -23,7 +23,8 @@ if not os.path.exists(outpath):
 
 # variables for results
 plt.close('all')
-search_res, max_overview, sc, _ = rdl.read_paramsearch_results(config['inpath'])
+search_res, max_overview, sc, _ = rdl.read_paramsearch_results(config['inpath'],
+                                                               p_selection=config['selection'])
 
 if config['plot_param_space']:
     for desc in search_res:

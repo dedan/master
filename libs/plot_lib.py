@@ -54,7 +54,11 @@ def new_descriptor_performance_plot(fig, max_overview, sc, boxplot=True):
         for i_sel, selection in enumerate(max_overview[method]):
 
             desc_names = max_overview[method][selection]['desc_names']
-            data = max_overview[method][selection]['max']
+            if 'p_selection' in max_overview[method][selection]:
+                print('plotting param selection instead of maximum')
+                data = max_overview[method][selection]['p_selection']
+            else:
+                data = max_overview[method][selection]['max']
             sort_x = np.argsort(np.mean(data, axis=0))
             sort_y = np.argsort(np.mean(data, axis=1))
             data = data[sort_y, :]

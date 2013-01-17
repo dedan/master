@@ -48,11 +48,14 @@ def get_id2name():
                for mol in molecules if 'Name' in mol.data}
     return id2name
 
-def read_paramsearch_results(path):
+def read_paramsearch_results(path, p_selection={}):
     """read the results from a parameter search for several descriptors"""
     # variables for results
+    if p_selection:
+        assert 'k_best_idx' in p_selection and 'c_best_idx' in p_selection
     search_res = utils.recursive_defaultdict()
     initializer = lambda: {'max': np.zeros((len(f_names), len(sc['glomeruli']))),
+                           'p_selection': np.zeros((len(f_names), len(sc['glomeruli']))),
                            'k_best': np.zeros((len(f_names), len(sc['glomeruli']))),
                            'c_best': np.zeros((len(f_names), len(sc['glomeruli']))),
                            'desc_names': [],
@@ -73,14 +76,20 @@ def read_paramsearch_results(path):
         for i_sel, selection in enumerate(sc['selection']):
             for i_glom, glom in enumerate(sorted(desc_res[selection])):
                 for i_meth, method in enumerate(methods):
+                    cur_max = max_overview[method][selection]
                     mat = get_search_matrix(desc_res[selection][glom], method)
                     search_res[desc][selection][glom][method] = mat
-                    max_overview[method][selection]['max'][i_file, i_glom] = np.max(mat)
-                    max_overview[method][selection]['k_best'][i_file, i_glom] = np.argmax(np.max(mat, axis=1))
-                    max_overview[method][selection]['c_best'][i_file, i_glom] = np.argmax(np.max(mat, axis=0))
+                    cur_max['max'][i_file, i_glom] = np.max(mat)
+                    cur_max['k_best'][i_file, i_glom] = np.argmax(np.max(mat, axis=1))
+                    cur_max['c_best'][i_file, i_glom] = np.argmax(np.max(mat, axis=0))
                     if i_glom == 0:
-                        max_overview[method][selection]['desc_names'].append(desc)
-                    max_overview[method][selection]['glomeruli'] = sorted(desc_res[selection])
+                        cur_max['desc_names'].append(desc)
+                    cur_max['glomeruli'] = sorted(desc_res[selection])
+                    if p_selection:
+                        sel_value = mat[p_selection['k_best_idx'], p_selection['c_best_idx']]
+                        cur_max['p_selection'][i_file, i_glom] = sel_value
+
+
 
     return search_res, max_overview, sc, k_best
 
