@@ -54,7 +54,7 @@ for f in feature_files:
     fig = plt.figure()
     print 'working on: ', desc
     ax = fig.add_subplot(111)
-    mol_fspace, _ = flib.get_features_for_molids(features, molecules)
+    mol_fspace = np.array([features[mol] for mol in molecules if len(features[mol]) > 0])
     assert not (mol_fspace == -999).any()
     mol_distances = pdist(mol_fspace)
     bins = np.linspace(0, max(mol_distances), num=N_BINS)
@@ -62,7 +62,7 @@ for f in feature_files:
 
     isomere_distances = np.array([])
     for isomere in isomeres:
-        iso_fspace, _ = flib.get_features_for_molids(features, isomere)
+        iso_fspace = np.array([features[iso] for iso in isomere])
         assert not (iso_fspace == -999).any()
         if iso_fspace.any():
             isomere_distances = np.hstack([isomere_distances, pdist(iso_fspace)])
@@ -70,5 +70,5 @@ for f in feature_files:
     _, _, patches = ax.hist(isomere_distances, bins=bins, log=True)
     for patch in patches:
         plt.setp(patch, color="r", edgecolor='k')
-    fig.savefig(os.path.join(out_path, f_space + '_histo.png'))
+    fig.savefig(os.path.join(out_path, desc + '_histo.png'))
 plt.close('all')
