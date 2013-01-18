@@ -54,7 +54,9 @@ def new_descriptor_performance_plot(fig, max_overview, sc, boxplot=True):
         for i_sel, selection in enumerate(max_overview[method]):
 
             desc_names = max_overview[method][selection]['desc_names']
-            if 'p_selection' in max_overview[method][selection]:
+            print np.sum(max_overview[method][selection]['p_selection'])
+            if 'p_selection' in max_overview[method][selection] and \
+               np.sum(max_overview[method][selection]['p_selection']) != 0.0:
                 print('plotting param selection instead of maximum')
                 data = max_overview[method][selection]['p_selection']
             else:
