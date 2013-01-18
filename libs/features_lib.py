@@ -108,6 +108,8 @@ def get_spectral_features(spectra, use_intensity=True, spec_type='ir',
         spec_type = [spec_type]
     features = defaultdict(list)
     for molid, spectrum in spectra.items():
+        # remove negative vibrations (result of imaginary frequencies)
+        valid_freqs = spectrum['freq'][spectrum['freq'] > 0]
         tmp = []
         for k_width in kernel_widths:
             for st in spec_type:
