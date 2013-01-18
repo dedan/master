@@ -122,9 +122,8 @@ def prepare_features(config):
 def load_data_targets(config, features):
     """load the targets for a glomerulus"""
     door2id = json.load(open(os.path.join(config['data_path'], 'door2id.json')))
-    if config['normed_responses']:
-        csv_path = os.path.join(config['data_path'], 'response_matrix.csv')
-    else:
+    csv_path = os.path.join(config['data_path'], 'response_matrix.csv')
+    if 'normed_responses' in config and not config['normed_responses']:
         csv_path = os.path.join(config['data_path'], 'unnorm_response_matrix.csv')
     cas_numbers, glomeruli, rm = rdl.load_response_matrix(csv_path, door2id)
     glom_idx = glomeruli.index(config['glomerulus'])
