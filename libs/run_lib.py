@@ -64,10 +64,13 @@ def do_paramsearch(sc, config, features, res):
                     del tmp_config['methods'][already_done]
             if 'svr' in tmp_config['methods']:
                 tmp_config['methods']['svr']['C'] = sc['svr'][i]
-            if 'svr_ens' in tmp_config['methods']:
-                tmp_config['methods']['svr_ens']['C'] = sc['svr'][i]
             if 'forest' in tmp_config['methods']:
                 tmp_config['methods']['forest']['max_depth'] = sc['forest'][i]
+
+            # don't search in the regularization direction if value set to -1
+            if sc['svr'][i] == -1:
+                tmp_config['methods']['forest'].pop('max_depth', None)
+
             print('running for {} - {}'.format(k_b, sc['svr'][i]))
             tmp = run_runner(tmp_config, data, targets, sc.get('get_models', False),
                              sc.get('get_feature_selection', False))
