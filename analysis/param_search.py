@@ -74,10 +74,15 @@ for config in configs:
     print('preparing features..')
     features = run_lib.prepare_features(config)
     n_features = len(features[features.keys()[0]])
+
+    # set k_best according to the number of available features
     max_expo = int(np.floor(np.log2(n_features))) + 1
     sc['k_best'] = [2**i for i in range(max_expo)]
     if sc['k_best'][-1] != n_features:
         sc['k_best'] += [n_features]
+
+    # and the forest regularization parameter (als n_features dependend)
+    sc['forest'] = range(2, max_expo + 1, 2)
 
     print 'working on: ', config['run_name']
     for selection in sc['selection']:
