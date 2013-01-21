@@ -1,0 +1,20 @@
+{
+    "normed_responses": true,
+    "feature_selection": {
+        "method": "forest",
+        "k_best": 200
+    },
+    "features": {
+        "type": "conventional",
+        "descriptor": "all",
+        "normalize": true,
+        "properties_to_add": []
+    },
+    "methods": {
+        "forest": {
+            "cross_val": "oob"
+        }
+    },
+    "glomerulus": "to_overwrite",
+    "randomization_test": false
+}
