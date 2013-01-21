@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # encoding: utf-8
 """
-plot the results obtained by validate_gen_score
+plot the results obtained by validate_gen_score or validate_nestimators_forest
 
 Created by  on 2012-01-27.
 Copyright (c) 2012. All rights reserved.
@@ -25,9 +25,10 @@ for i, glom in enumerate(res):
     ax.bar(np.arange(len(values)), values)
     ax.set_yticks([0, ax.get_yticks()[-1]])
     if i == len(res) -1:
+        ax.set_xticks(np.arange(len(values)) + 0.5)
         ax.set_xticklabels(sorted_keys, rotation='90')
     else:
         ax.set_xticks([])
-    ax.set_ylabel(glom, rotation='0')
+    ax.set_ylabel('{} - {}'.format(glom, np.mean(np.array([res[glom].values()]))), rotation='0')
 fig.subplots_adjust(hspace=0.6)
 plt.show()
