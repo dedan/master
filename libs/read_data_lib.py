@@ -70,6 +70,7 @@ def read_paramsearch_results(path, p_selection={}):
         desc = os.path.splitext(os.path.basename(f_name))[0]
         js = json.load(open(f_name))
         desc_res, sc = js['res'], js['sc']
+        desc_res = utils.nested_remove_empty_values(desc_res)
         k_best[desc] = sc['k_best']
         methods = sc['runner_config_content']['methods'].keys()
 

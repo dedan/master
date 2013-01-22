@@ -15,6 +15,14 @@ def nested_remove_keys(d, key):
             nested_remove_keys(subv, key)
     return d
 
+def nested_remove_empty_values(d):
+    """traverse nested dict and remove all key, values with the given key"""
+    for subk, subv in d.items():
+        if not subv:
+            del d[subk]
+        if isinstance(subv, dict):
+            nested_remove_empty_values(subv)
+    return d
 
 class RUDict(dict):
     """code for this class from http://stackoverflow.com/a/8447781/515807"""
