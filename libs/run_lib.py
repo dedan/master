@@ -62,7 +62,7 @@ def do_paramsearch(sc, config, features, res):
             for already_done in res[str(k_b)][str(i)]:
                 if already_done in tmp_config['methods']:
                     del tmp_config['methods'][already_done]
-            if i >= len(sc['forest']):
+            if i >= len(sc['forest']) and 'forest' in tmp_config['methods']:
                 del tmp_config['methods']['forest']
             if 'svr' in tmp_config['methods']:
                 tmp_config['methods']['svr']['C'] = sc['svr'][i]
