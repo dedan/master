@@ -82,7 +82,7 @@ for config in configs:
         sc['k_best'] += [n_features]
 
     # and the forest regularization parameter (als n_features dependend)
-    sc['forest'] = range(2, max_expo + 1, 2)
+    sc['forest'] = range(2, max_expo + 2, 2)
 
     print 'working on: ', config['run_name']
     for selection in sc['selection']:
