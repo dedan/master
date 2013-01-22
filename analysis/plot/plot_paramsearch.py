@@ -32,13 +32,6 @@ if config['plot_param_space']:
         plib.plot_search_matrix(fig, search_res[desc], sc)
         fig.savefig(os.path.join(outpath, desc + '.' + config['format']))
 
-
-# feature selection comparison plot
-fig = plt.figure()
-plib.feature_selection_comparison_plot(fig, max_overview, sc)
-fig.savefig(os.path.join(outpath, 'max_overview.' + config['format']))
-
-
 # descriptor method performance plots
 fig = plt.figure(figsize=(15,5))
 plib.new_descriptor_performance_plot(fig, max_overview, sc, config['boxplot'])

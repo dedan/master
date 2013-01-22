@@ -137,69 +137,6 @@ def descriptor_performance_plot(fig, max_overview, sc):
             ax.set_xlabel('overall method score histogram')
             fig.subplots_adjust(hspace=0.35, wspace=0.02)
 
-
-def feature_selection_comparison_plot(fig, max_overview, sc):
-    """plot comparison between linear and forest feature selection"""
-    sparse_thresh_idx = 2
-    for i_meth, method in enumerate(max_overview):
-
-        if not ('linear' in max_overview[method] and 'forest' in max_overview[method]):
-            print 'comparison not possible, not both methods available'
-            continue
-        cur_lin = max_overview[method]['linear']
-        cur_for = max_overview[method]['forest']
-        desc_names = cur_lin['desc_names']
-
-        ax = fig.add_subplot(3, len(max_overview), i_meth + 1)
-        flat_lin = cur_lin['max'].flatten()
-        flat_for = cur_for['max'].flatten()
-
-        # scatter plot of max values
-        lines = []
-        for i in range(len(flat_lin)):
-            lines.append(ax.plot(flat_lin[i], flat_for[i], 'xb')[0])
-        plt.axis('scaled')
-        ax.set_xticks([0, ax.get_xticks()[-1]])
-        ax.set_yticks([0, ax.get_yticks()[-1]])
-        ax.set_title(method)
-        ax.set_xlabel('linear')
-        if i_meth == 0:
-            ax.set_ylabel('forest')
-        ax.plot([0, 1], [0, 1], '-', color='0.6')
-
-        flat_lin_kbest = cur_lin['k_best'].flatten()
-        flat_for_kbest = cur_for['k_best'].flatten()
-        counts_lin, clb = np.histogram(flat_lin_kbest, bins=len(sc['k_best']))
-        counts_for, cfb = np.histogram(flat_for_kbest, bins=len(sc['k_best']))
-        idx = np.digitize(flat_for_kbest, cfb)
-        sparse_idx = np.where(idx == sparse_thresh_idx + 1)[0]
-        for i in sparse_idx:
-            ax.plot(flat_lin[i], flat_for[i], '.r')
-
-        # k_best histogram plot
-        ax = fig.add_subplot(3, len(max_overview), i_meth + len(max_overview) + 1)
-        ax.bar(range(len(sc['k_best'])), counts_lin, color='r', label='linear')
-        plt.hold(True)
-        bla = ax.bar(range(len(sc['k_best'])), -counts_for, color='g', label='forest')
-        bla[sparse_thresh_idx].set_alpha(0.5)
-        ax.set_xticks(np.arange(len(sc['k_best'])) + .5)
-        ax.set_xticklabels(sc['k_best'], rotation='90', ha='left')
-        fig.subplots_adjust(hspace=0.4)
-
-        conti = np.zeros(len(flat_lin))
-        conti[:] = np.nan
-        conti[sparse_idx] = flat_for[sparse_idx]
-        conti = conti.reshape((len(desc_names), -1))
-        values = nanmean(conti, axis=1)
-        counts = np.sum(~np.isnan(conti), axis=1) / float(cur_lin['k_best'].shape[1])
-        sort_idx = np.argsort(counts)
-        ax = fig.add_subplot(3, len(max_overview), i_meth + 2 * len(max_overview) + 1)
-        ax.bar(np.arange(len(desc_names))*2, counts[sort_idx])
-        ax.set_xticks(np.arange(len(desc_names)) *2 + 1)
-        ax.set_xticklabels([desc_names[i] for i in sort_idx], rotation='90', fontsize=7)
-        ax.bar(np.arange(len(desc_names))*2+1, values[sort_idx], color='r')
-
-
 def plot_search_matrix(fig, desc_res, sc):
     """docstring for plot_search_matrix"""
     methods = desc_res.values()[0].values()[0].keys()
