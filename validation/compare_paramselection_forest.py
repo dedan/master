@@ -31,10 +31,12 @@ out_res = {}
 for i, descriptor in enumerate(search_res):
 
     res = json.load(open(os.path.join(inpath, descriptor + '.json')))
+    sc[method] = res['sc'][method]
+    sc['svr'] = res['sc']['svr']
 
     # param selection values to compare against
-    c_k_best = np.max(res['sc']['k_best'])
-    c_reg_idx = len(sc[method])-1
+    c_k_best = np.max(sc['k_best'])
+    c_reg_idx = np.min((len(sc[method])-1, len(sc['svr'])-1))
 
     best_genscore = []
     picked_genscore = []
