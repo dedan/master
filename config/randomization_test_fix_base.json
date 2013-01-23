@@ -1,5 +1,5 @@
 {
-    "outpath": "/Users/dedan/projects/master/results/validations/test1",
+    "outpath": "/Users/dedan/projects/master/results/validation/test",
     "n_repetitions": 3,
     "glomeruli": [
         "Or19a",
@@ -13,39 +13,24 @@
         "Or98a",
         "Or9a"
     ],
-    "forest": [
-        3,
-        5,
-        10,
-        100,
-        500
-    ],
-    "svr": [
-        0.01,
-        0.10000000000000001,
-        1.0,
-        10.0,
-        100.0
-    ],
     "runner_config_content": {
         "feature_selection": {
-        	"method": "forest"
+        	"method": "forest",
+            "k_best": "to_overwrite"
         },
         "features": {
-            "type": "spectral",
-            "normalize": false,
-            "normalize_samples": false,
+            "type": "conventional",
+            "descriptor": "haddad_desc",
+            "normalize": true,
             "kernel_width": 30,
-            "bin_width": 45,
             "use_intensity": true,
             "spec_type": "ir",
             "properties_to_add": []
         },
         "methods": {
             "svr": {
-                "cross_val": true,
                 "C": 1.0,
-                "n_folds": 10
+                "n_folds": 50
             }
         },
         "randomization_test": false
