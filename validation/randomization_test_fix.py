@@ -62,7 +62,6 @@ for i in range(sc['n_repetitions']):
         data, targets, molids = run_lib.load_data_targets(config, features)
         tmp_res = run_lib.run_runner(config, data, targets, get_models=True)
         res[glomerulus] = tmp_res[method]['gen_score']
-    json.dump(res, open(os.path.join(sc['outpath'], 'true.json'), 'w'))
     run_name = 'run_' + time.strftime("%d%m%Y_%H%M%S", time.localtime())
     json.dump(res, open(os.path.join(sc['outpath'], run_name + '.json'), 'w'))
 
