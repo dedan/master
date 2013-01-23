@@ -12,11 +12,32 @@ import numpy as np
 import pylab as plt
 from collections import defaultdict
 from scipy.stats.stats import nanmean
+from scipy.stats import gaussian_kde
 from master.libs import utils
 from master.libs import read_data_lib as rdl
 
 structures_path = os.path.join(os.path.dirname(__file__), '..', 'data', 'structures')
 
+
+def violin_plot(ax, pos, data, bp=False):
+    '''
+    create violin plots on an axis
+    '''
+    dist = max(pos)-min(pos)
+    w = min(0.15*max(dist,1.0),0.5)
+    print data.shape
+    print pos
+    for d,p in zip(data,pos):
+        k = gaussian_kde(d) #calculates the kernel density
+        m = k.dataset.min() #lower bound of violin
+        M = k.dataset.max() #upper bound of violin
+        x = np.arange(m,M,(M-m)/100.) # support for violin
+        v = k.evaluate(x) #violin profile (density curve)
+        v = v/v.max()*w #scaling the violin to the available space
+        ax.fill_betweenx(x,p,v+p,facecolor='y',alpha=0.3)
+        ax.fill_betweenx(x,p,-v+p,facecolor='y',alpha=0.3)
+    if bp:
+        ax.boxplot(data.T,notch=1,positions=pos,vert=1)
 
 def structure_plot(fig, molids, activations=None):
     """plot molecule structures"""
@@ -78,10 +99,9 @@ def new_descriptor_performance_plot(fig, max_overview, sc, boxplot=True):
                         if not name is 'medians':
                             line.set_color('0.0')
             else:
-                ax.bar((np.arange(len(desc_names)) - 0.5) * 3,
-                       np.mean(data, axis=1),
-                       yerr=np.std(data, axis=1), width=1.7)
-                ax.set_xticks(np.arange(len(desc_names)) * 3)
+                print data.shape
+                print len(desc_names)
+                violin_plot(ax, np.arange(len(desc_names)), data, bp=True)
             ax.spines['top'].set_visible(False)
             ax.spines['right'].set_visible(False)
             ax.get_xaxis().tick_bottom()
