@@ -1,10 +1,16 @@
 {
-    "inpath": "/Users/dedan/projects/master/results/new_param_search/spec_features_wointenswonorm",
+    "inpath": "/Users/dedan/projects/master/results/param_search/merged",
     "format": "png",
-    "plot_param_space": true,
-    "boxplot": false,
+    "plot_param_space": false,
+    "boxplot": true,
     "selection": {
-    	"k_best_idx": -1,
-    	"c_best_idx": 2
+    	"svr": {
+	    	"k_best_idx": -1,
+	    	"c_best_idx": 1
+    	},
+    	"forest": {
+	    	"k_best_idx": -1,
+	    	"c_best_idx": -1
+    	}
     }
 }

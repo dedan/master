@@ -51,8 +51,8 @@ def get_id2name():
 def read_paramsearch_results(path, p_selection={}):
     """read the results from a parameter search for several descriptors"""
     # variables for results
-    if p_selection:
-        assert 'k_best_idx' in p_selection and 'c_best_idx' in p_selection
+    for psv in p_selection.values():
+        assert 'k_best_idx' in psv and 'c_best_idx' in psv
     search_res = utils.recursive_defaultdict()
     initializer = lambda: {'max': np.zeros((len(f_names), len(sc['glomeruli']))),
                            'p_selection': np.zeros((len(f_names), len(sc['glomeruli']))),
@@ -72,10 +72,10 @@ def read_paramsearch_results(path, p_selection={}):
         desc_res, sc = js['res'], js['sc']
         desc_res = utils.nested_remove_empty_values(desc_res)
         k_best[desc] = sc['k_best']
-        methods = sc['runner_config_content']['methods'].keys()
 
-        for i_sel, selection in enumerate(sc['selection']):
+        for i_sel, selection in enumerate(desc_res):
             for i_glom, glom in enumerate(sorted(desc_res[selection])):
+                methods = desc_res[selection][glom].values()[0].values()[0].keys()
                 for i_meth, method in enumerate(methods):
                     cur_max = max_overview[method][selection]
                     mat = get_search_matrix(desc_res[selection][glom], method)
@@ -86,12 +86,10 @@ def read_paramsearch_results(path, p_selection={}):
                     if i_glom == 0:
                         cur_max['desc_names'].append(desc)
                     cur_max['glomeruli'] = sorted(desc_res[selection])
-                    if p_selection:
-                        sel_value = mat[p_selection['k_best_idx'], p_selection['c_best_idx']]
+                    if method in p_selection:
+                        ps = p_selection[method]
+                        sel_value = mat[ps['k_best_idx'], ps['c_best_idx']]
                         cur_max['p_selection'][i_file, i_glom] = sel_value
-
-
-
     return search_res, max_overview, sc, k_best
 
 
