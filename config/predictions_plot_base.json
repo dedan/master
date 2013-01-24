@@ -1,0 +1,81 @@
+{
+  "svr_lin_haddad": {
+    "feature_selection": {
+        "k_best": "max",
+        "method": "linear"
+        },
+    "features": {
+      "type": "conventional",
+      "descriptor": "haddad_desc",
+      "normalize": true,
+      "properties_to_add": []
+    },
+    "methods": {
+      "svr": {
+        "C": 1.0
+      }
+    },
+    "randomization_test": false
+  },
+
+  "svr_lin_saito": {
+    "feature_selection": {
+        "k_best": "max",
+        "method": "linear"
+        },
+    "features": {
+      "type": "conventional",
+      "descriptor": "saito_desc",
+      "normalize": true,
+      "properties_to_add": []
+    },
+    "methods": {
+      "svr": {
+        "C": 1.0
+      }
+    },
+    "randomization_test": false
+  },
+
+  "svr_lin_all": {
+    "feature_selection": {
+        "k_best": "max",
+        "method": "linear"
+        },
+    "features": {
+      "type": "conventional",
+      "descriptor": "all",
+      "normalize": true,
+      "properties_to_add": []
+    },
+    "methods": {
+      "svr": {
+        "C": 1.0
+      }
+    },
+    "randomization_test": false
+  },
+
+    "svr_lin_vib100": {
+    "feature_selection": {
+        "k_best": "max",
+        "method": "linear"
+        },
+    "features": {
+      "type": "spectral",
+      "normalize": true,
+      "kernel_width": 100,
+      "bin_width": 150,
+      "use_intensity": false,
+      "spec_type": "ir",
+      "properties_to_add": []
+    },
+    "methods": {
+      "svr": {
+        "C": 1.0
+      }
+    },
+    "randomization_test": false
+  }
+
+}
