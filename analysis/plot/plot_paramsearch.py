@@ -10,9 +10,11 @@ import sys
 import os
 import json
 import pylab as plt
+import itertools as it
 from master.libs import plot_lib as plib
 from master.libs import read_data_lib as rdl
 from master.libs import utils
+import matplotlib.gridspec as gridspec
 reload(plib)
 reload(rdl)
 
@@ -38,7 +40,7 @@ plib.new_descriptor_performance_plot(fig, max_overview, sc, config['boxplot'])
 fig.subplots_adjust(bottom=0.3)
 fig.savefig(os.path.join(outpath, 'desc_comparison.' + config['format']))
 
-# method comparison plot
+# ML method comparison plot
 colors = ['#00A0B0', '#6A4A3C', '#CC333F', '#EB6841', '#EDC951']
 fig = plt.figure()
 ax = fig.add_subplot(111)
@@ -59,4 +61,27 @@ fig.savefig(os.path.join(outpath, 'best_method_comparison.' + config['format']))
 if utils.run_from_ipython():
     plt.show()
 
+
+# descriptor comparison plot for svr lin
+mn = desc2comp
+gs = gridspec.GridSpec(len(mn)-1, len(mn)-1)
+gs.update(wspace=0.2, hspace=0.2)
+cur_max = max_overview['svr']['linear']
+for m1, m2 in it.combinations(mn, 2):
+    ax = plt.subplot(gs[mn.index(m1), mn.index(m2)-1])
+    desc_idx1 = cur_max['desc_names'].index(m1)
+    desc_idx2 = cur_max['desc_names'].index(m2)
+    ax.plot(cur_max['max'][desc_idx2, :], cur_max['max'][desc_idx1, :], 'x')
+    ax.plot([0, 1], [0, 1], color='0.5')
+    ax.set_xlim([-0.2, 1])
+    ax.set_ylim([-0.2, 1])
+    if mn.index(m1) == (mn.index(m2)-1):
+        ax.set_ylabel(m1)
+    if mn.index(m1) == 0:
+        ax.set_title(m2)
+    if not (mn.index(m1) == 0 and mn.index(m2) == 1):
+        ax.set_yticks([])
+    if not (mn.index(m1) == (len(mn)-2) and mn.index(m2) == (len(mn)-1)):
+        ax.set_xticks([])
+plt.savefig(os.path.join(outpath, 'descriptor_comparison.png'))
 
