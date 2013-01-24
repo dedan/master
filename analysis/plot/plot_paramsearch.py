@@ -37,10 +37,26 @@ fig = plt.figure(figsize=(15,5))
 plib.new_descriptor_performance_plot(fig, max_overview, sc, config['boxplot'])
 fig.subplots_adjust(bottom=0.3)
 fig.savefig(os.path.join(outpath, 'desc_comparison.' + config['format']))
+
+# method comparison plot
+colors = ['#00A0B0', '#6A4A3C', '#CC333F', '#EB6841', '#EDC951']
+fig = plt.figure()
+ax = fig.add_subplot(111)
+desc2comp = ['haddad_desc', 'saito_desc', 'all', 'vib_100']
+for i, desc in enumerate(desc2comp):
+    desc_idx1 = max_overview['svr']['linear']['desc_names'].index(desc)
+    desc_idx2 = max_overview['forest']['forest']['desc_names'].index(desc)
+    ax.plot(max_overview['svr']['linear']['max'][desc_idx1, :],
+            max_overview['forest']['forest']['max'][desc_idx2, :],
+            '.', color=colors[i],
+            label=desc)
+ax.plot([0, 1], [0, 1], color='0.5')
+ax.set_xlabel('svr_lin')
+ax.set_ylabel('forest_forest')
+ax.legend(loc=2)
+fig.savefig(os.path.join(outpath, 'best_method_comparison.' + config['format']))
+
 if utils.run_from_ipython():
     plt.show()
-
-
-
 
 
