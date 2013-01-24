@@ -49,10 +49,10 @@ for conf_name, config in configs.items():
 
 
 mn = configs.keys()
-gs = gridspec.GridSpec(len(mn), len(mn))
+gs = gridspec.GridSpec(len(mn)-1, len(mn)-1)
 gs.update(wspace=0.2, hspace=0.2)
 for m1, m2 in it.combinations(mn, 2):
-    ax = plt.subplot(gs[mn.index(m1), mn.index(m2)])
+    ax = plt.subplot(gs[mn.index(m1), mn.index(m2)-1])
     ax.plot(res[m2], res[m1], 'x')
     ax.plot([0, 1], [0, 1], color='0.5')
     ax.set_xlim([-0.2, 1])
@@ -65,12 +65,12 @@ for m1, m2 in it.combinations(mn, 2):
         ax.set_yticks([])
     if not (mn.index(m1) == (len(mn)-2) and mn.index(m2) == (len(mn)-1)):
         ax.set_xticks([])
-plt.savefig(os.path.join(outpath, 'prediction_comparison.png'))
+plt.savefig(os.path.join(outpath, glom + '_prediction_comparison.png'))
 
 if utils.run_from_ipython():
     plt.show()
 
-with open(os.path.join(outpath, 'predictions.csv'), 'w') as f:
+with open(os.path.join(outpath, glom + '_predictions.csv'), 'w') as f:
     f.write(',{}\n'.format(','.join(res.keys())))
     for i, molid in enumerate(mol_intersection):
         f.write(molid + ',')
