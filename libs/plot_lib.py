@@ -89,7 +89,7 @@ def new_descriptor_performance_plot(fig, max_overview, sc, boxplot=True):
 
             plot_x = i_sel * len(max_overview) + i_meth + 1
             ax = fig.add_subplot(1, n_plots, plot_x)
-            ax.set_title('{}_{}.'.format(method, selection))
+            ax.set_title('{}'.format(method))
             if boxplot:
                 boxes = ax.boxplot(data.T)
                 for whisk in boxes['whiskers']:
@@ -98,6 +98,7 @@ def new_descriptor_performance_plot(fig, max_overview, sc, boxplot=True):
                     for line in thing:
                         if not name is 'medians':
                             line.set_color('0.0')
+                ax.plot(range(1, data.shape[0]+1), np.mean(data, axis=1), '.')
             else:
                 print data.shape
                 print len(desc_names)
@@ -107,7 +108,7 @@ def new_descriptor_performance_plot(fig, max_overview, sc, boxplot=True):
             ax.get_xaxis().tick_bottom()
             ax.get_yaxis().tick_left()
             ax.set_ylim([0, 0.8])
-            ax.set_xticklabels([desc_names[i] for i in sort_y], rotation='90', fontsize=6)
+            ax.set_xticklabels([desc_names[i][:16] for i in sort_y], rotation='90', fontsize=10)
             if plot_x == 1:
                 ax.set_ylabel('average descriptor score')
 
@@ -173,8 +174,9 @@ def plot_search_matrix(fig, desc_res, sc):
                 if i_sel + i_meth == 0:
                     ax.set_title(glom, rotation='0')
                 if i_glom == 0:
-                    ax.set_ylabel('{}\n{}'.format(method,selection))
+                    ax.set_ylabel('{}'.format(method))
                 ax.set_yticks([])
                 ax.set_xticks([])
                 ax.set_xlabel('{:.2f}'.format(np.max(mat)))
-    fig.subplots_adjust(hspace=0.5, wspace=0.3)
+                print('{}: {:.2f}'.format(glom, np.max(mat)))
+    fig.subplots_adjust(hspace=0.5, wspace=0.4)

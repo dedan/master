@@ -46,9 +46,9 @@ fig = plt.figure(figsize=(8,4))
 for i, glom in enumerate(res):
 
     ax = fig.add_subplot(len(res), 1, i+1)
-    ax.hist(res[glom]['rand_res_dist'])
-    ax.plot([res[glom]['true_res']], [5], 'r*')
-    ax.set_ylabel('{} - {:.3f}'.format(glom, res[glom]['p']), rotation='0')
+    ax.hist(res[glom]['rand_res_dist'], color='0.5')
+    ax.plot([res[glom]['true_res']], [20], 'r.')
+    ax.set_ylabel('{} p: {:.3f}'.format(glom, res[glom]['p']), rotation='0')
     ax.set_yticks([])
     ax.set_xlim([-0.4, 0.8])
     if not i == len(res) - 1:
