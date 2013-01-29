@@ -53,7 +53,7 @@ gs = gridspec.GridSpec(len(mn)-1, len(mn)-1)
 gs.update(wspace=0.2, hspace=0.2)
 for m1, m2 in it.combinations(mn, 2):
     ax = plt.subplot(gs[mn.index(m1), mn.index(m2)-1])
-    ax.plot(res[m2], res[m1], 'x')
+    ax.plot(res[m2], res[m1], 'x', color='#53777A')
     ax.plot([0, 1], [0, 1], color='0.5')
     ax.set_xlim([-0.2, 1])
     ax.set_ylim([-0.2, 1])

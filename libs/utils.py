@@ -6,6 +6,15 @@
 import numpy as np
 from collections import defaultdict
 
+
+def simple_axis(ax):
+    """remove top and right axis"""
+    ax.spines['top'].set_visible(False)
+    ax.spines['right'].set_visible(False)
+    ax.get_xaxis().tick_bottom()
+    ax.get_yaxis().tick_left()
+
+
 def nested_remove_keys(d, key):
     """traverse nested dict and remove all key, values with the given key"""
     for subk, subv in d.items():

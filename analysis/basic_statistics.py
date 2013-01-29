@@ -55,10 +55,10 @@ for i, idx in enumerate(larger_n_idx):
     glom = rm[:, idx]
     data = glom[~np.isnan(glom)]
     if scoreatpercentile(data, 75) < 0.2:
-        ax.hist(data, bins=np.arange(0, 1.1, 0.1), color='r')
+        ax.hist(data, bins=np.arange(0, 1.1, 0.1), color='#990000')
     else:
         interesting.append(glomeruli[idx])
-        ax.hist(data, bins=np.arange(0, 1.1, 0.1), color='b')
+        ax.hist(data, bins=np.arange(0, 1.1, 0.1), color='#38761d')
     ax.set_title(glomeruli[idx])
     ax.set_xticklabels([])  # can be switched of because all values 0 < x < 1
 fig.subplots_adjust(hspace=0.3)
@@ -75,13 +75,15 @@ sorted_idx = list(reversed(np.argsort(n_stimuli)))
 patches = ax.bar(range(len(glomeruli)), n_stimuli[sorted_idx])
 for i, p in enumerate(patches):
     if glomeruli[sorted_idx[i]] in interesting:
-        p.set_facecolor('b')
+        p.set_facecolor('#38761d')
     else:
-        p.set_facecolor('r')
+        p.set_facecolor('#990000')
 ax.set_xticks(np.arange(len(glomeruli)) + 1)
 ax.set_xticklabels([glomeruli[i] for i in sorted_idx], rotation='45', ha='right')
 ax.set_title('number of stimuli available for a glomerulus')
 fig.savefig(os.path.join(results_path, 'stimuli_per_glomerulus.' + format))
+for i in sorted_idx:
+    print('{}: {}'.format(glomeruli[i], n_stimuli[i]))
 
 # number of molecules available for all glomeruli
 print 'glomerulus for which all stimuli are available'

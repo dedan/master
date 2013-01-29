@@ -41,7 +41,7 @@ fig.subplots_adjust(bottom=0.3)
 fig.savefig(os.path.join(outpath, 'desc_comparison.' + config['format']))
 
 # ML method comparison plot
-colors = ['#00A0B0', '#6A4A3C', '#CC333F', '#EB6841', '#EDC951']
+colors = ['#95D4EC', '#C092DD', '#86E66C', '#F75454', '#FBCF39']
 fig = plt.figure()
 ax = fig.add_subplot(111)
 desc2comp = ['haddad_desc', 'saito_desc', 'all', 'vib_100']
@@ -50,11 +50,12 @@ for i, desc in enumerate(desc2comp):
     desc_idx2 = max_overview['forest']['forest']['desc_names'].index(desc)
     ax.plot(max_overview['svr']['linear']['max'][desc_idx1, :],
             max_overview['forest']['forest']['max'][desc_idx2, :],
-            '.', color=colors[i],
+            '.', color=colors[i], markersize=12,
             label=desc)
-ax.plot([0, 1], [0, 1], color='0.5')
-ax.set_xlabel('svr_lin')
-ax.set_ylabel('forest_forest')
+ax.plot([0, 0.8], [0, 0.8], color='0.5')
+ax.set_xlabel('SVR')
+ax.set_ylabel('forest')
+utils.simple_axis(ax)
 ax.legend(loc=2)
 fig.savefig(os.path.join(outpath, 'best_method_comparison.' + config['format']))
 
