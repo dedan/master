@@ -39,7 +39,9 @@ for rand_res_file in rand_res_files:
 
 # compute statistics
 for r in res.values():
-    r['p'] = np.sum(np.array(r['rand_res_dist']) > r['true_res']) / float(len(r['rand_res_dist']))
+    sum_larger_true = np.sum(np.array(r['rand_res_dist']) > r['true_res'])
+    n_repetitions = float(len(r['rand_res_dist']))
+    r['p'] = (1 + sum_larger_true) / n_repetitions
 
 # create a plot of the resulting distribution and the original value
 fig = plt.figure(figsize=(8,4))
