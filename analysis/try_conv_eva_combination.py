@@ -11,6 +11,7 @@ Copyright (c) 2012. All rights reserved.
 '''
 
 import os
+import copy
 import json
 from master.libs import run_lib
 import numpy as np
@@ -28,8 +29,8 @@ config = {
         "method": 'linear'
     },
     "methods": {
-        "forest": {
-            "n_estimators": 500,
+        "svr": {
+            "C": 1.0,
             "n_folds": 50
         }
     },
@@ -44,28 +45,36 @@ for glom in used_gloms:
     config['glomerulus'] = glom
 
     # prepare haddad features
-    features = run_lib.prepare_features(config)
-    data_haddad, targets, _ = run_lib.load_data_targets(config, features)
-    config['feature_selection']['k_best'] = data_haddad.shape[1]
-    tmp = run_lib.run_runner(config, data_haddad, targets, False, False)
-    alone_haddad.append(tmp['forest']['gen_score'])
+    features_h = run_lib.prepare_features(config)
+    data_h, targets_h, molids_h = run_lib.load_data_targets(config, features_h)
+    config['feature_selection']['k_best'] = data_h.shape[1]
+    tmp = run_lib.run_runner(config, data_h, targets_h)
+    print glom, tmp
+    alone_haddad.append(tmp['svr']['gen_score'])
 
     # prepare vib100
-    config['features']['type'] = 'spectral'
-    config['features']['kernel_width'] = 50
-    config['features']['bin_width'] = 75
-    config['features']['use_intensity'] = False
-    config['features']['spec_type'] = 'ir'
-    data_vib100, _, _ = run_lib.load_data_targets(config, features)
-    config['feature_selection']['k_best'] = data_vib100.shape[1]
-    tmp = run_lib.run_runner(config, data_vib100, targets, False, False)
-    alone_vib.append(tmp['forest']['gen_score'])
+    config_spec = copy.deepcopy(config)
+    config_spec['features']['type'] = 'spectral'
+    config_spec['features']['kernel_width'] = 100
+    config_spec['features']['bin_width'] = 150
+    config_spec['features']['use_intensity'] = False
+    config_spec['features']['spec_type'] = 'ir'
+
+    features_v = run_lib.prepare_features(config_spec)
+    data_v, targets_v, molids_v = run_lib.load_data_targets(config_spec, features_v)
+    config['feature_selection']['k_best'] = data_v.shape[1]
+    tmp = run_lib.run_runner(config, data_v, targets_v)
+    alone_vib.append(tmp['svr']['gen_score'])
 
     # together
-    data_combined = np.hstack((data_haddad, data_vib100))
+    both_avail = set(molids_v).intersection(molids_h)
+    idx_h = [i for i, m in enumerate(molids_h) if m in both_avail]
+    idx_v = [i for i, m in enumerate(molids_v) if m in both_avail]
+    data_combined = np.hstack((data_h[idx_h], data_v[idx_v]))
+    targets_combined = targets_h[idx_h]
     config['feature_selection']['k_best'] = data_combined.shape[1]
-    tmp = run_lib.run_runner(config, data_combined, targets, False, False)
-    together.append(tmp['forest']['gen_score'])
+    tmp = run_lib.run_runner(config, data_combined, targets_combined)
+    together.append(tmp['svr']['gen_score'])
 
 fig = plt.figure()
 ax = fig.add_subplot(111)
