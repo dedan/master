@@ -49,6 +49,7 @@ print '\n target distribution of glomeruli with more than %d stimuli' % N
 interesting = []
 fig = plt.figure(figsize=(10, 10))
 larger_n_idx = np.where(np.sum(~np.isnan(rm), axis=0) > 50)[0]
+n_avail_with_all_conditions = []
 for i, idx in enumerate(larger_n_idx):
     w_c = utils.ceiled_root(len(larger_n_idx))
     ax = fig.add_subplot(w_c, w_c, i + 1)
@@ -57,6 +58,7 @@ for i, idx in enumerate(larger_n_idx):
     if scoreatpercentile(data, 75) < 0.2:
         ax.hist(data, bins=np.arange(0, 1.1, 0.1), color='#990000')
     else:
+        n_avail_with_all_conditions.append(np.sum(~np.isnan(rm[:, idx])))
         interesting.append(glomeruli[idx])
         ax.hist(data, bins=np.arange(0, 1.1, 0.1), color='#38761d')
     ax.set_title(glomeruli[idx])
@@ -66,6 +68,9 @@ fig.savefig(os.path.join(results_path, 'target_quality.' + format))
 print ('\tlist of glomeruli with more than %d stimuli and %d percentile > %f' %
        (N, percentile, percentile_thres))
 print interesting
+
+print 'mean number of mols available for the 10 glom with all conds fulfilled'
+print np.mean(n_avail_with_all_conditions), n_avail_with_all_conditions
 
 # number of stimuli availabe for each glomerulus, colored according to selected or not
 fig = plt.figure(figsize=(15, 7))
