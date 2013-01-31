@@ -43,6 +43,7 @@ glomeruli = search_res[desc][selection].keys()
 
 # sort glomeruli according to performance
 maxes = [np.max(search_res[desc][selection][glom][method]) for glom in glomeruli]
+picks = [search_res[desc][selection][glom][method][-1, 1] for glom in glomeruli]
 max_idx = np.argsort(maxes)
 glomeruli = [glomeruli[i] for i in max_idx]
 
@@ -54,8 +55,8 @@ for i_glom, glom in enumerate(glomeruli):
     ax = plt.subplot2grid((len(glomeruli), 2), (i_glom, 1))
     if len(tmp_rm) > 50 and scoreatpercentile(tmp_rm, 75) > 0.2:
         ax.hist(tmp_rm, color='g')
-    elif scoreatpercentile(tmp_rm, 75) > 0.2:
-        ax.hist(tmp_rm, color='b')
+    elif scoreatpercentile(tmp_rm, 75) > 0.14:
+        ax.hist(tmp_rm, color='#6be463')
     else:
         ax.hist(tmp_rm, color='r')
     ax.set_xlim([0, 1])
@@ -69,9 +70,19 @@ for i_glom, glom in enumerate(glomeruli):
         ax.imshow(mat, interpolation='nearest', vmin=0)
     ax.set_yticks([])
     ax.set_xticks([])
-    ax.set_ylabel('{}-{:.2f}'.format(len(tmp_rm), np.max(mat)), rotation='0')
+    y_label = 'score: {:.2f}, n_targets: {}, percentile: {:.2f}'.format(
+                  np.max(mat),
+                  len(tmp_rm),
+                  scoreatpercentile(tmp_rm, 75)
+               )
+    ax.set_ylabel(y_label, rotation='0')
 
+fig.savefig(os.path.join(outpath, desc + '_allglom.' + config['format']))
 
-
-    fig.savefig(os.path.join(outpath, desc + '_allglom.' + config['format']))
-
+fig = plt.figure()
+ax = fig.add_subplot(211)
+ax.hist(maxes, bins=np.arange(0, 1, 0.05))
+ax.set_xlim([0, 1])
+ax = fig.add_subplot(212)
+ax.hist(picks, bins=np.arange(0, 1, 0.05))
+ax.set_xlim([0, 1])
