@@ -67,7 +67,7 @@ def structure_plot(fig, molids, activations=None):
         # plt.axis('off')
 
 
-def new_descriptor_performance_plot(fig, max_overview, sc, boxplot=True):
+def new_descriptor_performance_plot(fig, max_overview, sc, glomeruli, boxplot=True):
     """compare performance of different descriptors for several glomeruli"""
     n_plots = len(max_overview) * len(max_overview.values()[0])
     for i_meth, method in enumerate(max_overview):
@@ -82,6 +82,12 @@ def new_descriptor_performance_plot(fig, max_overview, sc, boxplot=True):
                 data = max_overview[method][selection]['p_selection']
             else:
                 data = max_overview[method][selection]['max']
+
+            # use only selected glomeruli
+            avail_glomeruli = max_overview[method][selection]['glomeruli']
+            glom_idx = [i for i, g in enumerate(avail_glomeruli) if g in glomeruli]
+            data = data[:, glom_idx]
+
             sort_x = np.argsort(np.mean(data, axis=0))
             sort_y = np.argsort(np.mean(data, axis=1))
             data = data[sort_y, :]
@@ -158,15 +164,15 @@ def descriptor_performance_plot(fig, max_overview, sc):
             ax.set_xlabel('overall method score histogram')
             fig.subplots_adjust(hspace=0.35, wspace=0.02)
 
-def plot_search_matrix(fig, desc_res, sc):
+def plot_search_matrix(fig, desc_res, sc, glomeruli):
     """docstring for plot_search_matrix"""
     methods = desc_res.values()[0].values()[0].keys()
     for i_sel, selection in enumerate(sc['selection']):
-        for i_glom, glom in enumerate(desc_res[selection]):
+        for i_glom, glom in enumerate(glomeruli):
             for i_meth, method in enumerate(methods):
                 mat = desc_res[selection][glom][method]
-                ax_idx = i_meth * len(sc['glomeruli']) * 2 + len(sc['glomeruli']) * i_sel + i_glom + 1
-                ax = fig.add_subplot(6, len(sc['glomeruli']), ax_idx)
+                ax_idx = i_meth * len(glomeruli) * 2 + len(glomeruli) * i_sel + i_glom + 1
+                ax = fig.add_subplot(6, len(glomeruli), ax_idx)
                 if np.max(mat) < 0:
                     ax.imshow(mat, interpolation='nearest')
                 else:
