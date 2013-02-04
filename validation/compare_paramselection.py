@@ -75,8 +75,12 @@ fig = plt.figure()
 ax = fig.add_subplot(111)
 all_best_genscores = __builtin__.sum([r['best_genscore'] for r in out_res.values()], [])
 all_picked_genscores = __builtin__.sum([r['picked_genscore'] for r in out_res.values()], [])
-ax.plot(all_best_genscores, all_picked_genscores, 'x')
+ax.plot(all_best_genscores, all_picked_genscores, '.')
 ax.plot([0, 0.8], [0, 0.8], color='0.5')
+ax.plot([0.1, 0.9], [0, 0.8], color='0.5')
+
+ax.set_xlim([0.3, 1])
+ax.set_ylim([-1, 1])
 fig.savefig(os.path.join(inpath, 'plots', 'param_selection_overview.png'))
 plt.show()
 
