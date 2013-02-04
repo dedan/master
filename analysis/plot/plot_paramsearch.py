@@ -9,6 +9,7 @@ Copyright (c) 2012. All rights reserved.
 import sys
 import os
 import json
+import numpy as np
 import pylab as plt
 import itertools as it
 from master.libs import plot_lib as plib
@@ -36,7 +37,8 @@ if config['plot_param_space']:
 
 # descriptor method performance plots
 fig = plt.figure(figsize=(15,5))
-plib.new_descriptor_performance_plot(fig, max_overview, sc, config['glomeruli'], config['boxplot'])
+plib.new_descriptor_performance_plot(fig, max_overview, sc,
+                                     config.get('glomeruli', []), config['boxplot'])
 fig.subplots_adjust(bottom=0.3)
 fig.savefig(os.path.join(outpath, 'desc_comparison.' + config['format']))
 

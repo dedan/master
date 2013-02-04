@@ -67,7 +67,7 @@ def structure_plot(fig, molids, activations=None):
         # plt.axis('off')
 
 
-def new_descriptor_performance_plot(fig, max_overview, sc, glomeruli, boxplot=True):
+def new_descriptor_performance_plot(fig, max_overview, sc, glomeruli=[], boxplot=True):
     """compare performance of different descriptors for several glomeruli"""
     n_plots = len(max_overview) * len(max_overview.values()[0])
     for i_meth, method in enumerate(max_overview):
@@ -85,13 +85,10 @@ def new_descriptor_performance_plot(fig, max_overview, sc, glomeruli, boxplot=Tr
 
             # use only selected glomeruli
             avail_glomeruli = max_overview[method][selection]['glomeruli']
-            glom_idx = [i for i, g in enumerate(avail_glomeruli) if g in glomeruli]
-            data = data[:, glom_idx]
+            if glomeruli:
+                glom_idx = [i for i, g in enumerate(avail_glomeruli) if g in glomeruli]
+                data = data[:, glom_idx]
 
-            sort_x = np.argsort(np.mean(data, axis=0))
-            sort_y = np.argsort(np.mean(data, axis=1))
-            data = data[sort_y, :]
-            data = data[:, sort_x]
 
             plot_x = i_sel * len(max_overview) + i_meth + 1
             ax = fig.add_subplot(1, n_plots, plot_x)
@@ -113,8 +110,8 @@ def new_descriptor_performance_plot(fig, max_overview, sc, glomeruli, boxplot=Tr
             ax.spines['right'].set_visible(False)
             ax.get_xaxis().tick_bottom()
             ax.get_yaxis().tick_left()
-            ax.set_ylim([0, 0.8])
-            ax.set_xticklabels([desc_names[i][:16] for i in sort_y], rotation='90', fontsize=10)
+            ax.set_ylim([-3, 0.8])
+            ax.set_xticklabels([desc_names[i][:16] for i in range(len(desc_names))], rotation='90', fontsize=10)
             if plot_x == 1:
                 ax.set_ylabel('average descriptor score')
 
