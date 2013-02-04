@@ -16,6 +16,7 @@ from master.libs import utils
 import numpy as np
 import pylab as plt
 import matplotlib.gridspec as gridspec
+from scipy import stats
 reload(rl)
 
 plt.close('all')
@@ -88,3 +89,4 @@ fig = plt.figure()
 ax = fig.add_subplot(111)
 ax.hist(list(it.chain(*correlations.values())))
 fig.savefig(os.path.join(outpath, 'prediction_correlations.png'))
+print stats.percentileofscore(all_cors, 0.7)
