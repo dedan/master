@@ -89,6 +89,9 @@ def new_descriptor_performance_plot(fig, max_overview, sc, glomeruli=[], boxplot
                 glom_idx = [i for i, g in enumerate(avail_glomeruli) if g in glomeruli]
                 data = data[:, glom_idx]
 
+            all_idx = max_overview['svr']['linear']['desc_names'].index('all')
+            all_values = data[all_idx]
+            clist_all = [sorted(all_values,reverse=True).index(i) / float(len(all_values)-1) for i in all_values]
 
             plot_x = i_sel * len(max_overview) + i_meth + 1
             ax = fig.add_subplot(1, n_plots, plot_x)
@@ -103,9 +106,12 @@ def new_descriptor_performance_plot(fig, max_overview, sc, glomeruli=[], boxplot
                             line.set_color('0.0')
                 ax.plot(range(1, data.shape[0]+1), np.mean(data, axis=1), '.')
             else:
-                print data.shape
-                print len(desc_names)
-                violin_plot(ax, np.arange(len(desc_names)), data, bp=True)
+                for j, d in enumerate(data):
+                    for jj, dd in enumerate(d):
+                        c = '{:.2f}'.format(clist_all[jj])
+                        ax.plot(j+1, dd, '.', color=c)
+                ax.set_xticks(range(len(data)))
+                # violin_plot(ax, np.arange(len(desc_names)), data, bp=True)
             ax.spines['top'].set_visible(False)
             ax.spines['right'].set_visible(False)
             ax.get_xaxis().tick_bottom()
