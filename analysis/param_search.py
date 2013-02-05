@@ -77,9 +77,13 @@ for config in configs:
 
     # set k_best according to the number of available features
     max_expo = int(np.floor(np.log2(n_features))) + 1
-    sc['k_best'] = [2**i for i in range(max_expo)]
-    if sc['k_best'][-1] != n_features:
-        sc['k_best'] += [n_features]
+    if not 'k_best' in sc:
+        sc['k_best'] = [2**i for i in range(max_expo)]
+        if sc['k_best'][-1] != n_features:
+            sc['k_best'] += [n_features]
+    else:
+        sc['k_best'] = [n_features]
+    print n_features
 
     # and the forest regularization parameter (als n_features dependend)
     sc['forest'] = range(2, max_expo + 2, 2)
