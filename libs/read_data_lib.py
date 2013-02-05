@@ -75,7 +75,11 @@ def read_paramsearch_results(path, p_selection={}):
 
         for i_sel, selection in enumerate(desc_res):
             for i_glom, glom in enumerate(sorted(desc_res[selection])):
-                methods = desc_res[selection][glom].values()[0].values()[0].keys()
+                methods = []
+                for bla in desc_res[selection][glom]:
+                    for blub in desc_res[selection][glom][bla]:
+                        methods.extend(desc_res[selection][glom][bla][blub].keys())
+                methods = set(methods)
                 for i_meth, method in enumerate(methods):
                     cur_max = max_overview[method][selection]
                     mat = get_search_matrix(desc_res[selection][glom], method)
@@ -83,7 +87,7 @@ def read_paramsearch_results(path, p_selection={}):
                     cur_max['max'][i_file, i_glom] = np.max(mat)
                     cur_max['k_best'][i_file, i_glom] = np.argmax(np.max(mat, axis=1))
                     cur_max['c_best'][i_file, i_glom] = np.argmax(np.max(mat, axis=0))
-                    if i_glom == 0:
+                    if not desc in cur_max['desc_names']:
                         cur_max['desc_names'].append(desc)
                     cur_max['glomeruli'] = sorted(desc_res[selection])
                     if method in p_selection:
@@ -95,9 +99,17 @@ def read_paramsearch_results(path, p_selection={}):
 
 def get_search_matrix(res, method):
     """helper method for reading data after parameter search"""
-    mat = np.zeros((len(res), len(res[res.keys()[0]])))
-    for j, k_b in enumerate(sorted(res, key=int)):
+    k_b_keys, reg_keys = [], []
+    for k_b in sorted(res, key=int):
         for i in res[k_b]:
+            if method in res[k_b][i]:
+                if not k_b in k_b_keys:
+                    k_b_keys.append(k_b)
+                if not i in reg_keys:
+                    reg_keys.append(i)
+    mat = np.zeros((len(k_b_keys), len(reg_keys)))
+    for j, k_b in enumerate(k_b_keys):
+        for i in reg_keys:
             mat[j, int(i)] = res[k_b][i][method]['gen_score']
     return mat
 
