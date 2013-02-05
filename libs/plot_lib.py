@@ -66,8 +66,39 @@ def structure_plot(fig, molids, activations=None):
                          rotation='20')
         # plt.axis('off')
 
+def _descriptor_boxplot(ax, data):
+    """docstring for _descriptor_boxplot"""
+    boxes = ax.boxplot(data.T)
+    for whisk in boxes['whiskers']:
+        whisk.set_linestyle('-')
+    for name, thing in boxes.items():
+        for line in thing:
+            if not name is 'medians':
+                line.set_color('0.0')
+    ax.plot(range(1, data.shape[0]+1), np.mean(data, axis=1), '.')
+    ax.set_ylim([-3, 0.8])
 
-def new_descriptor_performance_plot(fig, max_overview, sc, glomeruli=[], boxplot=True):
+def _descriptor_scatterplot(ax, data, clist):
+    """docstring for _descriptor_scatterplot"""
+    for j, d in enumerate(data):
+        # for jj, dd in enumerate(d):
+        #     c = '{:.2f}'.format(clist[jj])
+        #     ax.plot(j+1, dd, '.', color=c)
+        ax.plot(j, d, '.')
+    ax.set_xticks(range(len(data)))
+    ax.set_ylim([0, 0.5])
+
+def _descriptor_curveplot(ax, data, desc_names):
+    thresholds = np.arange(0, 1, 0.05)
+    for i, ddata in enumerate(data):
+        to_plot = []
+        for t in thresholds:
+            to_plot.append(np.sum(ddata < t) / float(len(ddata)))
+        ax.plot(thresholds, to_plot, label=desc_names[i])
+
+
+def new_descriptor_performance_plot(fig, max_overview, sc, glomeruli=[],
+                                    descriptor_plot_type='scatterplot'):
     """compare performance of different descriptors for several glomeruli"""
     n_plots = len(max_overview) * len(max_overview.values()[0])
     for i_meth, method in enumerate(max_overview):
@@ -96,27 +127,15 @@ def new_descriptor_performance_plot(fig, max_overview, sc, glomeruli=[], boxplot
             plot_x = i_sel * len(max_overview) + i_meth + 1
             ax = fig.add_subplot(1, n_plots, plot_x)
             ax.set_title('{}'.format(method))
-            if boxplot:
-                boxes = ax.boxplot(data.T)
-                for whisk in boxes['whiskers']:
-                    whisk.set_linestyle('-')
-                for name, thing in boxes.items():
-                    for line in thing:
-                        if not name is 'medians':
-                            line.set_color('0.0')
-                ax.plot(range(1, data.shape[0]+1), np.mean(data, axis=1), '.')
-            else:
-                for j, d in enumerate(data):
-                    for jj, dd in enumerate(d):
-                        c = '{:.2f}'.format(clist_all[jj])
-                        ax.plot(j+1, dd, '.', color=c)
-                ax.set_xticks(range(len(data)))
-                # violin_plot(ax, np.arange(len(desc_names)), data, bp=True)
-            ax.spines['top'].set_visible(False)
-            ax.spines['right'].set_visible(False)
-            ax.get_xaxis().tick_bottom()
-            ax.get_yaxis().tick_left()
-            ax.set_ylim([-3, 0.8])
+            if descriptor_plot_type == 'boxplot':
+                _descriptor_boxplot(ax, data)
+            elif descriptor_plot_type == 'scatterplot':
+                data[data < 0.3] = 0
+                data = np.sum(data, axis=1) / float(data.shape[1])
+                _descriptor_scatterplot(ax, data, clist_all)
+            elif descriptor_plot_type == 'curveplot':
+                _descriptor_curveplot(ax, data, desc_names)
+            utils.simple_axis(ax)
             ax.set_xticklabels([desc_names[i][:16] for i in range(len(desc_names))], rotation='90', fontsize=10)
             if plot_x == 1:
                 ax.set_ylabel('average descriptor score')

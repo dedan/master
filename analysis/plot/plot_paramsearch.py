@@ -38,9 +38,11 @@ if config['plot_param_space']:
 # descriptor method performance plots
 fig = plt.figure(figsize=(15,5))
 plib.new_descriptor_performance_plot(fig, max_overview, sc,
-                                     config.get('glomeruli', []), config['boxplot'])
+                                     config.get('glomeruli', []),
+                                     config['descriptor_plot_type'])
 fig.subplots_adjust(bottom=0.3)
 fig.savefig(os.path.join(outpath, 'desc_comparison.' + config['format']))
+plt.show()
 
 
 # descriptor comparison plot for svr lin

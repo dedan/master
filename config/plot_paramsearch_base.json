@@ -2,7 +2,7 @@
     "inpath": "/Users/dedan/projects/master/results/param_search/merged",
     "format": "png",
     "plot_param_space": false,
-    "boxplot": true,
+    "descriptor_plot_type": "scatterplot",
     "selection": {
     	"svr": {
 	    	"k_best_idx": -1,
