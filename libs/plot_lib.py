@@ -66,8 +66,10 @@ def structure_plot(fig, molids, activations=None):
                          rotation='20')
         # plt.axis('off')
 
-def _descriptor_boxplot(ax, data):
+def _descriptor_boxplot(ax, data, desc_names):
     """docstring for _descriptor_boxplot"""
+    sort_idx = np.argsort(np.mean(data, axis=1))
+    data = data[sort_idx, :]
     boxes = ax.boxplot(data.T)
     for whisk in boxes['whiskers']:
         whisk.set_linestyle('-')
@@ -76,7 +78,8 @@ def _descriptor_boxplot(ax, data):
             if not name is 'medians':
                 line.set_color('0.0')
     ax.plot(range(1, data.shape[0]+1), np.mean(data, axis=1), '.')
-    ax.set_ylim([-3, 0.8])
+    ax.set_ylim([0, 0.8])
+    ax.set_xticklabels([desc_names[i][:16] for i in sort_idx], rotation='90', fontsize=10)
 
 def _descriptor_scatterplot(ax, data, clist):
     """docstring for _descriptor_scatterplot"""
@@ -128,7 +131,7 @@ def new_descriptor_performance_plot(fig, max_overview, sc, glomeruli=[],
             ax = fig.add_subplot(1, n_plots, plot_x)
             ax.set_title('{}'.format(method))
             if descriptor_plot_type == 'boxplot':
-                _descriptor_boxplot(ax, data)
+                _descriptor_boxplot(ax, data, desc_names)
             elif descriptor_plot_type == 'scatterplot':
                 data[data < 0.3] = 0
                 data = np.sum(data, axis=1) / float(data.shape[1])
@@ -136,7 +139,6 @@ def new_descriptor_performance_plot(fig, max_overview, sc, glomeruli=[],
             elif descriptor_plot_type == 'curveplot':
                 _descriptor_curveplot(ax, data, desc_names)
             utils.simple_axis(ax)
-            ax.set_xticklabels([desc_names[i][:16] for i in range(len(desc_names))], rotation='90', fontsize=10)
             if plot_x == 1:
                 ax.set_ylabel('average descriptor score')
 
