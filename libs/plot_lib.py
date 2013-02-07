@@ -75,7 +75,9 @@ def _descriptor_boxplot(ax, data, desc_names):
         for line in thing:
             if not name is 'medians':
                 line.set_color('0.0')
-    ax.plot(range(1, data.shape[0]+1), np.mean(data, axis=1), '.')
+    data_copy = data.copy()
+    data_copy[data_copy<0] = 0
+    ax.plot(range(1, data_copy.shape[0]+1), np.mean(data_copy, axis=1), '.')
     ax.set_ylim([0, 0.8])
     ax.set_xticklabels([desc_names[i][:16] for i in sort_idx], rotation='90', fontsize=10)
 
