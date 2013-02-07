@@ -34,6 +34,11 @@ sc = json.load(open(sys.argv[1]))
 config = sc['runner_config_content']
 config['data_path'] = os.path.join(os.path.dirname(__file__), '..', 'data')
 
+if 'k_best' in sc:
+    k_best_set = True
+else:
+    k_best_set = False
+
 if config['features']['type'] == 'conventional':
     files = glob.glob(os.path.join(config['data_path'], 'conventional_features', '*.csv'))
     for f in files:
@@ -77,13 +82,13 @@ for config in configs:
 
     # set k_best according to the number of available features
     max_expo = int(np.floor(np.log2(n_features))) + 1
-    if not 'k_best' in sc:
+
+    if not k_best_set:
         sc['k_best'] = [2**i for i in range(max_expo)]
         if sc['k_best'][-1] != n_features:
             sc['k_best'] += [n_features]
     else:
         sc['k_best'] = [n_features]
-    print n_features
 
     # and the forest regularization parameter (als n_features dependend)
     sc['forest'] = range(2, max_expo + 2, 2)
