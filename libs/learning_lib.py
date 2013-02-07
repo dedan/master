@@ -70,7 +70,7 @@ def _convert_kwargs(kwargs):
         res[new_k] = new_v
     return res
 
-class MySVR(svm.SVR):
+class MySVR(svm.NuSVR):
     """docstring for MySVR"""
     def __init__(self, cross_val=True, n_folds=10, **kwargs):
         self.kwargs = _convert_kwargs(kwargs)
@@ -84,7 +84,7 @@ class MySVR(svm.SVR):
         assert data.shape[0] == len(targets)
         self.best_idx = _k_best_indeces(data, targets, selection_method, k_best)
         super(MySVR, self).fit(data[:, self.best_idx], targets)
-        tmp_svr = svm.SVR(**self.kwargs)
+        tmp_svr = svm.NuSVR(**self.kwargs)
         if self.cross_val:
             kf = StratifiedResampling(targets, self.n_folds)
             all_predictions, all_targets = [], []
