@@ -81,15 +81,17 @@ def _descriptor_boxplot(ax, data, desc_names):
     ax.set_ylim([0, 0.8])
     ax.set_xticklabels([desc_names[i][:16] for i in sort_idx], rotation='90', fontsize=10)
 
-def _descriptor_scatterplot(ax, data, clist):
+def _descriptor_scatterplot(ax, data, clist, desc_names):
     """docstring for _descriptor_scatterplot"""
+    sort_idx = np.argsort(np.mean(data, axis=1))
+    data = data[sort_idx, :]
     for j, d in enumerate(data):
-        # for jj, dd in enumerate(d):
-        #     c = '{:.2f}'.format(clist[jj])
-        #     ax.plot(j+1, dd, '.', color=c)
-        ax.plot(j, d, '.')
-    ax.set_xticks(range(len(data)))
-    ax.set_ylim([0, 0.5])
+        for jj, dd in enumerate(d):
+            c = '{:.2f}'.format(clist[jj])
+            ax.plot(j+0.5, dd, '.', color=c)
+    ax.set_xticks(np.arange(len(data))+0.5)
+    ax.set_ylim([-3, 0.8])
+    ax.set_xticklabels([desc_names[i][:16] for i in sort_idx], rotation='90', fontsize=10)
 
 def _descriptor_curveplot(ax, data, desc_names):
     thresholds = np.arange(0, 1, 0.05)
@@ -133,9 +135,7 @@ def new_descriptor_performance_plot(fig, max_overview, sc, glomeruli=[],
             if descriptor_plot_type == 'boxplot':
                 _descriptor_boxplot(ax, data, desc_names)
             elif descriptor_plot_type == 'scatterplot':
-                data[data < 0.3] = 0
-                data = np.sum(data, axis=1) / float(data.shape[1])
-                _descriptor_scatterplot(ax, data, clist_all)
+                _descriptor_scatterplot(ax, data, clist_all, desc_names)
             elif descriptor_plot_type == 'curveplot':
                 _descriptor_curveplot(ax, data, desc_names)
             utils.simple_axis(ax)

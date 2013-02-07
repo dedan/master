@@ -37,11 +37,12 @@ if config['plot_param_space']:
 
 # descriptor method performance plots
 fig = plt.figure(figsize=(15,5))
+ptype = config['descriptor_plot_type']
 plib.new_descriptor_performance_plot(fig, max_overview, sc,
                                      config.get('glomeruli', []),
-                                     config['descriptor_plot_type'])
+                                     ptype)
 fig.subplots_adjust(bottom=0.3)
-fig.savefig(os.path.join(outpath, 'desc_comparison.' + config['format']))
+fig.savefig(os.path.join(outpath, ptype + '_desc_comparison.' + config['format']))
 plt.show()
 
 
@@ -93,7 +94,7 @@ ax.set_ylim([-1, 1])
 ax.set_xlabel('SVR')
 ax.set_ylabel('forest')
 utils.simple_axis(ax)
-# ax.legend(loc='lower right')
+ax.legend(loc='upper left')
 fig.savefig(os.path.join(outpath, 'best_method_comparison.' + config['format']))
 
 assert len(desc1_collect) == len(desc2_collect)
