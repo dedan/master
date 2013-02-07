@@ -81,6 +81,20 @@ def _descriptor_boxplot(ax, data, desc_names):
     ax.set_ylim([0, 0.8])
     ax.set_xticklabels([desc_names[i][:16] for i in sort_idx], rotation='90', fontsize=10)
 
+def _violin_boxplot(ax, data, desc_names):
+    """docstring for _descriptor_boxplot"""
+    data_copy = data.copy()
+    data_copy[data_copy<0] = 0
+    sort_idx = np.argsort(np.mean(data, axis=1))
+    data_copy = data_copy[sort_idx, :]
+    violin_plot(ax, np.arange(len(data_copy))*3, data_copy)
+    ax.plot(np.arange(len(data_copy)) *3, np.mean(data_copy, axis=1), 'k.')
+    ax.plot(np.arange(len(data_copy)) *3, np.median(data_copy, axis=1), 'k*')
+    ax.set_ylim([0, 0.8])
+    ax.set_xticks(np.arange(len(data_copy)) *3)
+    ax.set_xticklabels([desc_names[i][:16] for i in sort_idx], rotation='90', fontsize=10)
+
+
 def _descriptor_scatterplot(ax, data, clist, desc_names):
     """docstring for _descriptor_scatterplot"""
     sort_idx = np.argsort(np.mean(data, axis=1))
@@ -111,7 +125,6 @@ def new_descriptor_performance_plot(fig, max_overview, sc, glomeruli=[],
         for i_sel, selection in enumerate(max_overview[method]):
 
             desc_names = max_overview[method][selection]['desc_names']
-            print np.sum(max_overview[method][selection]['p_selection'])
             if 'p_selection' in max_overview[method][selection] and \
                np.sum(max_overview[method][selection]['p_selection']) != 0.0:
                 print('plotting param selection instead of maximum')
@@ -138,6 +151,12 @@ def new_descriptor_performance_plot(fig, max_overview, sc, glomeruli=[],
                 _descriptor_scatterplot(ax, data, clist_all, desc_names)
             elif descriptor_plot_type == 'curveplot':
                 _descriptor_curveplot(ax, data, desc_names)
+                if i_meth == 1:
+                    ax.legend(prop={'size':5})
+            elif descriptor_plot_type == 'violinplot':
+                _violin_boxplot(ax, data, desc_names)
+            else:
+                assert False
             utils.simple_axis(ax)
             if plot_x == 1:
                 ax.set_ylabel('average descriptor score')
