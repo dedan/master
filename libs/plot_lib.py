@@ -163,7 +163,6 @@ def new_descriptor_performance_plot(fig, max_overview, sc, glomeruli=[],
 
 def plot_search_matrix(fig, desc_res, selection, method, glomeruli):
     """docstring for plot_search_matrix"""
-    print selection
     if not glomeruli:
         tmp_glomeruli = desc_res[selection].keys()
     else:
@@ -173,10 +172,11 @@ def plot_search_matrix(fig, desc_res, selection, method, glomeruli):
         mat = desc_res[selection][glom][method]
         ax = fig.add_subplot(n, n, i_glom+1)
         if np.max(mat) < 0:
-            ax.imshow(mat, interpolation='nearest', cmap=plt.cm.binary)
+            ax.imshow(np.zeros(mat.shape), interpolation='nearest', cmap=plt.cm.binary)
         else:
             ax.imshow(mat, interpolation='nearest', cmap=plt.cm.binary, vmin=0)
-        ax.set_title('{}'.format(glom), rotation='0')
+        ax.set_ylabel('{}'.format(glom))
         ax.set_yticks([])
         ax.set_xticks([])
         ax.set_xlabel('{:.2f}'.format(np.max(mat)))
+    fig.subplots_adjust(hspace=0.4)

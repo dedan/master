@@ -4,7 +4,7 @@
     "method": "svr",
     "format": "png",
     "plot_param_space": false,
-    "descriptor_plot_type": "scatterplot",
+    "descriptor_plot_type": "violinplot",
     "selection": {
     	"svr": {
 	    	"k_best_idx": -1,
@@ -14,17 +14,5 @@
 	    	"k_best_idx": -1,
 	    	"c_best_idx": -1
     	}
-    },
-    "glomeruli": [
-      "Or19a",
-      "Or22a",
-      "Or35a",
-      "Or43b",
-      "Or67a",
-      "Or67b",
-      "Or7a",
-      "Or85b",
-      "Or98a",
-      "Or9a"
-    ]
+    }
 }
