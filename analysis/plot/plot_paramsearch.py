@@ -32,7 +32,8 @@ search_res, max_overview, sc, _ = rdl.read_paramsearch_results(config['inpath'],
 if config['plot_param_space']:
     for desc in search_res:
         fig = plt.figure(figsize=(7,10))
-        plib.plot_search_matrix(fig, search_res[desc], sc, config['glomeruli'])
+        plib.plot_search_matrix(fig, search_res[desc], config['fselection'],
+                                config['method'], config.get('glomeruli', []))
         fig.savefig(os.path.join(outpath, desc + '.' + config['format']))
 
 # descriptor method performance plots

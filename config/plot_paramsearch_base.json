@@ -1,5 +1,7 @@
 {
     "inpath": "/Users/dedan/projects/master/results/param_search/merged",
+    "fselection": "linear",
+    "method": "svr",
     "format": "png",
     "plot_param_space": false,
     "descriptor_plot_type": "scatterplot",

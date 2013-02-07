@@ -161,25 +161,22 @@ def new_descriptor_performance_plot(fig, max_overview, sc, glomeruli=[],
             if plot_x == 1:
                 ax.set_ylabel('average descriptor score')
 
-def plot_search_matrix(fig, desc_res, sc, glomeruli):
+def plot_search_matrix(fig, desc_res, selection, method, glomeruli):
     """docstring for plot_search_matrix"""
-    methods = desc_res.values()[0].values()[0].keys()
-    for i_sel, selection in enumerate(sc['selection']):
-        for i_glom, glom in enumerate(glomeruli):
-            for i_meth, method in enumerate(methods):
-                mat = desc_res[selection][glom][method]
-                ax_idx = i_meth * len(glomeruli) * 2 + len(glomeruli) * i_sel + i_glom + 1
-                ax = fig.add_subplot(6, len(glomeruli), ax_idx)
-                if np.max(mat) < 0:
-                    ax.imshow(mat, interpolation='nearest')
-                else:
-                    ax.imshow(mat, interpolation='nearest', vmin=0)
-                if i_sel + i_meth == 0:
-                    ax.set_title(glom, rotation='0')
-                if i_glom == 0:
-                    ax.set_ylabel('{}'.format(method))
-                ax.set_yticks([])
-                ax.set_xticks([])
-                ax.set_xlabel('{:.2f}'.format(np.max(mat)))
-                print('{}: {:.2f}'.format(glom, np.max(mat)))
-    fig.subplots_adjust(hspace=0.5, wspace=0.4)
+    print selection
+    if not glomeruli:
+        tmp_glomeruli = desc_res[selection].keys()
+    else:
+        tmp_glomeruli = glomeruli
+    n = utils.ceiled_root(len(tmp_glomeruli))
+    for i_glom, glom in enumerate(tmp_glomeruli):
+        mat = desc_res[selection][glom][method]
+        ax = fig.add_subplot(n, n, i_glom+1)
+        if np.max(mat) < 0:
+            ax.imshow(mat, interpolation='nearest', cmap=plt.cm.binary)
+        else:
+            ax.imshow(mat, interpolation='nearest', cmap=plt.cm.binary, vmin=0)
+        ax.set_title('{}'.format(glom), rotation='0')
+        ax.set_yticks([])
+        ax.set_xticks([])
+        ax.set_xlabel('{:.2f}'.format(np.max(mat)))
