@@ -102,18 +102,18 @@ def _descriptor_scatterplot(ax, data, clist, desc_names):
     for j, d in enumerate(data):
         for jj, dd in enumerate(d):
             c = '{:.2f}'.format(clist[jj])
-            ax.plot(j+0.5, dd, '.', color=c)
+            ax.plot(j+0.5, dd, 'o', color=c)
     ax.set_xticks(np.arange(len(data))+0.5)
     ax.set_ylim([-3, 0.8])
     ax.set_xticklabels([desc_names[i][:16] for i in sort_idx], rotation='90', fontsize=10)
 
 def _descriptor_curveplot(ax, data, desc_names):
     thresholds = np.arange(0, 1, 0.05)
-    for i, ddata in enumerate(data):
+    for ddata, desc_name in zip(data, desc_names):
         to_plot = []
         for t in thresholds:
-            to_plot.append(np.sum(ddata < t) / float(len(ddata)))
-        ax.plot(thresholds, to_plot, label=desc_names[i])
+            to_plot.append(np.sum(ddata >= t) / float(len(ddata)))
+        ax.plot(thresholds, to_plot, label=desc_name)
 
 
 def new_descriptor_performance_plot(fig, max_overview, sc, glomeruli=[],
