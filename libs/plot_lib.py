@@ -85,7 +85,7 @@ def _violin_boxplot(ax, data, desc_names):
     """docstring for _descriptor_boxplot"""
     data_copy = data.copy()
     data_copy[data_copy<0] = 0
-    sort_idx = np.argsort(np.mean(data, axis=1))
+    sort_idx = np.argsort(np.mean(data_copy, axis=1))
     data_copy = data_copy[sort_idx, :]
     violin_plot(ax, np.arange(len(data_copy))*3, data_copy)
     ax.plot(np.arange(len(data_copy)) *3, np.mean(data_copy, axis=1), 'k.')
