@@ -92,7 +92,8 @@ def _violin_boxplot(ax, data, desc_names):
     ax.plot(np.arange(len(data_copy)) *3, np.median(data_copy, axis=1), 'k*')
     ax.set_ylim([0, 0.8])
     ax.set_xticks(np.arange(len(data_copy)) *3)
-    ax.set_xticklabels([desc_names[i][:16] for i in sort_idx], rotation='90', fontsize=10)
+    ax.set_xticklabels([desc_names[i][:16].lower() for i in sort_idx],
+                       rotation='90', fontsize=10)
 
 
 def _descriptor_scatterplot(ax, data, clist, desc_names):
@@ -116,50 +117,46 @@ def _descriptor_curveplot(ax, data, desc_names):
         ax.plot(thresholds, to_plot, label=desc_name)
 
 
-def new_descriptor_performance_plot(fig, max_overview, sc, glomeruli=[],
+def new_descriptor_performance_plot(fig, max_overview, selection, method, glomeruli=[],
                                     descriptor_plot_type='scatterplot'):
     """compare performance of different descriptors for several glomeruli"""
-    n_plots = len(max_overview) * len(max_overview.values()[0])
-    for i_meth, method in enumerate(max_overview):
 
-        for i_sel, selection in enumerate(max_overview[method]):
+    desc_names = max_overview[method][selection]['desc_names']
+    if 'p_selection' in max_overview[method][selection] and \
+       np.sum(max_overview[method][selection]['p_selection']) != 0.0:
+        print('plotting param selection instead of maximum')
+        data = max_overview[method][selection]['p_selection']
+    else:
+        data = max_overview[method][selection]['max']
 
-            desc_names = max_overview[method][selection]['desc_names']
-            if 'p_selection' in max_overview[method][selection] and \
-               np.sum(max_overview[method][selection]['p_selection']) != 0.0:
-                print('plotting param selection instead of maximum')
-                data = max_overview[method][selection]['p_selection']
-            else:
-                data = max_overview[method][selection]['max']
+    # use only selected glomeruli
+    avail_glomeruli = max_overview[method][selection]['glomeruli']
+    if glomeruli:
+        glom_idx = [i for i, g in enumerate(avail_glomeruli) if g in glomeruli]
+        data = data[:, glom_idx]
 
-            # use only selected glomeruli
-            avail_glomeruli = max_overview[method][selection]['glomeruli']
-            if glomeruli:
-                glom_idx = [i for i, g in enumerate(avail_glomeruli) if g in glomeruli]
-                data = data[:, glom_idx]
+    # compute colors to color all glomeruli according to their all performance
+    all_idx = max_overview[method][selection]['desc_names'].index('all')
+    all_values = data[all_idx]
+    n_val = float(len(all_values)-1)
+    clist_all = [sorted(all_values,reverse=True).index(i) / n_val for i in all_values]
 
-            all_idx = max_overview['svr']['linear']['desc_names'].index('all')
-            all_values = data[all_idx]
-            clist_all = [sorted(all_values,reverse=True).index(i) / float(len(all_values)-1) for i in all_values]
-
-            plot_x = i_sel * len(max_overview) + i_meth + 1
-            ax = fig.add_subplot(1, n_plots, plot_x)
-            ax.set_title('{}'.format(method))
-            if descriptor_plot_type == 'boxplot':
-                _descriptor_boxplot(ax, data, desc_names)
-            elif descriptor_plot_type == 'scatterplot':
-                _descriptor_scatterplot(ax, data, clist_all, desc_names)
-            elif descriptor_plot_type == 'curveplot':
-                _descriptor_curveplot(ax, data, desc_names)
-                if i_meth == 1:
-                    ax.legend(prop={'size':5})
-            elif descriptor_plot_type == 'violinplot':
-                _violin_boxplot(ax, data, desc_names)
-            else:
-                assert False
-            utils.simple_axis(ax)
-            if plot_x == 1:
-                ax.set_ylabel('average descriptor score')
+    ax = fig.add_subplot(111)
+    ax.set_title('{}'.format(method))
+    if descriptor_plot_type == 'boxplot':
+        _descriptor_boxplot(ax, data, desc_names)
+    elif descriptor_plot_type == 'scatterplot':
+        _descriptor_scatterplot(ax, data, clist_all, desc_names)
+    elif descriptor_plot_type == 'curveplot':
+        _descriptor_curveplot(ax, data, desc_names)
+        if i_meth == 1:
+            ax.legend(prop={'size':5})
+    elif descriptor_plot_type == 'violinplot':
+        _violin_boxplot(ax, data, desc_names)
+    else:
+        assert False
+    utils.simple_axis(ax)
+    ax.set_ylabel('average descriptor score')
 
 def plot_search_matrix(fig, desc_res, selection, method, glomeruli):
     """docstring for plot_search_matrix"""
