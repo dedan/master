@@ -72,7 +72,7 @@ for k, config in feat_config.items():
 all_mols = [r['features'].keys() for r in cache.values()]
 mol_intersection = set(all_mols[0]).intersection(*all_mols[1:])
 
-res = {g: {n: {} for n in feat_config} for g in gloms}
+res = {n: {g: {} for g in gloms} for n in feat_config}
 for glom in gloms:
     print('{}\n'.format(glom))
     base_config.update({'glomerulus': glom, 'data_path': data_path})
@@ -99,9 +99,9 @@ for glom in gloms:
         print("use {} molecules for training".format(data['data'].shape[0]))
         tmp_res = rl.run_runner(base_config, data['data'], data['targets'], get_models=True)
         to_predict = np.array([cache[name]['features'][molid] for molid in to_predict_molids])
-        res[glom][name]['predictions'] = tmp_res[method]['model'].predict(to_predict)
-        res[glom][name]['targets'] = data['targets']
-        res[glom][name]['score'] = tmp_res[method]['gen_score']
+        res[name][glom]['predictions'] = tmp_res[method]['model'].predict(to_predict)
+        res[name][glom]['targets'] = data['targets']
+        res[name][glom]['score'] = tmp_res[method]['gen_score']
         print('model genscore: {:.2f}\n'.format(tmp_res[method]['gen_score']))
 
 pickle.dump(dict(res), open(os.path.join(outpath, 'predictions.pkl'), 'w'))
