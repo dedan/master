@@ -12,68 +12,58 @@ import os
 import pickle
 import numpy as np
 import pylab as plt
+from master.libs import utils
 
 inpath = '/Users/dedan/projects/master/results/predict/'
 reference = 'all'
-res = pickle.load(open(os.path.join(inpath, 'predictions1.pkl')))
+res = pickle.load(open(os.path.join(inpath, 'predictions.pkl')))
 to_compare = set(res.keys()).difference([reference])
 
 fig = plt.figure()
+xticks = np.arange(0, 1.1, 0.25)
+xticklabels = ['0', '', '0.5', '', '1']
 for i, desc in enumerate(to_compare):
 
     ax = fig.add_subplot(2, len(to_compare), i+1)
-    correlations = []
+    correlations_both_pos = []
+    correlations_one_neg = []
     for glom in res[reference]:
         corr = np.corrcoef(res[reference][glom]['predictions'],
                            res[desc][glom]['predictions'])[0, 1]
-        correlations.append(corr)
-    ax.hist(correlations, facecolor='0.5')
+        if res[reference][glom]['score'] <= 0 or res[desc][glom]['score'] <=0:
+            correlations_one_neg.append(corr)
+        else:
+            correlations_both_pos.append(corr)
+    bins = np.arange(0, 1.01, 0.05)
+    c_both, _ = np.histogram(correlations_both_pos, bins=bins)
+    plt.bar(bins[:-1], c_both, width=bins[1]-bins[0], color='0.5')
+    c_one, _ = np.histogram(correlations_one_neg, bins=bins)
+    plt.bar(bins[:-1], c_one, bottom=c_both, width=bins[1]-bins[0], color='0.8')
+    annotation_text = '{}/{}'.format(len(correlations_both_pos), len(res[reference]))
+    ax.text(0.1, 0.9, annotation_text, transform=ax.transAxes)
     ax.set_xlim([0, 1])
-    ax.set_yticks([])
+    ax.set_xticks(xticks)
+    ax.set_xticklabels(xticklabels)
     if i == 0:
         ax.set_ylabel(reference)
+    else:
+        ax.set_yticklabels([])
+    utils.simple_axis(ax)
 
     ax = fig.add_subplot(2, len(to_compare), len(to_compare) + i + 1)
-    compare_scores = [res[desc][g]['score'] for g in res[desc]]
-    ref_scores = [res[reference][g]['score'] for g in res[reference]]
+    compare_scores = np.array([res[desc][g]['score'] for g in res[desc]])
+    ref_scores = np.array([res[reference][g]['score'] for g in res[reference]])
+    compare_scores[compare_scores < 0] = 0
+    ref_scores[ref_scores < 0] = 0
     ax.plot(compare_scores, ref_scores, 'ko', alpha=0.6)
-    ax.plot([0, 1], [0, 1], color='0.5')
+    ax.plot([0, 0.8], [0, 0.8], color='0.5')
+    ax.set_xticks(xticks)
+    ax.set_xticklabels(xticklabels)
+    ax.set_xlabel(desc)
+    if i == 0:
+        ax.set_ylabel(reference)
+    else:
+        ax.set_yticklabels([])
     ax.set_xlim([0, 1])
     ax.set_ylim([0, 1])
-    ax.set_xlabel(desc)
-
-#     mn = configs.keys()
-#     gs = gridspec.GridSpec(len(mn)-1, len(mn)-1)
-#     gs.update(wspace=0.2, hspace=0.2)
-#     for m1, m2 in it.combinations(mn, 2):
-#         ax = plt.subplot(gs[mn.index(m1), mn.index(m2)-1])
-#         ax.plot(res[m2], res[m1], 'x', color='#53777A')
-#         correlations[glom].append(np.corrcoef(res[m2], res[m1])[0, 1])
-#         ax.plot([0, 1], [0, 1], color='0.5')
-#         ax.set_xlim([-0.2, 1])
-#         ax.set_ylim([-0.2, 1])
-#         if mn.index(m1) == (mn.index(m2)-1):
-#             ax.set_ylabel(m1)
-#         if mn.index(m1) == 0:
-#             ax.set_title(m2)
-#         if not (mn.index(m1) == 0 and mn.index(m2) == 1):
-#             ax.set_yticks([])
-#         if not (mn.index(m1) == (len(mn)-2) and mn.index(m2) == (len(mn)-1)):
-#             ax.set_xticks([])
-#     plt.savefig(os.path.join(outpath, glom + '_prediction_comparison.png'))
-
-#     if utils.run_from_ipython():
-#         plt.show()
-
-#     with open(os.path.join(outpath, glom + '_predictions.csv'), 'w') as f:
-#         f.write(',{}\n'.format(','.join(res.keys())))
-#         for i, molid in enumerate(mol_intersection):
-#             f.write(molid + ',')
-#             f.write(','.join([str(r[i]) for r in res.values()]))
-#             f.write('\n')
-
-# fig = plt.figure()
-# ax = fig.add_subplot(111)
-# ax.hist(list(it.chain(*correlations.values())))
-# fig.savefig(os.path.join(outpath, 'prediction_correlations.png'))
-# print stats.percentileofscore(all_cors, 0.7)
+    utils.simple_axis(ax)
