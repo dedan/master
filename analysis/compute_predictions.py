@@ -45,9 +45,9 @@ feat_config = {
         "type": "conventional",
         "descriptor": "haddad_desc",
     },
-    "saito": {
+    "getaway": {
         "type": "conventional",
-        "descriptor": "saito_desc",
+        "descriptor": "GETAWAY",
     },
     "all": {
       "type": "conventional",
