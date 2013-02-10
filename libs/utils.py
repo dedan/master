@@ -5,7 +5,11 @@
 """
 import numpy as np
 from collections import defaultdict
+import itertools as it
 
+def flatten(listlist):
+    """docstring for flatten"""
+    return list(it.chain(*listlist))
 
 def simple_axis(ax):
     """remove top and right axis"""
