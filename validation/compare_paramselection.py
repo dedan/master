@@ -18,15 +18,17 @@ import glob
 import __builtin__
 import numpy as np
 import pylab as plt
+from scipy import stats
 from master.libs import read_data_lib as rdl
 from master.libs import utils
+import itertools as it
 
-inpath = '/Users/dedan/projects/master/results/param_search/forest'
-method = 'forest'
-selection = 'forest'
+inpath = '/Users/dedan/projects/master/results/param_search/merged'
+method = 'svr'
+selection = 'linear'
 
 data_path = os.path.join(os.path.dirname(__file__), '..', 'data')
-used_glomeruli = json.load(open(os.path.join(data_path, 'used_glomeruli.json')))
+used_glomeruli = json.load(open(os.path.join(data_path, 'all_glomeruli.json')))
 search_res, max_overview, sc, k_best_dict = rdl.read_paramsearch_results(inpath)
 
 out_res = {}
@@ -66,18 +68,38 @@ for i, descriptor in enumerate(search_res):
 
 fig = plt.figure()
 ax = fig.add_subplot(111)
-all_best_genscores = __builtin__.sum([r['best_genscore'] for r in out_res.values()], [])
-all_picked_genscores = __builtin__.sum([r['picked_genscore'] for r in out_res.values()], [])
-ax.plot(all_best_genscores, all_picked_genscores, 'o', alpha=0.6, markersize=4)
-ax.plot([0, 0.8], [0, 0.8], color='0.5')
-ax.plot([0.1, 0.9], [0, 0.8], color='0.5')
-ax.set_xlabel('param search results')
-ax.set_ylabel('fixed parameter')
-ax.set_title(method)
-utils.simple_axis(ax)
+line_max = 0.9
 
-ax.set_xlim([0, 0.8])
-ax.set_ylim([0, 0.8])
+# use only glomeruli for which paramsearch result > 0
+best_descs = ['haddad_desc', 'GETAWAY', 'all', 'vib_100']
+vals = [out_res[k] for k in best_descs]
+all_best = np.array(utils.flatten([r['best_genscore'] for r in vals]))
+all_picked = np.array(utils.flatten([r['picked_genscore'] for r in vals]))
+
+# only look at gloms for which paramsearch yields genscores above 0
+all_picked = all_picked[all_best > 0]
+all_best = all_best[all_best > 0]
+
+# everything below 0 is equally bad
+all_picked[all_picked < 0] = 0
+
+# ax.plot(all_best, all_picked, 'ko', alpha=0.6, markersize=4)
+# ax.plot([0, line_max], [0, line_max], color='0.5')
+diffs = np.abs(all_best - all_picked)
+ax.plot(all_picked, diffs, 'ko', alpha=0.6, markersize=4)
+ax.set_ylim([-0.1, 0.4])
+score_perc = stats.scoreatpercentile(diffs, 90)
+ax.plot([0, 1], [score_perc, score_perc], color='0.5')
+# score = stats.scoreatpercentile(diffs, 90)
+# ax.plot([score, line_max], [0, line_max - score], '--', color='0.5')
+# ax.plot([0.3, 0.3], [-2, 1], 'r')
+# ax.set_xlabel('param search results')
+# ax.set_ylabel('fixed parameter')
+# ax.set_title(method)
+# utils.simple_axis(ax)
+
+# ax.set_xlim([0, 0.8])
+# ax.set_ylim([0, 0.8])
 fig.savefig(os.path.join(inpath, 'plots', method + '_param_selection_overview.png'))
 plt.show()
 
