@@ -47,34 +47,34 @@ for i, descriptor in enumerate(search_res):
         c_regularization = 1.0
         c_reg_idx = sc[method].index(c_regularization)      # regularization 1.0
 
-    best = []
-    picked = []
-    picked_regonly = []
-    picked_konly = []
+    both_opt = []
+    none_opt = []
+    reg_opt = []
+    k_opt = []
     for glom in used_glomeruli:
         best_params = rdl.get_best_params(max_overview, sc, k_best_dict,
                                           descriptor, glom, method, selection)
         k_best = best_params['feature_selection']['k_best']
         reg_idx = res['sc'][method].index(best_params['methods'][method]['regularization'])
-        best_res = res['res'][selection][glom][str(k_best)][str(reg_idx)]
-        best.append(best_res[method]['gen_score'])
+        tmp = res['res'][selection][glom][str(k_best)][str(reg_idx)]
+        both_opt.append(tmp[method]['gen_score'])
 
-        # pick only fixed regularization
+        # use optimal k_best with fixed regularization
         tmp = res['res'][selection][glom][str(k_best)][str(c_reg_idx)]
-        picked_regonly.append(tmp[method]['gen_score'])
+        k_opt.append(tmp[method]['gen_score'])
 
-        # pick only fixed k_best
+        # use optimal regularization with fixed k_best
         tmp = res['res'][selection][glom][str(c_k_best)][str(reg_idx)]
-        picked_konly.append(tmp[method]['gen_score'])
+        reg_opt.append(tmp[method]['gen_score'])
 
-        # pick regularization and k_best
+        # use fixed regularization and k_best
         tmp = res['res'][selection][glom][str(c_k_best)][str(c_reg_idx)]
-        picked.append(tmp[method]['gen_score'])
+        none_opt.append(tmp[method]['gen_score'])
 
-    out_res[descriptor] = {'best_genscore': best,
-                           'picked_genscore': picked,
-                           'picked_regonly': picked_regonly,
-                           'picked_konly': picked_konly,
+    out_res[descriptor] = {'both_opt': both_opt,
+                           'none_opt': none_opt,
+                           'k_opt': k_opt,
+                           'reg_opt': reg_opt,
                            'labels': max_overview[method][selection]['glomeruli']}
 
 
@@ -84,47 +84,30 @@ best_descs = ['haddad_desc', 'GETAWAY', 'all', 'vib_100']
 vals = [out_res[k] for k in best_descs]
 
 # which search dimension is more important
-for pick_type in ['picked_genscore', 'picked_regonly', 'picked_konly']:
+reference_name = 'none_opt'
+for pick_type in ['both_opt', 'reg_opt', 'k_opt']:
     fig = plt.figure()
     fig.suptitle(pick_type)
-    ax = fig.add_subplot(211)
-    all_best = np.array(utils.flatten([r['best_genscore'] for r in vals]))
-    all_picked = np.array(utils.flatten([r[pick_type] for r in vals]))
-    # only look at gloms for which paramsearch yields genscores above 0
-    all_picked = all_picked[all_best > 0]
-    all_best = all_best[all_best > 0]
-    # everything below 0 is equally bad
-    all_picked[all_picked < 0] = 0
-    diffs = np.abs(all_best - all_picked)
-    score_perc = stats.scoreatpercentile(diffs, 90)
-    ax.plot(all_picked, diffs, 'ko', alpha=0.6, markersize=4)
-    ax.plot([0, 1], [score_perc, score_perc], color='0.5')
-    ax.set_xlabel('fixed parameter result')
-    ax.set_ylabel('performance gain')
-    ax.set_xlim([-0.05, 0.8])
-    ax.set_ylim([-0.05, 0.4])
-    utils.simple_axis(ax)
-
 
     ax = fig.add_subplot(212)
     line_max = 0.9
     vals = [out_res[k] for k in best_descs]
-    all_best = np.array(utils.flatten([r['best_genscore'] for r in vals]))
-    all_picked = np.array(utils.flatten([r[pick_type] for r in vals]))
-    # only look at gloms for which paramsearch yields genscores above 0
-    all_picked = all_picked[all_best > 0]
-    all_best = all_best[all_best > 0]
-    # everything below 0 is equally bad
-    all_picked[all_picked < 0] = 0
-    ax.plot(all_picked, all_best, 'ko', alpha=0.6, markersize=4)
+    reference = np.array(utils.flatten([r[reference_name] for r in vals]))
+    improved = np.array(utils.flatten([r[pick_type] for r in vals]))
+    # only plot values which reach genscore > 0 after paramsearch
+    reference = reference[improved > 0]
+    improved = improved[improved > 0]
+
+    reference[reference < 0] = 0
+    ax.plot(reference, improved, 'ko', alpha=0.6, markersize=4)
     ax.plot([0, line_max], [0, line_max], color='0.5')
-    ax.set_xlabel('fixed parameter')
-    ax.set_ylabel('param search results')
+    ax.set_xlabel(reference_name)
+    ax.set_ylabel(pick_type)
     ax.set_title(method)
     utils.simple_axis(ax)
-    ax.set_xlim([0, 0.8])
     ax.set_ylim([0, 0.8])
-    plt.axis('equal')
+    plt.axis('scaled')
+    ax.set_xlim([-0.05, 0.8])
 
 
     fig.savefig(os.path.join(inpath, 'plots', pick_type + '_param_selection_overview.png'))
