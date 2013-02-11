@@ -91,9 +91,10 @@ def _violin_boxplot(ax, data, desc_names):
     ax.plot(np.arange(len(data_copy)) *3, np.mean(data_copy, axis=1), 'k.')
     ax.plot(np.arange(len(data_copy)) *3, np.median(data_copy, axis=1), 'k*')
     ax.set_ylim([0, 0.8])
-    ax.set_xticks(np.arange(len(data_copy)) *3)
-    ax.set_xticklabels([desc_names[i][:16].lower() for i in sort_idx],
-                       rotation='90', fontsize=10)
+    ax.set_xticks(np.arange(len(data_copy)) *3 + 1)
+    ax.xaxis.set_tick_params(size=0)
+    ax.set_xticklabels(['_'.join(desc_names[i].split('_')[:2]).lower() for i in sort_idx],
+                       rotation='45', ha='right', fontsize=10)
 
 
 def _descriptor_scatterplot(ax, data, clist, desc_names):
