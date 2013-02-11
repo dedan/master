@@ -24,7 +24,7 @@ def violin_plot(ax, pos, data, bp=False):
     create violin plots on an axis
     '''
     dist = max(pos)-min(pos)
-    w = 1
+    w = 1.1
     for d,p in zip(data,pos):
         k = gaussian_kde(d) #calculates the kernel density
         m = k.dataset.min() #lower bound of violin
@@ -95,6 +95,7 @@ def _violin_boxplot(ax, data, desc_names):
     ax.xaxis.set_tick_params(size=0)
     ax.set_xticklabels(['_'.join(desc_names[i].split('_')[:2]).lower() for i in sort_idx],
                        rotation='45', ha='right', fontsize=10)
+    ax.set_xlim([-3, len(data_copy) * 3 + 1])
 
 
 def _descriptor_scatterplot(ax, data, clist, desc_names):
