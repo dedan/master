@@ -114,10 +114,12 @@ for pick_type in ['picked_genscore', 'picked_regonly', 'picked_konly']:
     # only look at gloms for which paramsearch yields genscores above 0
     all_picked = all_picked[all_best > 0]
     all_best = all_best[all_best > 0]
-    ax.plot(all_best, all_picked, 'ko', alpha=0.6, markersize=4)
+    # everything below 0 is equally bad
+    all_picked[all_picked < 0] = 0
+    ax.plot(all_picked, all_best, 'ko', alpha=0.6, markersize=4)
     ax.plot([0, line_max], [0, line_max], color='0.5')
-    ax.set_xlabel('param search results')
-    ax.set_ylabel('fixed parameter')
+    ax.set_xlabel('fixed parameter')
+    ax.set_ylabel('param search results')
     ax.set_title(method)
     utils.simple_axis(ax)
     ax.set_xlim([0, 0.8])
