@@ -22,7 +22,7 @@ to_compare = set(res.keys()).difference([reference])
 
 fig = plt.figure()
 xticks = np.arange(0, 1.1, 0.25)
-xticklabels = ['0', '', '0.5', '', '1']
+xticklabels = ['0', '', '.5', '', '1']
 bins = np.arange(0, 1.01, 0.05)
 plot_res = {desc:{'corr_both_pos': [], 'corr_one_neg': [], 'all': []} for desc in to_compare}
 for desc in to_compare:
@@ -53,7 +53,7 @@ for i, (desc, pres) in enumerate(plot_res.items()):
     ax.set_xticks(xticks)
     ax.set_xticklabels(xticklabels)
     if i == 0:
-        ax.set_ylabel(reference)
+        ax.set_ylabel(reference.upper())
     else:
         ax.set_yticklabels([])
     utils.simple_axis(ax)
@@ -67,12 +67,14 @@ for i, (desc, pres) in enumerate(plot_res.items()):
     ax.plot([0, 0.8], [0, 0.8], color='0.5')
     ax.set_xticks(xticks)
     ax.set_xticklabels(xticklabels)
-    ax.set_xlabel(desc)
+    ax.set_xlabel(desc.upper() if not desc == 'eva' else 'VIB_100')
+    ax.set_yticks([0, 0.2, 0.4, 0.6, 0.8, 0.9])
+    ax.set_yticklabels(['0', '.2', '.4', '.6', '.8', ''])
     if i == 0:
-        ax.set_ylabel(reference)
+        ax.set_ylabel(reference.upper())
     else:
         ax.set_yticklabels([])
     ax.set_xlim([0, 1])
-    ax.set_ylim([0, 1])
+    ax.set_ylim([0, 0.9])
     utils.simple_axis(ax)
 fig.savefig(os.path.join(inpath, 'predictions_comparison.png'))
