@@ -88,14 +88,15 @@ def _violin_boxplot(ax, data, desc_names):
     sort_idx = np.argsort(np.mean(data_copy, axis=1))
     data_copy = data_copy[sort_idx, :]
     violin_plot(ax, np.arange(len(data_copy))*3, data_copy)
-    ax.plot(np.arange(len(data_copy)) *3, np.mean(data_copy, axis=1), 'k.')
-    ax.plot(np.arange(len(data_copy)) *3, np.median(data_copy, axis=1), 'k*')
+    ax.plot(np.arange(len(data_copy)) *3, np.mean(data_copy, axis=1), 'ko', label='mean', markersize=4)
+    ax.plot(np.arange(len(data_copy)) *3, np.median(data_copy, axis=1), 'k*', label='median', markersize=4)
     ax.set_ylim([0, 0.8])
     ax.set_xticks(np.arange(len(data_copy)) *3 + 1)
     ax.xaxis.set_tick_params(size=0)
     ax.set_xticklabels(['_'.join(desc_names[i].split('_')[:2]).lower() for i in sort_idx],
                        rotation='45', ha='right', fontsize=10)
     ax.set_xlim([-3, len(data_copy) * 3 + 1])
+    ax.legend(loc='lower left', frameon=False, numpoints=1, prop={'size': 'small'}, bbox_to_anchor=(0., 0.85))
 
 
 def _descriptor_scatterplot(ax, data, clist, desc_names):
@@ -158,7 +159,7 @@ def new_descriptor_performance_plot(fig, max_overview, selection, method, glomer
     else:
         assert False
     utils.simple_axis(ax)
-    ax.set_ylabel('average descriptor score')
+    ax.set_ylabel('q2 score')
 
 def plot_search_matrix(fig, desc_res, selection, method, glomeruli):
     """docstring for plot_search_matrix"""
