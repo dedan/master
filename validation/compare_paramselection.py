@@ -5,7 +5,7 @@ Compare the result of optimal feature selection and regularization values with
 the results for some fixed settings. I had a look at this because we had the
 feeling that for the SVR we don't need any feature selection and special
 regularization. It works already good with standard values, but still we want
-to see the drop of performance we'll have.
+to see the gain of performance we'll have.
 
 Created by  on 2012-01-27.
 Copyright (c) 2012. All rights reserved.
@@ -47,70 +47,68 @@ for i, descriptor in enumerate(search_res):
         c_regularization = 1.0
         c_reg_idx = sc[method].index(c_regularization)      # regularization 1.0
 
-    both_opt = []
-    none_opt = []
-    reg_opt = []
-    k_opt = []
+    out_res[descriptor] = {'both_opt': [], 'none_opt': [], 'k_opt': [], 'reg_opt': [],
+                           'labels': max_overview[method][selection]['glomeruli']}
     for glom in used_glomeruli:
         best_params = rdl.get_best_params(max_overview, sc, k_best_dict,
                                           descriptor, glom, method, selection)
         k_best = best_params['feature_selection']['k_best']
         reg_idx = res['sc'][method].index(best_params['methods'][method]['regularization'])
-        tmp = res['res'][selection][glom][str(k_best)][str(reg_idx)]
-        both_opt.append(tmp[method]['gen_score'])
 
+        # optimal k_best and regularization
+        tmp = res['res'][selection][glom][str(k_best)][str(reg_idx)]
+        out_res[descriptor]['both_opt'].append(tmp[method]['gen_score'])
         # use optimal k_best with fixed regularization
         tmp = res['res'][selection][glom][str(k_best)][str(c_reg_idx)]
-        k_opt.append(tmp[method]['gen_score'])
-
+        out_res[descriptor]['k_opt'].append(tmp[method]['gen_score'])
         # use optimal regularization with fixed k_best
         tmp = res['res'][selection][glom][str(c_k_best)][str(reg_idx)]
-        reg_opt.append(tmp[method]['gen_score'])
-
+        out_res[descriptor]['reg_opt'].append(tmp[method]['gen_score'])
         # use fixed regularization and k_best
         tmp = res['res'][selection][glom][str(c_k_best)][str(c_reg_idx)]
-        none_opt.append(tmp[method]['gen_score'])
+        out_res[descriptor]['none_opt'].append(tmp[method]['gen_score'])
 
-    out_res[descriptor] = {'both_opt': both_opt,
-                           'none_opt': none_opt,
-                           'k_opt': k_opt,
-                           'reg_opt': reg_opt,
-                           'labels': max_overview[method][selection]['glomeruli']}
-
-
-
-# use only glomeruli for which paramsearch result > 0
-best_descs = ['haddad_desc', 'GETAWAY', 'all', 'vib_100']
-vals = [out_res[k] for k in best_descs]
 
 # which search dimension is more important
+best_descs = ['haddad_desc', 'GETAWAY', 'all', 'vib_100']
+nice_names = {'none_opt': 'default parameters',
+              'k_opt': 'k_best optimized',
+              'reg_opt': 'C optimized',
+              'both_opt': 'both optimized',
+              }
+line_max = 0.9
+ticks = [0, 0.2, 0.4, 0.6, 0.8, 0.9]
+ticklabels = ['0', '.2', '.4', '.6', '.8', '']
+vals = [out_res[k] for k in best_descs]
 reference_name = 'none_opt'
-for pick_type in ['both_opt', 'reg_opt', 'k_opt']:
-    fig = plt.figure()
-    fig.suptitle(pick_type)
+to_compare = ['k_opt', 'reg_opt'] #, 'both_opt']
+fig = plt.figure()
+for i, pick_type in enumerate(to_compare):
 
-    ax = fig.add_subplot(212)
-    line_max = 0.9
-    vals = [out_res[k] for k in best_descs]
     reference = np.array(utils.flatten([r[reference_name] for r in vals]))
     improved = np.array(utils.flatten([r[pick_type] for r in vals]))
     # only plot values which reach genscore > 0 after paramsearch
     reference = reference[improved > 0]
     improved = improved[improved > 0]
-
+    # don't care how negative it was before search, all < 0 are equally bad
     reference[reference < 0] = 0
+
+    ax = fig.add_subplot(1, len(to_compare), i+1)
     ax.plot(reference, improved, 'ko', alpha=0.6, markersize=4)
-    ax.plot([0, line_max], [0, line_max], color='0.5')
-    ax.set_xlabel(reference_name)
-    ax.set_ylabel(pick_type)
-    ax.set_title(method)
-    utils.simple_axis(ax)
-    ax.set_ylim([0, 0.8])
+    ax.plot([0, line_max-0.05], [0, line_max-0.05], color='0.5')
+    ax.set_xlabel(nice_names[reference_name])
+    ax.set_ylabel(nice_names[pick_type])
+    ax.set_title(method.upper())
     plt.axis('scaled')
-    ax.set_xlim([-0.05, 0.8])
+    ax.set_xlim([-0.05, line_max])
+    ax.set_ylim([0, line_max])
+    ax.set_xticks(ticks)
+    ax.set_yticks(ticks)
+    ax.set_xticklabels(ticklabels)
+    ax.set_yticklabels(ticklabels)
+    utils.simple_axis(ax)
 
-
-    fig.savefig(os.path.join(inpath, 'plots', pick_type + '_param_selection_overview.png'))
-    plt.show()
+fig.savefig(os.path.join(inpath, 'plots', 'param_selection_overview.png'))
+plt.show()
 
 
