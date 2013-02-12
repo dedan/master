@@ -1,18 +1,6 @@
 {
     "outpath": "/Users/dedan/projects/master/results/validation/test",
     "n_repetitions": 3,
-    "glomeruli": [
-        "Or19a",
-        "Or22a",
-        "Or35a",
-        "Or43b",
-        "Or67a",
-        "Or67b",
-        "Or7a",
-        "Or85b",
-        "Or98a",
-        "Or9a"
-    ],
     "runner_config_content": {
         "feature_selection": {
         	"method": "forest",
@@ -22,7 +10,8 @@
             "type": "conventional",
             "descriptor": "haddad_desc",
             "normalize": true,
-            "kernel_width": 30,
+            "kernel_width": 100,
+            "bin_width": 150,
             "use_intensity": true,
             "spec_type": "ir",
             "properties_to_add": []
@@ -30,7 +19,7 @@
         "methods": {
             "svr": {
                 "C": 1.0,
-                "n_folds": 50
+                "n_folds": 10
             }
         },
         "randomization_test": false

@@ -33,6 +33,8 @@ plt.close('all')
 sc = json.load(open(sys.argv[1]))
 config = sc['runner_config_content']
 config['data_path'] = os.path.join(os.path.dirname(__file__), '..', 'data')
+all_glom_path = os.path.join(config['data_path'], 'all_glomeruli.json')
+sc['glomeruli'] = json.load(open(all_glom_path))
 json.dump(sc, open(os.path.join(sc['outpath'], 'sc_config.json'), 'w'))
 assert len(config['methods']) == 1  # only one method a time
 method = config['methods'].keys()[0]
