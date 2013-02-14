@@ -36,8 +36,7 @@ for desc in to_compare:
             plot_res[desc]['corr_both_pos'].append(corr)
 
 for desc, pres in plot_res.items():
-    scor_perc = stats.scoreatpercentile(pres['all'], 10)
-    print desc, scor_perc
+    print '{} mean r: {:.2f}'.format(desc, np.mean(pres['all']))
 
 
 fig = plt.figure()
@@ -80,26 +79,6 @@ ax.set_ylabel('ALL (prediction)')
 utils.simple_axis(ax)
 ax.text(0.6, 0.7, 'r:{:.2f}'.format(stats.pearsonr(ref_predictions, comp_predictions)[0]))
 
-
-xticks = np.arange(0, 1.1, 0.25)
-xticklabels = ['0', '', '.5', '', '1']
-bins = np.arange(0, 1.01, 0.05)
-fig = plt.figure()
-ylim = np.max([np.histogram(v['all'], bins=bins)[0] for v in plot_res.values()])
-for i, (desc, pres) in enumerate(plot_res.items()):
-    ax = fig.add_subplot(1, 3, i+1)
-    c_both, _ = np.histogram(pres['all'], bins=bins)
-    plt.bar(bins[:-1], c_both, width=bins[1]-bins[0], color='0.5')
-    ax.set_xlim([0, 1])
-    ax.set_ylim([0, ylim])
-    ax.set_xticks(xticks)
-    ax.set_xticklabels(xticklabels)
-    ax.set_xlabel(desc)
-    if i == 0:
-        ax.set_ylabel(reference.upper())
-    else:
-        ax.set_yticklabels([])
-    utils.simple_axis(ax)
 
 if utils.run_from_ipython():
     plt.show()
