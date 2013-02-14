@@ -17,13 +17,12 @@ from scipy import stats
 
 inpath = '/Users/dedan/projects/master/results/predict/'
 reference = 'all'
+example_receptor = 'Or22a'
+comparison_desc = 'eva'
 res = pickle.load(open(os.path.join(inpath, 'predictions.pkl')))
 to_compare = set(res.keys()).difference([reference])
 
 fig = plt.figure()
-xticks = np.arange(0, 1.1, 0.25)
-xticklabels = ['0', '', '.5', '', '1']
-bins = np.arange(0, 1.01, 0.05)
 plot_res = {desc:{'corr_both_pos': [], 'corr_one_neg': [], 'all': []} for desc in to_compare}
 for desc in to_compare:
 
@@ -39,6 +38,7 @@ for desc in to_compare:
 for desc, pres in plot_res.items():
     scor_perc = stats.scoreatpercentile(pres['all'], 10)
     print desc, scor_perc
+
 
 fig = plt.figure()
 marker = ['s', 'o', 'd']
@@ -65,9 +65,6 @@ ax.set_ylabel('ALL (q2)')
 ax.legend(loc='lower right', numpoints=1, frameon=True, fancybox=True)
 utils.simple_axis(ax)
 
-
-example_receptor = 'Or22a'
-comparison_desc = 'eva'
 fig = plt.figure()
 ax = fig.add_subplot(111)
 ax.plot([0, 0.8], [0, 0.8], color='0.6')
@@ -82,6 +79,27 @@ ax.set_xlabel('EVA_100 (prediction)')
 ax.set_ylabel('ALL (prediction)')
 utils.simple_axis(ax)
 ax.text(0.6, 0.7, 'r:{:.2f}'.format(stats.pearsonr(ref_predictions, comp_predictions)[0]))
+
+
+xticks = np.arange(0, 1.1, 0.25)
+xticklabels = ['0', '', '.5', '', '1']
+bins = np.arange(0, 1.01, 0.05)
+fig = plt.figure()
+ylim = np.max([np.histogram(v['all'], bins=bins)[0] for v in plot_res.values()])
+for i, (desc, pres) in enumerate(plot_res.items()):
+    ax = fig.add_subplot(1, 3, i+1)
+    c_both, _ = np.histogram(pres['all'], bins=bins)
+    plt.bar(bins[:-1], c_both, width=bins[1]-bins[0], color='0.5')
+    ax.set_xlim([0, 1])
+    ax.set_ylim([0, ylim])
+    ax.set_xticks(xticks)
+    ax.set_xticklabels(xticklabels)
+    ax.set_xlabel(desc)
+    if i == 0:
+        ax.set_ylabel(reference.upper())
+    else:
+        ax.set_yticklabels([])
+    utils.simple_axis(ax)
 
 if utils.run_from_ipython():
     plt.show()
