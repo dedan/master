@@ -45,27 +45,15 @@ marker = ['s', 'o', 'd']
 xticks = [0, 0.2, 0.4, 0.6, 0.8, 0.9]
 xticklabels = ['0', '.2', '.4', '.6', '.8', '']
 ax = fig.add_subplot(111)
+ax.plot([0, 0.8], [0, 0.8], color='0.6')
 for i, (desc, pres) in enumerate(plot_res.items()):
     compare_scores = np.array([res[desc][g]['score'] for g in res[desc]])
     ref_scores = np.array([res[reference][g]['score'] for g in res[reference]])
     compare_scores[compare_scores < 0] = 0
     ref_scores[ref_scores < 0] = 0
-    ax.plot(compare_scores[compare_scores>0], ref_scores[compare_scores>0],
+    ax.plot(compare_scores, ref_scores,
             '.', marker=marker[i], color='0.5', markeredgecolor='0.3',
             label=desc.upper() if not desc == 'eva' else 'VIB_100')
-for i, (desc, pres) in enumerate(plot_res.items()):
-    compare_scores = np.array([res[desc][g]['score'] for g in res[desc]])
-    ref_scores = np.array([res[reference][g]['score'] for g in res[reference]])
-    compare_scores[compare_scores < 0] = 0
-    ref_scores[ref_scores < 0] = 0
-    if i == 0:
-        ax.plot(compare_scores[compare_scores==0], ref_scores[compare_scores==0],
-                'ko', color='0.0',
-                label='q2 = 0')
-    else:
-        ax.plot(compare_scores[compare_scores==0], ref_scores[compare_scores==0],
-                'ko', color='0.0')
-ax.plot([0, 0.8], [0, 0.8], color='0.6')
 ax.set_yticks(xticks)
 ax.set_yticklabels(xticklabels)
 ax.set_xticks(xticks)
@@ -78,12 +66,14 @@ ax.legend(loc='lower right', numpoints=1, frameon=True, fancybox=True)
 utils.simple_axis(ax)
 
 
-
+example_receptor = 'Or22a'
+comparison_desc = 'eva'
 fig = plt.figure()
 ax = fig.add_subplot(111)
 ax.plot([0, 0.8], [0, 0.8], color='0.6')
-ax.plot(res['all']['Or22a']['predictions'], res['eva']['Or22a']['predictions'],
-        'ko', color='0.5', markeredgecolor='0.3')
+ref_predictions = res[reference][example_receptor]['predictions']
+comp_predictions = res[comparison_desc][example_receptor]['predictions']
+ax.plot(ref_predictions, comp_predictions, 'ko', color='0.5', markeredgecolor='0.3')
 ax.set_yticks(xticks)
 ax.set_yticklabels(xticklabels)
 ax.set_xticks(xticks)
@@ -91,7 +81,7 @@ ax.set_xticklabels(xticklabels)
 ax.set_xlabel('EVA_100 (prediction)')
 ax.set_ylabel('ALL (prediction)')
 utils.simple_axis(ax)
-
+ax.text(0.6, 0.7, 'r:{:.2f}'.format(stats.pearsonr(ref_predictions, comp_predictions)[0]))
 
 if utils.run_from_ipython():
     plt.show()
