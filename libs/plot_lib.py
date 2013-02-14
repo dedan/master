@@ -8,6 +8,7 @@ Copyright (c) 2012. All rights reserved.
 
 import sys
 import os
+import string
 import numpy as np
 import pylab as plt
 from collections import defaultdict
@@ -95,7 +96,8 @@ def _violin_boxplot(ax, data, desc_names):
     ax.set_yticklabels(['0', '', '.2', '', '.4', '', '.6', '', '.8', ''])
     ax.set_xticks(np.arange(len(data_copy)) *3 + 1)
     ax.xaxis.set_tick_params(size=0)
-    ax.set_xticklabels(['_'.join(desc_names[i].split('_')[:2]).upper() for i in sort_idx],
+    new_desc_names = ['_'.join(d.split('_')[:2]) if not d[-1] in string.digits else d for d in desc_names]
+    ax.set_xticklabels([new_desc_names[i].upper() for i in sort_idx],
                        rotation='45', ha='right', fontsize=10)
     ax.set_xlim([-3, len(data_copy) * 3 + 1])
     ax.legend(loc='lower left', frameon=False, numpoints=1, prop={'size': 'medium'}, bbox_to_anchor=(0., 0.85))
@@ -174,9 +176,9 @@ def plot_search_matrix(fig, desc_res, selection, method, glomeruli):
         mat = desc_res[selection][glom][method]
         ax = fig.add_subplot(n, n, i_glom+1)
         if np.max(mat) < 0:
-            ax.imshow(np.zeros(mat.shape), interpolation='nearest', cmap=plt.cm.binary)
+            ax.imshow(np.zeros(mat.shape), interpolation='nearest', cmap=plt.cm.gray)
         else:
-            ax.imshow(mat, interpolation='nearest', cmap=plt.cm.binary, vmin=0)
+            ax.imshow(mat, interpolation='nearest', cmap=plt.cm.gray, vmin=0)
         ax.set_ylabel('{}'.format(glom))
         ax.set_yticks([])
         ax.set_xticks([])

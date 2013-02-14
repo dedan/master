@@ -50,7 +50,7 @@ plt.show()
 
 # ML method comparison plot
 markers = ['1', '0']
-desc2comp = ['vib_100', 'all']
+desc2comp = ['EVA_100', 'all']
 fig = plt.figure()
 ax = fig.add_subplot(111)
 desc1_collect, desc2_collect = [], []
