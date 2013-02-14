@@ -36,45 +36,62 @@ for desc in to_compare:
         else:
             plot_res[desc]['corr_both_pos'].append(corr)
 
-ylim = np.max([np.histogram(v['all'], bins=bins)[0] for v in plot_res.values()])
-for i, (desc, pres) in enumerate(plot_res.items()):
-    ax = fig.add_subplot(2, len(to_compare), i+1)
-    c_both, _ = np.histogram(pres['corr_both_pos'], bins=bins)
-    plt.bar(bins[:-1], c_both, width=bins[1]-bins[0], color='0.5')
-    c_one, _ = np.histogram(pres['corr_one_neg'], bins=bins)
-    plt.bar(bins[:-1], c_one, bottom=c_both, width=bins[1]-bins[0], color='0.8')
-    annotation_text = '{}/{}'.format(len(pres['corr_both_pos']), len(res[reference]))
-    ax.text(0.1, 0.9, annotation_text, transform=ax.transAxes)
+for desc, pres in plot_res.items():
     scor_perc = stats.scoreatpercentile(pres['all'], 10)
     print desc, scor_perc
-    ax.plot([scor_perc, scor_perc], [-1, ylim*2/3], 'r')
-    ax.set_xlim([0, 1])
-    ax.set_ylim([0, ylim])
-    ax.set_xticks(xticks)
-    ax.set_xticklabels(xticklabels)
-    if i == 0:
-        ax.set_ylabel(reference.upper())
-    else:
-        ax.set_yticklabels([])
-    utils.simple_axis(ax)
 
-    ax = fig.add_subplot(2, len(to_compare), len(to_compare) + i + 1)
+fig = plt.figure()
+marker = ['s', 'o', 'd']
+xticks = [0, 0.2, 0.4, 0.6, 0.8, 0.9]
+xticklabels = ['0', '.2', '.4', '.6', '.8', '']
+ax = fig.add_subplot(111)
+for i, (desc, pres) in enumerate(plot_res.items()):
     compare_scores = np.array([res[desc][g]['score'] for g in res[desc]])
     ref_scores = np.array([res[reference][g]['score'] for g in res[reference]])
     compare_scores[compare_scores < 0] = 0
     ref_scores[ref_scores < 0] = 0
-    ax.plot(compare_scores, ref_scores, 'ko', alpha=0.6)
-    ax.plot([0, 0.8], [0, 0.8], color='0.5')
-    ax.set_xticks(xticks)
-    ax.set_xticklabels(xticklabels)
-    ax.set_xlabel(desc.upper() if not desc == 'eva' else 'VIB_100')
-    ax.set_yticks([0, 0.2, 0.4, 0.6, 0.8, 0.9])
-    ax.set_yticklabels(['0', '.2', '.4', '.6', '.8', ''])
+    ax.plot(compare_scores[compare_scores>0], ref_scores[compare_scores>0],
+            '.', marker=marker[i], color='0.5', markeredgecolor='0.3',
+            label=desc.upper() if not desc == 'eva' else 'VIB_100')
+for i, (desc, pres) in enumerate(plot_res.items()):
+    compare_scores = np.array([res[desc][g]['score'] for g in res[desc]])
+    ref_scores = np.array([res[reference][g]['score'] for g in res[reference]])
+    compare_scores[compare_scores < 0] = 0
+    ref_scores[ref_scores < 0] = 0
     if i == 0:
-        ax.set_ylabel(reference.upper())
+        ax.plot(compare_scores[compare_scores==0], ref_scores[compare_scores==0],
+                'ko', color='0.0',
+                label='q2 = 0')
     else:
-        ax.set_yticklabels([])
-    ax.set_xlim([0, 1])
-    ax.set_ylim([0, 0.9])
-    utils.simple_axis(ax)
-fig.savefig(os.path.join(inpath, 'predictions_comparison.png'))
+        ax.plot(compare_scores[compare_scores==0], ref_scores[compare_scores==0],
+                'ko', color='0.0')
+ax.plot([0, 0.8], [0, 0.8], color='0.6')
+ax.set_yticks(xticks)
+ax.set_yticklabels(xticklabels)
+ax.set_xticks(xticks)
+ax.set_xticklabels(xticklabels)
+ax.set_xlim([-0.05, 0.9])
+ax.set_ylim([-0.05, 0.9])
+ax.set_xlabel('comparison descriptor (q2)')
+ax.set_ylabel('ALL (q2)')
+ax.legend(loc='lower right', numpoints=1, frameon=True, fancybox=True)
+utils.simple_axis(ax)
+
+
+
+fig = plt.figure()
+ax = fig.add_subplot(111)
+ax.plot([0, 0.8], [0, 0.8], color='0.6')
+ax.plot(res['all']['Or22a']['predictions'], res['eva']['Or22a']['predictions'],
+        'ko', color='0.5', markeredgecolor='0.3')
+ax.set_yticks(xticks)
+ax.set_yticklabels(xticklabels)
+ax.set_xticks(xticks)
+ax.set_xticklabels(xticklabels)
+ax.set_xlabel('EVA_100 (prediction)')
+ax.set_ylabel('ALL (prediction)')
+utils.simple_axis(ax)
+
+
+if utils.run_from_ipython():
+    plt.show()
