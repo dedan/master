@@ -71,10 +71,10 @@ for i, descriptor in enumerate(search_res):
 
 # which search dimension is more important
 best_descs = ['haddad_desc', 'GETAWAY', 'all', 'vib_100']
-nice_names = {'none_opt': 'default parameters',
-              'k_opt': 'k_best optimized',
-              'reg_opt': 'C optimized',
-              'both_opt': 'both optimized',
+nice_names = {'none_opt': 'default parameters (q2)',
+              'k_opt': 'k_best optimized (q2)',
+              'reg_opt': 'C optimized (q2)',
+              'both_opt': 'both optimized (q2)',
               }
 line_max = 0.9
 ticks = [0, 0.2, 0.4, 0.6, 0.8, 0.9]

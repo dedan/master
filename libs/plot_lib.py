@@ -33,8 +33,7 @@ def violin_plot(ax, pos, data, bp=False):
         x = np.arange(m,M,(M-m)/100.) # support for violin
         v = k.evaluate(x) #violin profile (density curve)
         v = v/v.max()*w #scaling the violin to the available space
-        ax.fill_betweenx(x,p,v+p,facecolor='k',alpha=0.3)
-        ax.fill_betweenx(x,p,-v+p,facecolor='k',alpha=0.3)
+        bla = ax.fill_betweenx(x, -v+p, v+p, facecolor='k', edgecolor='k', alpha=0.3)
     if bp:
         ax.boxplot(data.T,notch=1,positions=pos,vert=1)
 
@@ -89,18 +88,22 @@ def _violin_boxplot(ax, data, desc_names):
     sort_idx = np.argsort(np.mean(data_copy, axis=1))
     data_copy = data_copy[sort_idx, :]
     violin_plot(ax, np.arange(len(data_copy))*3, data_copy)
-    ax.plot(np.arange(len(data_copy)) *3, np.mean(data_copy, axis=1), 'ko', label='mean', markersize=4)
-    ax.plot(np.arange(len(data_copy)) *3, np.median(data_copy, axis=1), 'k*', label='median', markersize=4)
+    for i, m in zip(np.arange(len(data_copy)) *3, np.mean(data_copy, axis=1)):
+        if not i:
+            ax.plot([i-0.2, i+0.2], [m, m], 'k', label='mean', markersize=6)
+        else:
+            ax.plot([i-0.2, i+0.2], [m, m], 'k', markersize=6)
+    ax.plot(np.arange(len(data_copy)) *3, np.median(data_copy, axis=1), 'k*', label='median', markersize=6)
     ax.set_ylim([0, 0.9])
     ax.set_yticks([0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9])
     ax.set_yticklabels(['0', '', '.2', '', '.4', '', '.6', '', '.8', ''])
-    ax.set_xticks(np.arange(len(data_copy)) *3 + 1)
     ax.xaxis.set_tick_params(size=0)
     new_desc_names = ['_'.join(d.split('_')[:2]) if not d[-1] in string.digits else d for d in desc_names]
+    ax.set_xticks(np.arange(len(data_copy)) *3)
     ax.set_xticklabels([new_desc_names[i].upper() for i in sort_idx],
-                       rotation='45', ha='right', fontsize=10)
-    ax.set_xlim([-3, len(data_copy) * 3 + 1])
-    ax.legend(loc='lower left', frameon=False, numpoints=1, prop={'size': 'medium'}, bbox_to_anchor=(0., 0.85))
+                       rotation='0', fontsize=10)
+    ax.set_xlim([-2, len(data_copy) * 3-1])
+    ax.legend(loc='upper left', fancybox=True, numpoints=1, prop={'size': 'medium'}, bbox_to_anchor=(0.01, 1))
 
 
 def _descriptor_scatterplot(ax, data, clist, desc_names):
