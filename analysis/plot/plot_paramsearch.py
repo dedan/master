@@ -31,20 +31,20 @@ search_res, max_overview, sc, _ = rdl.read_paramsearch_results(config['inpath'],
 
 if config['plot_param_space']:
     for desc in search_res:
-        fig = plt.figure(figsize=(7,10))
+        fig = plt.figure()
         plib.plot_search_matrix(fig, search_res[desc], config['fselection'],
                                 config['method'], config.get('glomeruli', []))
         fig.savefig(os.path.join(outpath, config['method'] + '_' + desc + '.' + config['format']))
 
 # descriptor method performance plots
-fig = plt.figure(figsize=(10,3))
+fig = plt.figure(figsize=(3.35, 2))
 ptype = config['descriptor_plot_type']
 plib.new_descriptor_performance_plot(fig, max_overview, config['fselection'],
                                      config['method'],
                                      config.get('glomeruli', []),
                                      ptype)
-fig.subplots_adjust(bottom=0.3)
-fig.savefig(os.path.join(outpath, ptype + '_desc_comparison.' + config['format']))
+fig.subplots_adjust(bottom=0.25)
+fig.savefig(os.path.join(outpath, ptype + '_desc_comparison.' + config['format']), dpi=300)
 plt.show()
 
 

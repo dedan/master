@@ -88,12 +88,7 @@ def _violin_boxplot(ax, data, desc_names):
     sort_idx = np.argsort(np.mean(data_copy, axis=1))
     data_copy = data_copy[sort_idx, :]
     violin_plot(ax, np.arange(len(data_copy))*3, data_copy)
-    for i, m in zip(np.arange(len(data_copy)) *3, np.mean(data_copy, axis=1)):
-        if not i:
-            ax.plot([i-0.2, i+0.2], [m, m], 'k', label='mean', markersize=6)
-        else:
-            ax.plot([i-0.2, i+0.2], [m, m], 'k', markersize=6)
-    ax.plot(np.arange(len(data_copy)) *3, np.median(data_copy, axis=1), 'k*', label='median', markersize=6)
+    ax.plot(np.arange(len(data_copy)) *3, np.median(data_copy, axis=1), 'wo', label='median', markersize=6)
     ax.set_ylim([0, 0.9])
     ax.set_yticks([0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9])
     ax.set_yticklabels(['0', '', '.2', '', '.4', '', '.6', '', '.8', ''])
@@ -101,10 +96,9 @@ def _violin_boxplot(ax, data, desc_names):
     new_desc_names = ['_'.join(d.split('_')[:2]) if not d[-1] in string.digits else d for d in desc_names]
     ax.set_xticks(np.arange(len(data_copy)) *3)
     ax.set_xticklabels([new_desc_names[i].upper() for i in sort_idx],
-                       rotation='0', fontsize=10)
+                       rotation='45', fontsize=7)
     ax.set_xlim([-2, len(data_copy) * 3-1])
-    ax.legend(loc='upper left', fancybox=True, numpoints=1, prop={'size': 'medium'}, bbox_to_anchor=(0.01, 1))
-
+    ax.legend(loc='upper left', frameon=False, numpoints=1, prop={'size': 'small'}, bbox_to_anchor=(0.01, 1))
 
 def _descriptor_scatterplot(ax, data, clist, desc_names):
     """docstring for _descriptor_scatterplot"""
@@ -152,7 +146,6 @@ def new_descriptor_performance_plot(fig, max_overview, selection, method, glomer
     clist_all = [sorted(all_values,reverse=True).index(i) / n_val for i in all_values]
 
     ax = fig.add_subplot(111)
-    ax.set_title('{}'.format(method.upper()))
     if descriptor_plot_type == 'boxplot':
         _descriptor_boxplot(ax, data, desc_names)
     elif descriptor_plot_type == 'scatterplot':
