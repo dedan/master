@@ -40,10 +40,8 @@ for i, descriptor in enumerate(search_res):
 
     # param selection values to compare against
     if method == 'forest':
-        sc[method] = res['sc'][method]
-        sc['svr'] = res['sc']['svr']
-        c_k_best = np.max(sc['k_best'])
-        c_reg_idx = np.min((len(sc[method])-1, len(sc['svr'])-1))
+        c_k_best = -1
+        c_reg_idx = -1
     else:
         c_k_best = -1              # all features
         c_regularization = 1.0
