@@ -26,6 +26,8 @@ import itertools as it
 inpath = '/Users/dedan/projects/master/results/param_search/nusvr'
 method = 'svr'
 selection = 'linear'
+example_desc = 'all'
+example_gloms = ['Or43b', 'Or67c']
 
 data_path = os.path.join(os.path.dirname(__file__), '..', 'data')
 used_glomeruli = json.load(open(os.path.join(data_path, 'all_glomeruli.json')))
@@ -70,7 +72,7 @@ for i, descriptor in enumerate(search_res):
 
 
 # which search dimension is more important
-best_descs = ['haddad_desc', 'GETAWAY', 'all', 'vib_100']
+best_descs = ['haddad_desc', 'all', 'vib_100']
 nice_names = {'none_opt': 'default parameters (q2)',
               'k_opt': 'k_best optimized (q2)',
               'reg_opt': 'C optimized (q2)',
@@ -107,8 +109,26 @@ for i, pick_type in enumerate(to_compare):
     ax.set_xticklabels(ticklabels)
     ax.set_yticklabels(ticklabels)
     utils.simple_axis(ax)
-
 fig.savefig(os.path.join(inpath, 'plots', 'param_selection_overview.png'))
+
+fig = plt.figure()
+for i, glom in enumerate(example_gloms):
+    mat = search_res[example_desc][selection][glom][method]
+    ax = fig.add_subplot(1, len(example_gloms), i+1)
+    ax.set_xticks([0, 1, 2])
+    ax.set_xticklabels(['0.1', '1', '10'], rotation=90)
+    ax.set_yticks(range(mat.shape[0]))
+    yticklabels = [str(2**j) if j%2==0 else '' for j in range(mat.shape[0])]
+    yticklabels[-1] = '{} (all)'.format(k_best_dict[example_desc][-1])
+    ax.set_yticklabels(yticklabels)
+    ax.set_title(glom)
+    ax.set_xlabel('C')
+    if i == 0:
+        ax.set_ylabel('k best')
+    cax = ax.imshow(mat, interpolation='nearest', cmap=plt.cm.gray, vmin=0)
+    ticks = [0, np.max(mat)/2, np.max(mat)]
+    cbar = fig.colorbar(cax, ticks=ticks)
+    cbar.ax.set_yticklabels(['{:.2f}'.format(t) for t in ticks])
 plt.show()
 
 
