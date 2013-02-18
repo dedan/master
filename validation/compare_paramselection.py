@@ -45,31 +45,30 @@ for i, descriptor in enumerate(search_res):
         c_k_best = np.max(sc['k_best'])
         c_reg_idx = np.min((len(sc[method])-1, len(sc['svr'])-1))
     else:
-        c_k_best = np.max(res['sc']['k_best'])              # all features
+        c_k_best = -1              # all features
         c_regularization = 1.0
         c_reg_idx = sc[method].index(c_regularization)      # regularization 1.0
 
     out_res[descriptor] = {'both_opt': [], 'none_opt': [], 'k_opt': [], 'reg_opt': [],
                            'labels': max_overview[method][selection]['glomeruli']}
     for glom in used_glomeruli:
-        best_params = rdl.get_best_params(max_overview, sc, k_best_dict,
-                                          descriptor, glom, method, selection)
-        k_best = best_params['feature_selection']['k_best']
-        reg_idx = res['sc'][method].index(best_params['methods'][method]['regularization'])
+
+        cur_res = search_res[descriptor][selection][glom][method]
 
         # optimal k_best and regularization
-        tmp = res['res'][selection][glom][str(k_best)][str(reg_idx)]
-        out_res[descriptor]['both_opt'].append(tmp[method]['gen_score'])
-        # use optimal k_best with fixed regularization
-        tmp = res['res'][selection][glom][str(k_best)][str(c_reg_idx)]
-        out_res[descriptor]['k_opt'].append(tmp[method]['gen_score'])
-        # use optimal regularization with fixed k_best
-        tmp = res['res'][selection][glom][str(c_k_best)][str(reg_idx)]
-        out_res[descriptor]['reg_opt'].append(tmp[method]['gen_score'])
-        # use fixed regularization and k_best
-        tmp = res['res'][selection][glom][str(c_k_best)][str(c_reg_idx)]
-        out_res[descriptor]['none_opt'].append(tmp[method]['gen_score'])
+        out_res[descriptor]['both_opt'].append(np.max(cur_res))
 
+        # use optimal k_best with fixed regularization
+        k_best = np.argmax(cur_res[:, c_reg_idx])
+        out_res[descriptor]['k_opt'].append(cur_res[k_best, c_reg_idx])
+
+        # use optimal regularization with fixed k_best
+        reg_idx = np.argmax(cur_res[c_k_best, :])
+        out_res[descriptor]['reg_opt'].append(cur_res[c_k_best, reg_idx])
+
+        # use fixed regularization and k_best
+        out_res[descriptor]['none_opt'].append(cur_res[c_k_best, c_reg_idx])
+    assert not (np.array(out_res[descriptor]['none_opt']) > out_res[descriptor]['k_opt']).any()
 
 # which search dimension is more important
 best_descs = ['haddad_desc', 'all', 'vib_100']
@@ -94,6 +93,7 @@ for i, pick_type in enumerate(to_compare):
     improved = improved[improved > 0]
     # don't care how negative it was before search, all < 0 are equally bad
     reference[reference < 0] = 0
+    improved[improved < 0] = 0
 
     ax = fig.add_subplot(1, len(to_compare), i+1)
     ax.plot(reference, improved, 'ko', alpha=0.6, markersize=4)
