@@ -51,7 +51,7 @@ plt.show()
 # ML method comparison plot
 markers = ['1', '0']
 desc2comp = ['EVA_100', 'all']
-fig = plt.figure()
+fig = plt.figure(figsize=(3.35, 3))
 ax = fig.add_subplot(111)
 desc1_collect, desc2_collect = [], []
 for i, desc in enumerate(desc2comp):
@@ -62,19 +62,24 @@ for i, desc in enumerate(desc2comp):
     ax.plot(max_overview['svr']['linear']['p_selection'][desc_idx1, :],
             max_overview['forest']['forest']['p_selection'][desc_idx2, :],
             'o', mfc=markers[i],
-            label=desc)
+            label=desc,
+            markersize=5)
 ax.plot([0, 0.8], [0, 0.8], color='0.5')
+plt.axis('scaled')
 ax.set_xlim([0, .9])
 ax.set_ylim([0, .9])
-ax.set_xlabel('SVR')
-ax.set_ylabel('RFR')
+ax.set_xlabel('SVR (q2)')
+ax.set_ylabel('RFR (q2)')
 utils.simple_axis(ax)
-ax.legend(loc='upper left', numpoints=1, fancybox=True, prop={'size': 'medium'}, bbox_to_anchor=(0.01, 1))
-ax.set_yticks([0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9])
-ax.set_yticklabels(['0', '.1', '.2', '.3', '.4', '.5', '.6', '.7', '.8', ''])
-ax.set_xticks([0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9])
-ax.set_xticklabels(['0', '.1', '.2', '.3', '.4', '.5', '.6', '.7', '.8', ''])
-fig.savefig(os.path.join(outpath, 'best_method_comparison.' + config['format']))
+ax.legend(loc='upper left', numpoints=1, frameon=False, prop={'size': 'small'}, bbox_to_anchor=(0.01, 1))
+ticks = [0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9]
+ticklabels = ['0', '', '.2', '', '.4', '', '.6', '', '.8', '']
+ax.set_yticks(ticks)
+ax.set_yticklabels(ticklabels)
+ax.set_xticks(ticks)
+ax.set_xticklabels(ticklabels)
+fig.subplots_adjust(bottom=0.2)
+fig.savefig(os.path.join(outpath, 'best_method_comparison.' + config['format']), dpi=300)
 
 assert len(desc1_collect) == len(desc2_collect)
 svr_better = np.sum([1 for d1, d2 in zip(desc1_collect, desc2_collect) if d1 > d2])

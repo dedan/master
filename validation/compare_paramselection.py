@@ -15,6 +15,7 @@ import sys
 import os
 import json
 import glob
+import string
 import __builtin__
 import numpy as np
 import pylab as plt
@@ -69,7 +70,7 @@ for i, descriptor in enumerate(search_res):
     assert not (np.array(out_res[descriptor]['none_opt']) > out_res[descriptor]['k_opt']).any()
 
 
-fig = plt.figure(figsize=(3.35, 2.2))
+fig = plt.figure(figsize=(3.35, 3.5))
 for i, glom in enumerate(example_gloms):
     mat = search_res[example_desc][selection][glom][method]
     ax = fig.add_subplot(1, len(example_gloms), i+1)
@@ -79,7 +80,7 @@ for i, glom in enumerate(example_gloms):
     yticklabels = [str(2**j) if j%2==0 else '' for j in range(mat.shape[0])]
     yticklabels[-1] = str(k_best_dict[example_desc][-1])
     ax.set_yticklabels(yticklabels)
-    ax.set_title(glom)
+    ax.set_title('{}) {}'.format(string.lowercase[i], glom))
     ax.set_xlabel('C')
     if i == 0:
         ax.set_ylabel('k best')
@@ -106,7 +107,8 @@ ticklabels = ['0', '.2', '.4', '.6', '.8', '']
 vals = [out_res[k] for k in best_descs]
 reference_name = 'none_opt'
 to_compare = ['k_opt', 'reg_opt'] #, 'both_opt']
-fig = plt.figure(figsize=(3.35, 5))
+fig = plt.figure(figsize=(3.35, 6))
+titles = ['c)', 'd)']
 for i, pick_type in enumerate(to_compare):
 
     reference = np.array(utils.flatten([r[reference_name] for r in vals]))
@@ -129,8 +131,10 @@ for i, pick_type in enumerate(to_compare):
     ax.set_yticks(ticks)
     ax.set_xticklabels(ticklabels)
     ax.set_yticklabels(ticklabels)
+    ax.set_title(titles[i])
     utils.simple_axis(ax)
 ax.set_xlabel(nice_names[reference_name])
+fig.subplots_adjust(hspace=0.3)
 fig.savefig(os.path.join(inpath, 'plots', 'param_selection_overview.png'), dpi=300)
 plt.show()
 
