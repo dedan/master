@@ -68,6 +68,31 @@ for i, descriptor in enumerate(search_res):
         out_res[descriptor]['none_opt'].append(cur_res[c_k_best, c_reg_idx])
     assert not (np.array(out_res[descriptor]['none_opt']) > out_res[descriptor]['k_opt']).any()
 
+
+fig = plt.figure(figsize=(3.35, 2.2))
+for i, glom in enumerate(example_gloms):
+    mat = search_res[example_desc][selection][glom][method]
+    ax = fig.add_subplot(1, len(example_gloms), i+1)
+    ax.set_xticks([0, 1, 2])
+    ax.set_xticklabels(['0.1', '1', '10'], rotation=90)
+    ax.set_yticks(range(mat.shape[0]))
+    yticklabels = [str(2**j) if j%2==0 else '' for j in range(mat.shape[0])]
+    yticklabels[-1] = str(k_best_dict[example_desc][-1])
+    ax.set_yticklabels(yticklabels)
+    ax.set_title(glom)
+    ax.set_xlabel('C')
+    if i == 0:
+        ax.set_ylabel('k best')
+    else:
+        ax.set_yticks([])
+    ax.tick_params('both', length=0, width=2, which='major')
+    cax = ax.imshow(mat, interpolation='nearest', cmap=plt.cm.gray, vmin=0)
+    ticks = [0, np.max(mat)/2, np.max(mat)]
+    cbar = fig.colorbar(cax, ticks=ticks)
+    cbar.ax.set_yticklabels(['{:.2f}'.format(t) for t in ticks])
+fig.savefig(os.path.join(inpath, 'plots', 'paramsearch_examples.png'), dpi=300)
+
+
 # which search dimension is more important
 best_descs = ['haddad_desc', 'all', 'vib_100']
 nice_names = {'none_opt': 'default parameters (q2)',
@@ -81,7 +106,7 @@ ticklabels = ['0', '.2', '.4', '.6', '.8', '']
 vals = [out_res[k] for k in best_descs]
 reference_name = 'none_opt'
 to_compare = ['k_opt', 'reg_opt'] #, 'both_opt']
-fig = plt.figure()
+fig = plt.figure(figsize=(3.35, 5))
 for i, pick_type in enumerate(to_compare):
 
     reference = np.array(utils.flatten([r[reference_name] for r in vals]))
@@ -93,12 +118,10 @@ for i, pick_type in enumerate(to_compare):
     reference[reference < 0] = 0
     improved[improved < 0] = 0
 
-    ax = fig.add_subplot(1, len(to_compare), i+1)
+    ax = fig.add_subplot(len(to_compare), 1, i+1)
     ax.plot(reference, improved, 'ko', alpha=0.6, markersize=4)
     ax.plot([0, line_max-0.05], [0, line_max-0.05], color='0.5')
-    ax.set_xlabel(nice_names[reference_name])
     ax.set_ylabel(nice_names[pick_type])
-    ax.set_title(method.upper())
     plt.axis('scaled')
     ax.set_xlim([-0.05, line_max])
     ax.set_ylim([0, line_max])
@@ -107,26 +130,9 @@ for i, pick_type in enumerate(to_compare):
     ax.set_xticklabels(ticklabels)
     ax.set_yticklabels(ticklabels)
     utils.simple_axis(ax)
-fig.savefig(os.path.join(inpath, 'plots', 'param_selection_overview.png'))
-
-fig = plt.figure()
-for i, glom in enumerate(example_gloms):
-    mat = search_res[example_desc][selection][glom][method]
-    ax = fig.add_subplot(1, len(example_gloms), i+1)
-    ax.set_xticks([0, 1, 2])
-    ax.set_xticklabels(['0.1', '1', '10'], rotation=90)
-    ax.set_yticks(range(mat.shape[0]))
-    yticklabels = [str(2**j) if j%2==0 else '' for j in range(mat.shape[0])]
-    yticklabels[-1] = '{} (all)'.format(k_best_dict[example_desc][-1])
-    ax.set_yticklabels(yticklabels)
-    ax.set_title(glom)
-    ax.set_xlabel('C')
-    if i == 0:
-        ax.set_ylabel('k best')
-    cax = ax.imshow(mat, interpolation='nearest', cmap=plt.cm.gray, vmin=0)
-    ticks = [0, np.max(mat)/2, np.max(mat)]
-    cbar = fig.colorbar(cax, ticks=ticks)
-    cbar.ax.set_yticklabels(['{:.2f}'.format(t) for t in ticks])
+ax.set_xlabel(nice_names[reference_name])
+fig.savefig(os.path.join(inpath, 'plots', 'param_selection_overview.png'), dpi=300)
 plt.show()
+
 
 
