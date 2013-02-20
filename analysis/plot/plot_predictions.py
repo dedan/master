@@ -17,7 +17,7 @@ from scipy import stats
 
 inpath = '/Users/dedan/projects/master/results/predict/'
 reference = 'all'
-example_receptor = 'Or22a'
+example_receptor = 'ac3a'
 comparison_desc = 'eva'
 res = pickle.load(open(os.path.join(inpath, 'predictions.pkl')))
 del res['getaway']
@@ -31,10 +31,6 @@ for desc in to_compare:
         corr, _ = stats.pearsonr(res[reference][glom]['predictions'],
                                  res[desc][glom]['predictions'])
         plot_res[desc]['all'].append(corr)
-        if res[reference][glom]['score'] <= 0 or res[desc][glom]['score'] <=0:
-            plot_res[desc]['corr_one_neg'].append(corr)
-        else:
-            plot_res[desc]['corr_both_pos'].append(corr)
 
 for desc, pres in plot_res.items():
     print '{} mean r: {:.2f}'.format(desc, np.mean(pres['all']))
@@ -67,6 +63,7 @@ plt.axis('scaled')
 ax.annotate(example_receptor, xy=(comp_score, ref_score), xytext=(0.65, 0.4),
             arrowprops=dict(facecolor='black', shrink=0.25, width=1, frac=0.2, headwidth=3))
 ax.text(0.55, 0.75, 'r:{:.2f}'.format(stats.pearsonr(col_comp, col_ref)[0]))
+print stats.pearsonr(col_comp, col_ref)
 ax.set_yticks(xticks)
 ax.set_yticklabels(xticklabels)
 ax.set_xticks(xticks)
@@ -104,32 +101,7 @@ ax.text(0.55, 0.75, 'r:{:.2f}'.format(stats.pearsonr(ref_predictions, comp_predi
 print stats.pearsonr(ref_predictions, comp_predictions)
 fig.subplots_adjust(bottom=0.2)
 ax.set_title('b)')
-fig.savefig(os.path.join(inpath, 'prediction_comparison.png'), dpi=300)
-
-
-
-
-
-xticks = np.arange(0, 1.1, 0.25)
-xticklabels = ['0', '', '.5', '', '1']
-bins = np.arange(0, 1.01, 0.05)
-fig = plt.figure()
-ylim = np.max([np.histogram(v['all'], bins=bins)[0] for v in plot_res.values()])
-for i, (desc, pres) in enumerate(plot_res.items()):
-    ax = fig.add_subplot(1, 2, i+1)
-    c_both, _ = np.histogram(pres['all'], bins=bins)
-    plt.bar(bins[:-1], c_both, width=bins[1]-bins[0], color='0.5')
-    ax.set_xlim([0, 1])
-    ax.set_ylim([0, ylim])
-    ax.set_xticks(xticks)
-    ax.set_xticklabels(xticklabels)
-    ax.set_xlabel(desc)
-    if i == 0:
-        ax.set_ylabel(reference.upper())
-    else:
-        ax.set_yticklabels([])
-    utils.simple_axis(ax)
-
+fig.savefig(os.path.join(inpath, 'prediction_comparison_{}.png'.format(example_receptor)), dpi=300)
 
 if utils.run_from_ipython():
     plt.show()
