@@ -1,27 +1,36 @@
 #!/usr/bin/env python
 # encoding: utf-8
 """
+hinton diagram of response matrix
 
 Created by  on 2012-01-27.
 Copyright (c) 2012. All rights reserved.
 """
 
+import os
 import numpy as np
 import pylab as plt
 from matplotlib.patches import Rectangle, Circle
 from matplotlib.ticker import NullLocator
 from master.libs import read_data_lib as rdl
 
-cases, gloms, rm = rdl.load_response_matrix('data/response_matrix.csv', door2id=None)
+subtract_sfr = False
+outpath = '/Users/dedan/projects/master/results/summary/'
+rm_path = 'data/response_matrix.csv'
 
-# # read standard firing rates
-# sfrs = open('data/response_matrix.csv').readlines()[1].split(',')[1:]
-# sfrs = np.array([float(s) if not s == 'NA' else 0 for s in sfrs])
-# rm = np.subtract(rm, sfrs)
+cases, gloms, rm = rdl.load_response_matrix(rm_path, door2id=None)
 
+# read standard firing rates
+if subtract_sfr:
+    sfrs = open(rm_path).readlines()[1].split(',')[1:]
+    sfrs = np.array([float(s) if not s == 'NA' else 0 for s in sfrs])
+    rm = np.subtract(rm, sfrs)
+
+# only look at a slice of the matrix
+rm = rm[50:120]
 rm[np.isnan(rm)] = 0
 
-fig = plt.figure(figsize=(9, 30))
+fig = plt.figure(figsize=(rm.shape[1]/7, rm.shape[0]/7))
 ax = fig.add_subplot(111)
 ax.set_aspect('equal')
 ax.xaxis.set_major_locator(NullLocator())
@@ -35,11 +44,8 @@ for (x,y),w in np.ndenumerate(rm.T):
         rect = Rectangle([x - size / 2, y - size / 2], size, size, facecolor=color, edgecolor=color)
         ax.add_patch(rect)
 ax.autoscale_view()
+ax.set_xlim([-1, rm.shape[1]])
+ax.set_ylim([-1, rm.shape[0]])
 
-fig.savefig('bla.png', dpi=300)
-
-# for i_cas, cas in enumerate(cases):
-#     for i_glom, glom in enumerate(gloms):
-#         ax.plot(i_cas, i_glom, 'o', markersize=rm[i_cas, i_glom])
-#     print i_cas
+fig.savefig(os.path.join(outpath, 'rm.png'), dpi=300)
 plt.show()
