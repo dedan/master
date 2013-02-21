@@ -58,32 +58,42 @@ config = {
         'descriptor': 'haddad_desc',
         'spec_type': 'ir',
         'use_intensity': False,
-        'kernel_width': 100,
-        'bin_width': 150,
+        'kernel_width': 75,
+        'bin_width': 110,
         'properties_to_add': [],
         'normalize': True
     }
 }
 
-for k_width in range(50, 100, 5):
 
-    config['features']['kernel_width'] = k_width
-    config['features']['bin_width'] = int(1.5 * k_width)
-    features = run_lib.prepare_features(config)
-    door2id = json.load(open('data/door2id.json'))
-    available = [True if door2id[c][0] in features else False for c in cases]
-    cases = [cases[i] for i in range(len(available)) if available[i]]
-    rm = rm[np.array(available)]
-    rm[np.isnan(rm)] = 0
+features = run_lib.prepare_features(config)
+door2id = json.load(open('data/door2id.json'))
+available = [True if door2id[c][0] in features else False for c in cases]
+cases = [cases[i] for i in range(len(available)) if available[i]]
+rm = rm[np.array(available)]
+rm[np.isnan(rm)] = 0
 
-    eva_space = np.array([features[door2id[c][0]] for c in cases])
-    assert eva_space.shape[0] == rm.shape[0]
+eva_space = np.array([features[door2id[c][0]] for c in cases])
+assert eva_space.shape[0] == rm.shape[0]
 
-    response_dists = pdist(rm, 'correlation')
-    nan_cors = np.isnan(response_dists)
-    eva_dists = pdist(eva_space)
+response_dists = pdist(rm, 'correlation')
 
-    response_dists = response_dists[~nan_cors]
-    eva_dists = eva_dists[~nan_cors]
-    print k_width
-    print stats.pearsonr(response_dists, eva_dists)
+# greedy feature selection
+all_idx = range(eva_space.shape[1]-1)
+chosen = []
+greedy_res = []
+for i in all_idx:
+
+    to_try = set(all_idx) - set(chosen)
+
+    tmp = []
+    for tt in to_try:
+        current = chosen + [tt]
+
+        eva_dists = pdist(eva_space[:, current])
+        r = stats.pearsonr(response_dists, eva_dists)[0]
+        tmp.append((current, r))
+    sorted_tmp = sorted(tmp, key=lambda t: t[1], reverse=True)
+    chosen = sorted_tmp[0][0]
+    greedy_res.append(sorted_tmp[0][1])
+    plt.plot(greedy_res)
