@@ -140,10 +140,10 @@ def new_descriptor_performance_plot(fig, max_overview, selection, method, glomer
         data = data[:, glom_idx]
 
     # compute colors to color all glomeruli according to their all performance
-    all_idx = max_overview[method][selection]['desc_names'].index('all')
-    all_values = data[all_idx]
-    n_val = float(len(all_values)-1)
-    clist_all = [sorted(all_values,reverse=True).index(i) / n_val for i in all_values]
+    # all_idx = max_overview[method][selection]['desc_names'].index('all')
+    # all_values = data[all_idx]
+    # n_val = float(len(all_values)-1)
+    # clist_all = [sorted(all_values,reverse=True).index(i) / n_val for i in all_values]
 
     ax = fig.add_subplot(111)
     if descriptor_plot_type == 'boxplot':

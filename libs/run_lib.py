@@ -48,9 +48,12 @@ ml_methods = {'forest': llib.MyRFR,
               'svr': llib.MySVR,
               'svr_ens': llib.SVREnsemble}
 
+selection_75 = [ 1,  3,  4,  5,  6,  9, 15, 18, 19, 20, 21, 22, 23, 24, 26, 32, 33, 34]
+
 def do_paramsearch(sc, config, features, res):
     """docstring for do_paramsearch"""
     data, targets, _ = load_data_targets(config, features)
+    data = data[:, selection_75]
     for k_b in sc['k_best']:
         if not str(k_b) in res:
             res[str(k_b)] = {}
