@@ -20,6 +20,8 @@ import numpy as np
 import pylab as plt
 from master.libs import run_lib
 from master.libs import read_data_lib as rdl
+from master.libs import utils
+from sklearn.cross_validation import KFold
 from scipy.spatial.distance import pdist
 from scipy import stats
 import csv, glob
@@ -76,8 +78,6 @@ rm[np.isnan(rm)] = 0
 eva_space = np.array([features[door2id[c][0]] for c in cases])
 assert eva_space.shape[0] == rm.shape[0]
 
-response_dists = pdist(rm, 'correlation')
-
 def greedy_selection(space, measure):
     """implement greedy feature selection"""
 
@@ -89,9 +89,32 @@ def greedy_selection(space, measure):
         tmp = [(chosen + [tt], measure(space[:, chosen + [tt]])) for tt in to_try]
         sorted_tmp = sorted(tmp, key=lambda t: t[1], reverse=True)
         chosen = sorted_tmp[0][0]
-        res.append(sorted_tmp[0][1])
-    return res
+        res.append(sorted_tmp[0])
+    return res, chosen
 
-measure = lambda x: stats.pearsonr(response_dists, pdist(x))[0]
-greedy_res = greedy_selection(eva_space, measure)
-plt.plot(greedy_res)
+
+val_res = []
+chosens = []
+for _ in range(100):
+    kf = KFold(rm.shape[0], 5, indices=False, shuffle=True)
+    for train, test in kf:
+        measure = lambda x: stats.pearsonr(pdist(rm[train], 'correlation'), pdist(x))[0]
+        greedy_res, chosen = greedy_selection(eva_space[train], measure)
+        sorted_res = sorted(greedy_res, key=lambda t: t[1], reverse=True)
+        best_chosen = sorted_res[0][0]
+        chosens.append(best_chosen)
+        perf = stats.pearsonr(pdist(rm[test], 'correlation'), pdist(eva_space[np.ix_(test, best_chosen)]))[0]
+        val_res.append(perf)
+
+
+fig = plt.figure()
+ax = fig.add_subplot(211)
+ax.hist(val_res, color='0.5')
+ax.set_xlabel('histogram over r, mean: {}'.format(np.mean(val_res)))
+
+ax = fig.add_subplot(212)
+ax.hist(utils.flatten(chosens), bins=range(eva_space.shape[1]+1), color='0.5')
+ax.set_xlabel('dimension selection histogram')
+fig.subplots_adjust(hspace=0.2)
+
+
