@@ -78,22 +78,20 @@ assert eva_space.shape[0] == rm.shape[0]
 
 response_dists = pdist(rm, 'correlation')
 
-# greedy feature selection
-all_idx = range(eva_space.shape[1]-1)
-chosen = []
-greedy_res = []
-for i in all_idx:
+def greedy_selection(space, measure):
+    """implement greedy feature selection"""
 
-    to_try = set(all_idx) - set(chosen)
+    all_idx = range(space.shape[1]-1)
+    chosen, res = [], []
+    for i in all_idx:
 
-    tmp = []
-    for tt in to_try:
-        current = chosen + [tt]
+        to_try = set(all_idx) - set(chosen)
+        tmp = [(chosen + [tt], measure(space[:, chosen + [tt]])) for tt in to_try]
+        sorted_tmp = sorted(tmp, key=lambda t: t[1], reverse=True)
+        chosen = sorted_tmp[0][0]
+        res.append(sorted_tmp[0][1])
+    return res
 
-        eva_dists = pdist(eva_space[:, current])
-        r = stats.pearsonr(response_dists, eva_dists)[0]
-        tmp.append((current, r))
-    sorted_tmp = sorted(tmp, key=lambda t: t[1], reverse=True)
-    chosen = sorted_tmp[0][0]
-    greedy_res.append(sorted_tmp[0][1])
-    plt.plot(greedy_res)
+measure = lambda x: stats.pearsonr(response_dists, pdist(x))[0]
+greedy_res = greedy_selection(eva_space, measure)
+plt.plot(greedy_res)
