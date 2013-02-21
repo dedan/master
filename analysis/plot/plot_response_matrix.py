@@ -27,7 +27,7 @@ if subtract_sfr:
     rm = np.subtract(rm, sfrs)
 
 # only look at a slice of the matrix
-rm = rm[50:120]
+rm = rm[70:110]
 rm[np.isnan(rm)] = 0
 
 fig = plt.figure(figsize=(rm.shape[1]/7, rm.shape[0]/7))
@@ -43,9 +43,15 @@ for (x,y),w in np.ndenumerate(rm.T):
     if not w == 0:
         rect = Rectangle([x - size / 2, y - size / 2], size, size, facecolor=color, edgecolor=color)
         ax.add_patch(rect)
+    else:
+        pass
+        circ = Circle([x, y], 0.3, facecolor='r', edgecolor='0.3', alpha=0.5)
+        ax.add_patch(circ)
+
 ax.autoscale_view()
 ax.set_xlim([-1, rm.shape[1]])
 ax.set_ylim([-1, rm.shape[0]])
+ax.axis('off')
 
-fig.savefig(os.path.join(outpath, 'rm.png'), dpi=300)
+fig.savefig(os.path.join(outpath, 'rm.png'), dpi=300, bbox_inches='tight')
 plt.show()
