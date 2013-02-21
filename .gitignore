@@ -5,6 +5,7 @@ data/response_matrix.csv
 data/features.json
 data/spectra
 data/structures
+data/door_csvs
 docs
 *.pdf
 *.ttf
