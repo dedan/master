@@ -84,7 +84,16 @@ class TestLearning(unittest.TestCase):
 
 class TestFlib(unittest.TestCase):
     """test my feature lib"""
-    pass
+
+    def test_spectral_features(self):
+        """docstring for test_spectral_features"""
+        bin_width = 1
+        k_width = 5
+        spectra = {'1': {'freq': np.array([20, 30, 50]), 'ir': np.array([20, 1, 1])}}
+        x_range = range(0, 10, bin_width)
+        intensities = np.ones(len(spectra['1']['ir']))
+        tmp = flib._sum_of_gaussians(x_range, spectra['1']['freq'], intensities, k_width)
+        self.assertTrue(tmp[0] != tmp[1])
 
 class TestLibs(unittest.TestCase):
 

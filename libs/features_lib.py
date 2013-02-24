@@ -91,12 +91,12 @@ def get_features_for_molids(f_space, molids):
 
 def _gaussian(x, mu, sigma):
     """docstring for gaussian"""
-    return 1 / (sigma * np.sqrt(2 * np.pi)) * np.exp(-0.5 * ((x-mu)/sigma)**2)
+    return 1 / (sigma * np.sqrt(2 * np.pi)) * np.exp(-0.5 * ((x-mu)/float(sigma))**2)
 
 def _sum_of_gaussians(x_range, positions, heights, sigma):
     """docstring for sum_of_gaussians"""
     assert len(positions) == len(heights)
-    return [np.sum([heights * _gaussian(x, positions, sigma)]) for x in x_range]
+    return [np.sum(heights * _gaussian(x, positions, sigma)) for x in x_range]
 
 def get_spectral_features(spectra, use_intensity=True, spec_type='ir',
                           kernel_widths=10, bin_width=10, BFS_max=4000):
