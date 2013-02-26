@@ -24,17 +24,21 @@ del res['getaway']
 to_compare = set(res.keys()).difference([reference])
 
 fig = plt.figure()
-plot_res = {desc:{'corr_both_pos': [], 'corr_one_neg': [], 'all': []} for desc in to_compare}
+plot_res = {desc:{'ps': [], 'corrs': []} for desc in to_compare}
 for desc in to_compare:
 
     for glom in res[reference]:
-        corr, _ = stats.pearsonr(res[reference][glom]['predictions'],
+        corr, p = stats.pearsonr(res[reference][glom]['predictions'],
                                  res[desc][glom]['predictions'])
-        plot_res[desc]['all'].append(corr)
+        plot_res[desc]['corrs'].append(corr)
+        plot_res[desc]['ps'].append(p)
 
 for desc, pres in plot_res.items():
-    print '{} mean r: {:.2f}'.format(desc, np.mean(pres['all']))
+    print '{} mean r: {:.2f}'.format(desc, np.mean(pres['corrs']))
 
+plt.figure()
+ax = fig.add_subplot(111)
+ax.hist(utils.flatten([v['ps'] for v in plot_res.values()]))
 
 fig = plt.figure(figsize=(3.35, 3))
 marker = ['o', 's', 'd']
