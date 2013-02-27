@@ -70,7 +70,9 @@ for i, descriptor in enumerate(search_res):
     assert not (np.array(out_res[descriptor]['none_opt']) > out_res[descriptor]['k_opt']).any()
 
 
-fig = plt.figure(figsize=(3.35, 3.5))
+fig = plt.figure(figsize=(2.23, 2.0))
+minimum = 0
+maximum = np.max([np.max(search_res[example_desc][selection][glom][method]) for glom in example_gloms])
 for i, glom in enumerate(example_gloms):
     mat = search_res[example_desc][selection][glom][method]
     ax = fig.add_subplot(1, len(example_gloms), i+1)
@@ -81,17 +83,20 @@ for i, glom in enumerate(example_gloms):
     yticklabels[-1] = str(k_best_dict[example_desc][-1])
     ax.set_yticklabels(yticklabels)
     ax.set_title('{}) {}'.format(string.lowercase[i], glom))
-    ax.set_xlabel('C')
     if i == 0:
         ax.set_ylabel('k best')
     else:
         ax.set_yticks([])
     ax.tick_params('both', length=0, width=2, which='major')
-    cax = ax.imshow(mat, interpolation='nearest', cmap=plt.cm.gray, vmin=0)
-    ticks = [0, np.max(mat)/2, np.max(mat)]
-    cbar = fig.colorbar(cax, ticks=ticks)
-    cbar.ax.set_yticklabels(['{:.2f}'.format(t) for t in ticks])
-fig.savefig(os.path.join(inpath, 'plots', 'paramsearch_examples.png'), dpi=300)
+    im = ax.imshow(mat, interpolation='nearest', cmap=plt.cm.gray,
+                    vmin=minimum, vmax=maximum)
+    if i == 1:
+        ticks = [0, maximum/2, maximum]
+        cax = fig.add_axes([0.8, 0.12, 0.03, 0.78])
+        cbar = fig.colorbar(im, cax=cax, ticks=ticks)
+        cbar.ax.set_yticklabels(['{:.2f}'.format(t) for t in ticks])
+fig.subplots_adjust(left=0.2, right=0.8)
+fig.savefig(os.path.join(inpath, 'plots', 'paramsearch_examples.svg'), dpi=300)
 
 
 # which search dimension is more important
@@ -107,7 +112,6 @@ ticklabels = ['0', '.2', '.4', '.6', '.8', '']
 vals = [out_res[k] for k in best_descs]
 reference_name = 'none_opt'
 to_compare = ['k_opt', 'reg_opt'] #, 'both_opt']
-fig = plt.figure(figsize=(3.35, 6))
 titles = ['c)', 'd)']
 for i, pick_type in enumerate(to_compare):
 
@@ -120,7 +124,8 @@ for i, pick_type in enumerate(to_compare):
     reference[reference < 0] = 0
     improved[improved < 0] = 0
 
-    ax = fig.add_subplot(len(to_compare), 1, i+1)
+    fig = plt.figure(figsize=(2.23, 2))
+    ax = fig.add_subplot(111)
     ax.plot(reference, improved, 'ko', alpha=0.6, markersize=4)
     ax.plot([0, line_max-0.05], [0, line_max-0.05], color='0.5')
     ax.set_ylabel(nice_names[pick_type])
@@ -133,9 +138,9 @@ for i, pick_type in enumerate(to_compare):
     ax.set_yticklabels(ticklabels)
     ax.set_title(titles[i])
     utils.simple_axis(ax)
-ax.set_xlabel(nice_names[reference_name])
-fig.subplots_adjust(hspace=0.3)
-fig.savefig(os.path.join(inpath, 'plots', 'param_selection_overview.png'), dpi=300)
+    ax.set_xlabel(nice_names[reference_name])
+    fig.subplots_adjust(bottom=0.2)
+    fig.savefig(os.path.join(inpath, 'plots', str(i) + 'param_selection_overview.svg'), dpi=300)
 plt.show()
 
 

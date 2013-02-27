@@ -80,7 +80,7 @@ ax.legend(loc='lower right', numpoints=1, frameon=False, fancybox=True, prop={'s
 utils.simple_axis(ax)
 fig.subplots_adjust(bottom=0.2)
 ax.set_title('a)')
-fig.savefig(os.path.join(inpath, 'q2_comparison.png'), dpi=300)
+fig.savefig(os.path.join(inpath, 'q2_comparison.svg'), dpi=300)
 
 fig = plt.figure(figsize=(3.35, 3))
 ax = fig.add_subplot(111)
@@ -99,13 +99,14 @@ ax.set_xticklabels(xticklabels)
 ax.set_xlabel('EVA_100 predictions')
 ax.set_ylabel('ALL predictions')
 # ax.set_title(example_receptor)
-ax.legend(loc='lower right', numpoints=1, frameon=False, fancybox=True)
+ax.legend(loc='lower right', numpoints=1, frameon=False, fancybox=True,
+          prop={'size': 'small'})
 utils.simple_axis(ax)
 ax.text(0.55, 0.75, 'r:{:.2f}'.format(stats.pearsonr(ref_predictions, comp_predictions)[0]))
 print stats.pearsonr(ref_predictions, comp_predictions)
 fig.subplots_adjust(bottom=0.2)
 ax.set_title('b)')
-fig.savefig(os.path.join(inpath, 'prediction_comparison_{}.png'.format(example_receptor)), dpi=300)
+fig.savefig(os.path.join(inpath, 'prediction_comparison_{}.svg'.format(example_receptor)), dpi=300)
 
 if utils.run_from_ipython():
     plt.show()
