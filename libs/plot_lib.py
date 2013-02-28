@@ -85,10 +85,10 @@ def _violin_boxplot(ax, data, desc_names):
     """docstring for _descriptor_boxplot"""
     data_copy = data.copy()
     data_copy[data_copy<0] = 0
-    sort_idx = np.argsort(np.mean(data_copy, axis=1))
+    sort_idx = np.argsort(np.median(data_copy, axis=1))
     data_copy = data_copy[sort_idx, :]
     violin_plot(ax, np.arange(len(data_copy))*3, data_copy)
-    ax.plot(np.arange(len(data_copy)) *3, np.median(data_copy, axis=1), 'wo', label='median', markersize=6)
+    ax.plot(np.arange(len(data_copy)) *3, np.median(data_copy, axis=1), 'wo', label='median', markersize=3)
     ax.set_ylim([0, 0.9])
     ax.set_yticks([0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9])
     ax.set_yticklabels(['0', '', '.2', '', '.4', '', '.6', '', '.8', ''])
