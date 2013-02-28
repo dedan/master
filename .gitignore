@@ -10,3 +10,8 @@ docs
 *.pdf
 *.ttf
 scratch
+data/predictions.pkl
+data/merged_micha
+data/nusvr_micha
+.spyderproject
+data/Fig2.png
