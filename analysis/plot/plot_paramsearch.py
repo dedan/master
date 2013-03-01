@@ -12,12 +12,20 @@ import json
 import numpy as np
 import pylab as plt
 import itertools as it
-from master.libs import plot_lib as plib
-from master.libs import read_data_lib as rdl
-from master.libs import utils
+from libs import plot_lib as plib
+from libs import read_data_lib as rdl
+from libs import utils
 import matplotlib.gridspec as gridspec
 reload(plib)
 reload(rdl)
+
+
+params = {'axes.labelsize': 6,
+    'font.size': 6,
+    'legend.fontsize': 7,
+    'xtick.labelsize':6,
+    'ytick.labelsize': 6}
+plt.rcParams.update(params)
 
 config = json.load(open(sys.argv[1]))
 outpath = os.path.join(config['inpath'], 'plots')
@@ -44,14 +52,14 @@ plib.new_descriptor_performance_plot(fig, max_overview, config['fselection'],
                                      config.get('glomeruli', []),
                                      ptype)
 fig.subplots_adjust(bottom=0.25)
-fig.savefig(os.path.join(outpath, ptype + '_desc_comparison.' + config['format']), dpi=300)
-plt.show()
+fig.savefig(os.path.join(outpath, ptype + '_desc_comparison.' + config['format']), dpi=600)
+#plt.show()
 
 
 # ML method comparison plot
 markers = ['1', '0']
 desc2comp = ['EVA_100', 'all']
-fig = plt.figure(figsize=(3.35, 3))
+fig = plt.figure(figsize=(3.35, 1.8))
 ax = fig.add_subplot(111)
 desc1_collect, desc2_collect = [], []
 for i, desc in enumerate(desc2comp):
@@ -79,7 +87,8 @@ ax.set_yticklabels(ticklabels)
 ax.set_xticks(ticks)
 ax.set_xticklabels(ticklabels)
 fig.subplots_adjust(bottom=0.2)
-fig.savefig(os.path.join(outpath, 'best_method_comparison.' + config['format']), dpi=300)
+fig.tight_layout()
+fig.savefig(os.path.join(outpath, 'best_method_comparison.' + config['format']), dpi=600)
 
 assert len(desc1_collect) == len(desc2_collect)
 svr_better = np.sum([1 for d1, d2 in zip(desc1_collect, desc2_collect) if d1 > d2])

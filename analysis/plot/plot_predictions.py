@@ -95,9 +95,9 @@ ax = fig.add_subplot(1,2,2)
 ax.plot([-0.1, 0.8], [-0.1, 0.8], color='0.6')
 ref_predictions = res[reference][example_receptor]['predictions']
 comp_predictions = res[comparison_desc][example_receptor]['predictions']
-ax.plot(ref_predictions, comp_predictions, 'ko', color='0.5',
+ax.plot(ref_predictions, comp_predictions, 'kx', color='0.3',
         markeredgecolor='0.3',
-        markersize=4,
+        markersize=2,
         label=example_receptor)
 plt.axis('scaled')
 ax.set_yticks(xticks)

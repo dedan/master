@@ -1,5 +1,5 @@
 {
-    "inpath": "/Users/dedan/projects/master/results/param_search/merged",
+    "inpath": "/home/micha/Projects/EVA/PhyspropVsEVA/data/merged_micha",
     "fselection": "linear",
     "method": "svr",
     "format": "png",
