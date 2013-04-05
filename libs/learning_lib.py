@@ -15,6 +15,8 @@ from sklearn import svm
 from sklearn.ensemble import RandomForestRegressor
 from sklearn.metrics import r2_score
 from sklearn.feature_selection import f_regression
+from sklearn.cross_validation import LeaveOneOut
+from collections import defaultdict
 import numpy as np
 import random
 import __builtin__
@@ -44,6 +46,25 @@ class StratifiedResampling(object):
             assert len(set(train_idx).intersection(test_idx)) == 0
             yield train_idx, test_idx
 
+def _greedy_selection(data, targets, regressor):
+    feature_list, perf_list = [],[]
+    while (len(feature_list)<2) or (perf_list[-1]>perf_list[-2]):
+        r2_list = []
+        remaining = list(set(range(features.shape[1])).difference(feature_list))
+        for feat_num in remaining:
+            current_features = copy.copy(feature_list) + [feat_num]
+            r2 = _loo(dataset_features[train_idx][:,current_features], dataset_targets[train_idx], regressor)
+            r2_list.append(r2)
+        perf_list.append(np.max(r2_list))
+        feature_list.append(remaining[np.argmax(r2_list)])
+        print perf_list[-1], ' with ', feature_list
+
+def _loo(data, targets, regressor):
+    prediction = []
+    for train_ix, test_ix in LeaveOneOut(len(targets)):
+        regressor.fit(features[train_ix], targets[train_ix])
+        prediction.append(regressor.predict(features[test_ix]))
+    return r2_score(targets, np.array(prediction).squeeze())
 
 def _k_best_indeces(data, targets, selection_method, k):
     """get indices for the k best features depending on the scores"""
@@ -82,14 +103,20 @@ class MySVR(svm.NuSVR):
     def fit(self, data, targets, selection_method, k_best):
         """docstring for fit"""
         assert data.shape[0] == len(targets)
-        self.best_idx = _k_best_indeces(data, targets, selection_method, k_best)
+        if selection_method == 'greedy':
+            self.best_idx = _greedy_selection(data, targets, super(MySVR, self))
+        elif selection_method in ['linear', 'forest']:
+            self.best_idx = _k_best_indeces(data, targets, selection_method, k_best)
         super(MySVR, self).fit(data[:, self.best_idx], targets)
         tmp_svr = svm.NuSVR(**self.kwargs)
         if self.cross_val:
             kf = StratifiedResampling(targets, self.n_folds)
             all_predictions, all_targets = [], []
             for train, test in kf:
-                best_idx = _k_best_indeces(data[train], targets[train], selection_method, k_best)
+                if selection_method == 'greedy':
+                    best_idx = _greedy_selection(data[train], targets[train], tmp_svr)
+                elif selection_method in ['linear', 'forest']:
+                    best_idx = _k_best_indeces(data[train], targets[train], selection_method, k_best)
                 tmp_svr.fit(data[np.ix_(train, best_idx)], targets[train])
                 all_predictions.extend(tmp_svr.predict(data[np.ix_(test, best_idx)]))
                 all_targets.extend(targets[test])
