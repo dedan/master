@@ -50,7 +50,7 @@ ml_methods = {'forest': llib.MyRFR,
 
 def do_paramsearch(sc, config, features, res):
     """docstring for do_paramsearch"""
-    data, targets, _ = load_data_targets(config, features)
+    data, targets, molids = load_data_targets(config, features)
     for k_b in sc['k_best']:
         if not str(k_b) in res:
             res[str(k_b)] = {}
@@ -76,6 +76,8 @@ def do_paramsearch(sc, config, features, res):
             print('running for {} - {}'.format(k_b, sc['svr'][i]))
             tmp = run_runner(tmp_config, data, targets, sc.get('get_models', False),
                              sc.get('get_feature_selection', False))
+            for method in config['methods']:
+                tmp[method]['molids'] = molids
             res[str(k_b)][str(i)].update(tmp)
     return res
 

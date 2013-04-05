@@ -111,18 +111,19 @@ class MySVR(svm.NuSVR):
         tmp_svr = svm.NuSVR(**self.kwargs)
         if self.cross_val:
             kf = StratifiedResampling(targets, self.n_folds)
-            all_predictions, all_targets = [], []
+            all_predictions = defaultdict(list)
             for train, test in kf:
                 if selection_method == 'greedy':
                     best_idx = _greedy_selection(data[train], targets[train], tmp_svr)
                 elif selection_method in ['linear', 'forest']:
                     best_idx = _k_best_indeces(data[train], targets[train], selection_method, k_best)
                 tmp_svr.fit(data[np.ix_(train, best_idx)], targets[train])
-                all_predictions.extend(tmp_svr.predict(data[np.ix_(test, best_idx)]))
-                all_targets.extend(targets[test])
-            self.gen_score = r2_score(all_targets, all_predictions)
+
+                for k, pred in zip(test, tmp_svr.predict(data[np.ix_(test, best_idx)])):
+                    all_predictions[k].append((p, targets[k]))
+            pred_array = np.vstack(all_predictions.values())
+            self.gen_score = r2_score(pred_array[:, 1], pred_array[:, 0])
             self.all_predictions = all_predictions
-            self.all_targets = all_targets
         return self
 
     def predict(self, data):
