@@ -27,6 +27,7 @@ if __name__ == '__main__':
     dview = rc.direct_view()
     dview.block = True
     dview.execute('from master.analysis import param_search')
+    dview.execute("reload(param_search)")
     dview.block = False
     lview = rc.load_balanced_view()
     out = lview.map(param_search.paramsearch, configs)

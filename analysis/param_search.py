@@ -63,7 +63,6 @@ def paramsearch(sc):
     else:
         assert False
 
-
     for config in configs:
 
         cur_outpath = os.path.join(sc['outpath'], config['run_name'] + '.json')
@@ -105,8 +104,8 @@ def paramsearch(sc):
                 res[selection][glomerulus] = run_lib.do_paramsearch(sc, config, features, res[selection][glomerulus])
                 print('param search for {} done'.format(glomerulus))
                 if sc['get_models']:
-                    cur_outpath_pckl = os.path.splitext(cur_outpath)[0] + '.pckl'
-                    pickle.dump(res, open(cur_outpath_pckl + '_' + config['glomeruli'][0], 'w'))
+                    cur_outpath_pckl = os.path.splitext(cur_outpath)[0] + '_' + config['glomeruli'][0] + '.pckl'
+                    pickle.dump(res, open(cur_outpath_pckl, 'w'))
                 json_res = utils.nested_remove_keys(copy.deepcopy(res), 'model')
                 json.dump({'sc': sc, 'res': json_res}, open(cur_outpath, 'w'))
     return 'fertig: ' + config['glomeruli']
