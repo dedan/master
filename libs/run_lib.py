@@ -76,7 +76,7 @@ def do_paramsearch(sc, config, features, res):
             print('running for {} - {}'.format(k_b, sc['svr'][i]))
             tmp = run_runner(tmp_config, data, targets, sc.get('get_models', False),
                              sc.get('get_feature_selection', False))
-            for method in config['methods']:
+            for method in tmp_config['methods']:
                 tmp[method]['molids'] = molids
             res[str(k_b)][str(i)].update(tmp)
     return res

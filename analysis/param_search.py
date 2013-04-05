@@ -104,11 +104,11 @@ def paramsearch(sc):
                 res[selection][glomerulus] = run_lib.do_paramsearch(sc, config, features, res[selection][glomerulus])
                 print('param search for {} done'.format(glomerulus))
                 if sc['get_models']:
-                    cur_outpath_pckl = os.path.splitext(cur_outpath)[0] + '_' + config['glomeruli'][0] + '.pckl'
+                    cur_outpath_pckl = os.path.splitext(cur_outpath)[0] + '_' + glomerulus + '.pckl'
                     pickle.dump(res, open(cur_outpath_pckl, 'w'))
                 json_res = utils.nested_remove_keys(copy.deepcopy(res), 'model')
                 json.dump({'sc': sc, 'res': json_res}, open(cur_outpath, 'w'))
-    return 'fertig: ' + config['glomeruli']
+    return 'fertig: ' + glomerulus
 
 if __name__ == '__main__':
     sc = json.load(open(sys.argv[1]))

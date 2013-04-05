@@ -49,7 +49,7 @@ class StratifiedResampling(object):
 
 def _greedy_selection(data, targets, regressor):
     feature_list, perf_list = [],[]
-    while (len(feature_list)<2) or (perf_list[-1]>perf_list[-2]):
+    while ((len(feature_list)<2) or (perf_list[-1]>perf_list[-2])) and (not(len(feature_list) == data.shape[1])):
         r2_list = []
         remaining = list(set(range(data.shape[1])).difference(feature_list))
         for feat_num in remaining:

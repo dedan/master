@@ -1,6 +1,6 @@
 {
     "outpath": "/mnt/nfshome/dedan/results/param_search/greedy",
-    "descriptors": ["haddad_desc"],
+    "descriptors": ["all"],
     "get_models": true,
     "get_feature_selection": false,
     "sigma_l_ratio": 1.5,
@@ -38,7 +38,7 @@
         },
         "methods": {
             "svr": {
-                "n_folds": 1
+                "n_folds": 10
             }
         },
         "randomization_test": false
