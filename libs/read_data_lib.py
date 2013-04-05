@@ -14,7 +14,7 @@ import json
 import glob
 import csv
 import numpy as np
-import pybel
+# import pybel
 from collections import defaultdict
 from master.libs import utils
 try:

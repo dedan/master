@@ -11,6 +11,7 @@ Copyright (c) 2012. All rights reserved.
 
 import sys
 import os
+import copy
 from sklearn import svm
 from sklearn.ensemble import RandomForestRegressor
 from sklearn.metrics import r2_score
@@ -50,20 +51,21 @@ def _greedy_selection(data, targets, regressor):
     feature_list, perf_list = [],[]
     while (len(feature_list)<2) or (perf_list[-1]>perf_list[-2]):
         r2_list = []
-        remaining = list(set(range(features.shape[1])).difference(feature_list))
+        remaining = list(set(range(data.shape[1])).difference(feature_list))
         for feat_num in remaining:
             current_features = copy.copy(feature_list) + [feat_num]
-            r2 = _loo(dataset_features[train_idx][:,current_features], dataset_targets[train_idx], regressor)
+            r2 = _loo(data[:, current_features], targets, regressor)
             r2_list.append(r2)
         perf_list.append(np.max(r2_list))
         feature_list.append(remaining[np.argmax(r2_list)])
         print perf_list[-1], ' with ', feature_list
+    return feature_list
 
 def _loo(data, targets, regressor):
     prediction = []
     for train_ix, test_ix in LeaveOneOut(len(targets)):
-        regressor.fit(features[train_ix], targets[train_ix])
-        prediction.append(regressor.predict(features[test_ix]))
+        regressor.fit(data[train_ix], targets[train_ix])
+        prediction.append(regressor.predict(data[test_ix]))
     return r2_score(targets, np.array(prediction).squeeze())
 
 def _k_best_indeces(data, targets, selection_method, k):
@@ -120,7 +122,7 @@ class MySVR(svm.NuSVR):
                 tmp_svr.fit(data[np.ix_(train, best_idx)], targets[train])
 
                 for k, pred in zip(test, tmp_svr.predict(data[np.ix_(test, best_idx)])):
-                    all_predictions[k].append((p, targets[k]))
+                    all_predictions[k].append((pred, targets[k]))
             pred_array = np.vstack(all_predictions.values())
             self.gen_score = r2_score(pred_array[:, 1], pred_array[:, 0])
             self.all_predictions = all_predictions

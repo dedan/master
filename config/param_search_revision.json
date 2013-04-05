@@ -1,0 +1,46 @@
+{
+    "outpath": "/mnt/nfshome/dedan/results/param_search/greedy",
+    "descriptors": ["haddad_desc"],
+    "get_models": true,
+    "get_feature_selection": false,
+    "sigma_l_ratio": 1.5,
+    "selection": [
+        "greedy"
+    ],
+    "glomeruli": [
+      "Or35a"
+    ],
+    "svr": [
+        1
+    ],
+    "k_best": -1,
+    "kernel_widths": [
+        50,
+        75,
+        100,
+        200,
+        400,
+        15,
+        20,
+        30
+    ],
+    "runner_config_content": {
+        "normed_responses": true,
+        "feature_selection": {
+        },
+        "features": {
+            "type": "conventional",
+            "normalize": true,
+            "kernel_width": 2,
+            "use_intensity": false,
+            "spec_type": "ir",
+            "properties_to_add": []
+        },
+        "methods": {
+            "svr": {
+                "n_folds": 1
+            }
+        },
+        "randomization_test": false
+    }
+}
