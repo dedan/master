@@ -107,7 +107,7 @@ def paramsearch(sc):
                     cur_outpath_pckl = os.path.splitext(cur_outpath)[0] + '_' + glomerulus + '.pckl'
                     pickle.dump(res, open(cur_outpath_pckl, 'w'))
                 json_res = utils.nested_remove_keys(copy.deepcopy(res), 'model')
-                json.dump({'sc': sc, 'res': json_res}, open(cur_outpath, 'w'))
+                json.dump({'sc': sc, 'res': json_res}, open(cur_outpath+ '_' + glomerulus, 'w'))
     return 'fertig: ' + glomerulus
 
 if __name__ == '__main__':
