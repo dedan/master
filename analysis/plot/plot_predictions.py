@@ -12,7 +12,7 @@ import os
 import pickle
 import numpy as np
 import pylab as plt
-from libs import utils
+from master.libs import utils
 from scipy import stats
 
 params = {'axes.labelsize': 6,
@@ -22,8 +22,7 @@ params = {'axes.labelsize': 6,
     'ytick.labelsize': 6}
 plt.rcParams.update(params)
 
-inpath = os.path.join(os.environ['HOME'], 'Projects', 'EVA', 'PhyspropVsEVA', 
-                      'data')
+inpath = '/Users/dedan/projects/master/results/predict/'
 reference = 'all'
 example_receptor = 'ac3a'
 comparison_desc = 'eva'
@@ -86,10 +85,7 @@ ax.set_xlabel('comparison descriptor (q2)')
 ax.set_ylabel('ALL (q2)')
 ax.legend(loc='lower right', numpoints=1, frameon=False, fancybox=True, prop={'size': 'small'})
 utils.simple_axis(ax)
-#fig.subplots_adjust(bottom=0.2)
-#ax.set_title('a)')
 ax.text(-0.3,0.85, 'A)', fontsize=9, weight='bold')
-#fig.savefig(os.path.join(inpath, 'q2_comparison.svg'), dpi=300)
 
 ax = fig.add_subplot(1,2,2)
 ax.plot([-0.1, 0.8], [-0.1, 0.8], color='0.6')
@@ -108,16 +104,13 @@ ax.set_xlabel('EVA_100 predictions\n(normalized response)')
 ax.set_ylabel('ALL predictions')
 ax.set_xlim([-0.1, 0.9])
 ax.set_ylim([-0.1, 0.9])
-# ax.set_title(example_receptor)
 ax.legend(loc='lower right', numpoints=1, frameon=False, fancybox=True,
           prop={'size': 'small'})
 utils.simple_axis(ax)
 ax.text(0.55, 0.75, 'r:{:.2f}'.format(stats.pearsonr(ref_predictions, comp_predictions)[0]))
 print stats.pearsonr(ref_predictions, comp_predictions)
 fig.subplots_adjust(bottom=0.2)
-#ax.set_title('b)')
 ax.text(-0.3,0.85, 'B)', fontsize=9, weight='bold')
-#fig.savefig(os.path.join(inpath, 'prediction_comparison_{}.svg'.format(example_receptor)), dpi=300)
 fig.tight_layout()
 fig.savefig(os.path.join(inpath, 'Fig2.png'.format(example_receptor)), dpi=600)
 

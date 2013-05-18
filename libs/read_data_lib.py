@@ -16,7 +16,7 @@ import csv
 import numpy as np
 import pybel
 from collections import defaultdict
-from libs import utils
+from master.libs import utils
 try:
     from rpy2.robjects.packages import importr
     import rpy2.robjects as robjects

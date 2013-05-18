@@ -14,8 +14,8 @@ import pylab as plt
 from collections import defaultdict
 from scipy.stats.stats import nanmean
 from scipy.stats import gaussian_kde
-from libs import utils
-from libs import read_data_lib as rdl
+from master.libs import utils
+from master.libs import read_data_lib as rdl
 
 structures_path = os.path.join(os.path.dirname(__file__), '..', 'data', 'structures')
 

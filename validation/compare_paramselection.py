@@ -20,8 +20,8 @@ import __builtin__
 import numpy as np
 import pylab as plt
 from scipy import stats
-from libs import read_data_lib as rdl
-from libs import utils
+from master.libs import read_data_lib as rdl
+from master.libs import utils
 import itertools as it
 
 params = {'axes.labelsize': 6,
@@ -36,7 +36,7 @@ print plt.rcParams['mathtext.fontset']
 fig = plt.figure(figsize=(2.5, 1.8))
 gs = plt.GridSpec(1,2)
 
-inpath = '/home/micha/Projects/EVA/PhyspropVsEVA/data/nusvr_micha'
+inpath = '/Users/dedan/projects/master/results/param_search/nusvr'
 method = 'svr'
 selection = 'linear'
 example_desc = 'all'
@@ -87,7 +87,7 @@ maximum = np.max([np.max(search_res[example_desc][selection][glom][method]) for 
 ad = ['A)', 'B)']
 for i, glom in enumerate(example_gloms):
     mat = search_res[example_desc][selection][glom][method]
-    ax = plt.subplot(gs[0,i]) #fig.add_subplot(1, len(example_gloms)*3., i+1)
+    ax = plt.subplot(gs[0,i])
     ax.set_xticks([0, 1, 2])
     ax.set_xticklabels(['0.1', '1', '10'], rotation=90)
     ax.set_yticks(range(mat.shape[0]))
@@ -105,15 +105,12 @@ for i, glom in enumerate(example_gloms):
                     vmin=minimum, vmax=maximum)
     ax.text(-3,-1.2, ad[i], fontsize=9, weight='bold')
     if i == 1:
-        ticks = [0, maximum]#maximum/2, maximum]
-        #cax = plt.subplot(gs[0,2])#fig.add_axes([0.8, 0.12, 0.03, 0.78])
+        ticks = [0, maximum]
         cbar = fig.colorbar(im, ticks=ticks, use_gridspec=True)#
         cbar.ax.set_yticklabels(['{:.2f}'.format(t) for t in ticks])
         cbar.set_label('$q^{2}$', fontsize=9)
 gs.tight_layout(fig)
 fig.savefig(os.path.join(inpath, 'plots', 'Fig3ab.png'), dpi=600)
-#fig.subplots_adjust(left=0.2, right=0.8)
-#fig.savefig(os.path.join(inpath, 'plots', 'paramsearch_examples.svg'), dpi=600)
 
 fig = plt.figure(figsize=(3.5, 1.8))
 gs = plt.GridSpec(1,2)
@@ -130,7 +127,7 @@ ticks = [0, 0.2, 0.4, 0.6, 0.8, 0.9]
 ticklabels = ['0', '.2', '.4', '.6', '.8', '']
 vals = [out_res[k] for k in best_descs]
 reference_name = 'none_opt'
-to_compare = ['k_opt', 'reg_opt'] #, 'both_opt']
+to_compare = ['k_opt', 'reg_opt']
 titles = ['c)', 'd)']
 for i, pick_type in enumerate(to_compare):
 
@@ -159,11 +156,6 @@ for i, pick_type in enumerate(to_compare):
     utils.simple_axis(ax)
     ax.set_xlabel(nice_names[reference_name])
     ax.text(-0.2, 0.91, ad[i], fontsize=9, weight='bold')
-#    fig.subplots_adjust(bottom=0.2)
-#    fig.savefig(os.path.join(inpath, 'plots', str(i) + 'param_selection_overview.svg'), dpi=600)
-#plt.show()
-#gs.tight_layout(fig)
 fig.tight_layout()
 fig.savefig(os.path.join(inpath, 'plots', 'Fig3cd.png'), dpi=600)
-
 

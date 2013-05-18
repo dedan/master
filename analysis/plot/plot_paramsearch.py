@@ -12,9 +12,9 @@ import json
 import numpy as np
 import pylab as plt
 import itertools as it
-from libs import plot_lib as plib
-from libs import read_data_lib as rdl
-from libs import utils
+from master.libs import plot_lib as plib
+from master.libs import read_data_lib as rdl
+from master.libs import utils
 import matplotlib.gridspec as gridspec
 reload(plib)
 reload(rdl)
@@ -53,7 +53,6 @@ plib.new_descriptor_performance_plot(fig, max_overview, config['fselection'],
                                      ptype)
 fig.subplots_adjust(bottom=0.25)
 fig.savefig(os.path.join(outpath, ptype + '_desc_comparison.' + config['format']), dpi=600)
-#plt.show()
 
 
 # ML method comparison plot
